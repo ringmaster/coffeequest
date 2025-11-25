@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { base } from '$app/paths';
 	import { gameStore } from '$lib/stores/gameState.svelte';
 	import type { StepData } from '$lib/types/game';
 	import CharacterCreation from '$lib/components/CharacterCreation.svelte';
@@ -14,7 +15,7 @@
 
 	onMount(async () => {
 		try {
-			const response = await fetch('/steps.json');
+			const response = await fetch(`${base}/steps.json`);
 			if (!response.ok) {
 				throw new Error('Failed to load game data');
 			}
