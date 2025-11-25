@@ -1,0 +1,188 @@
+{
+  "name": "Baker's Flour",
+  "description": "Help the baker by fetching flour from the market",
+  "steps": [
+    {
+      "id": "bakery_welcome",
+      "location": "B7",
+      "tags": [],
+      "vars": {
+        "baked_item": [
+          "bread",
+          "pastries",
+          "cakes"
+        ]
+      },
+      "text": "The baker greets you warmly. 'I'd love to serve you some {{baked_item}}, but I'm all out of flour. Could you help me?'",
+      "options": [
+        {
+          "label": "I'll help you",
+          "tags": [],
+          "pass": "bakery_accept_quest"
+        },
+        {
+          "label": "Sorry, I'm busy",
+          "tags": [],
+          "pass": null
+        }
+      ]
+    },
+    {
+      "id": "bakery_accept_quest",
+      "location": "bakery_accept",
+      "tags": [
+        "+baker_flour_quest",
+        "+quest"
+      ],
+      "text": "The baker smiles gratefully. 'Wonderful! Please visit the market at D9 and get some flour.'",
+      "log": "Agreed to fetch flour for the baker"
+    },
+    {
+      "id": "market_busy",
+      "location": "D9",
+      "tags": [
+        "@baker_flour_quest"
+      ],
+      "text": "The market is bustling. You see a stall selling flour.",
+      "options": [
+        {
+          "label": "Buy flour for 2 silver",
+          "tags": [
+            "silver",
+            "silver"
+          ],
+          "pass": "market_purchase"
+        },
+        {
+          "label": "Try to negotiate",
+          "tags": [],
+          "skill": "guile",
+          "dc": 4,
+          "pass": "market_negotiate_success",
+          "fail": "market_negotiate_fail"
+        },
+        {
+          "label": "Try to steal flour",
+          "tags": [],
+          "skill": "guile",
+          "dc": 10,
+          "pass": "market_steal_success",
+          "fail": "market_steal_caught"
+        }
+      ]
+    },
+    {
+      "id": "market_purchase",
+      "location": "market_buy",
+      "tags": [
+        "-silver",
+        "-silver",
+        "+flour",
+        "-baker_flour_quest"
+      ],
+      "text": "You purchase the flour for 2 silver.",
+      "log": "Bought flour at the market for 2 silver"
+    },
+    {
+      "id": "market_negotiate_success",
+      "location": "market_deal",
+      "tags": [],
+      "text": "The merchant agrees to sell for just 1 silver!",
+      "options": [
+        {
+          "label": "Buy flour for 1 silver",
+          "tags": [
+            "silver"
+          ],
+          "pass": "market_purchase_discount"
+        },
+        {
+          "label": "Walk away",
+          "tags": [],
+          "pass": null
+        }
+      ]
+    },
+    {
+      "id": "market_purchase_discount",
+      "location": "market_buy_discount",
+      "tags": [
+        "-silver",
+        "+flour",
+        "-baker_flour_quest",
+        "+shrewd_negotiator"
+      ],
+      "text": "You purchase the flour for 1 silver. The merchant respects your negotiating skills.",
+      "log": "Negotiated a good deal and bought flour for 1 silver"
+    },
+    {
+      "id": "market_negotiate_fail",
+      "location": "market_no_deal",
+      "tags": [],
+      "text": "The merchant is unmoved by your haggling. Full price or nothing.",
+      "options": [
+        {
+          "label": "Pay 2 silver",
+          "tags": [
+            "silver",
+            "silver"
+          ],
+          "pass": "market_purchase"
+        },
+        {
+          "label": "Walk away",
+          "tags": [],
+          "pass": null
+        }
+      ]
+    },
+    {
+      "id": "market_steal_success",
+      "location": "market_theft_success",
+      "tags": [
+        "+flour",
+        "-baker_flour_quest",
+        "+thief_reputation"
+      ],
+      "text": "You manage to slip a bag of flour into your pack unnoticed.",
+      "log": "Stole flour from the market"
+    },
+    {
+      "id": "market_steal_caught",
+      "location": "market_theft_caught",
+      "tags": [
+        "+banned_from_market",
+        "-baker_flour_quest"
+      ],
+      "text": "The guards catch you! You're banned from the market.",
+      "log": "Got caught stealing and banned from the market"
+    },
+    {
+      "id": "bakery_return",
+      "location": "B7",
+      "tags": [
+        "@flour",
+        "!baker_flour_quest"
+      ],
+      "text": "The baker is delighted to see you return with flour. 'Thank you! Here's some silver for your trouble.'",
+      "options": [
+        {
+          "label": "Accept payment",
+          "tags": [],
+          "pass": "bakery_complete"
+        }
+      ]
+    },
+    {
+      "id": "bakery_complete",
+      "location": "bakery_thanks",
+      "tags": [
+        "-flour",
+        "+silver",
+        "+assisted_baker"
+      ],
+      "text": "The baker hands you a silver coin and smiles warmly.",
+      "log": "Delivered flour to baker and earned silver"
+    }
+  ]
+}
