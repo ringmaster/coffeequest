@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { gameStore } from '$lib/stores/gameState.svelte';
-	import { selectOption } from '$lib/game/engine';
+	import { selectOption, isOptionAvailable } from '$lib/game/engine';
 	import type { StepOption, StatName } from '$lib/types/game';
 
 	function handleOption(option: StepOption) {
-		selectOption(option);
+		if (isOptionAvailable(option)) {
+			selectOption(option);
+		}
 	}
 
 	function returnToNavigation() {
@@ -26,6 +28,11 @@
 		if (rollNeeded <= 6) return 'challenging';
 		return 'impossible';
 	}
+
+	// Check if any options are available (for showing "Continue exploring" button)
+	const hasAvailableOptions = $derived(
+		gameStore.availableOptions.some((opt) => isOptionAvailable(opt))
+	);
 </script>
 
 <div class="step-display">
@@ -36,7 +43,13 @@
 
 		<div class="options">
 			{#each gameStore.availableOptions as option (option.label)}
-				<button class="option-button" onclick={() => handleOption(option)}>
+				{@const available = isOptionAvailable(option)}
+				<button
+					class="option-button"
+					class:unavailable={!available}
+					onclick={() => handleOption(option)}
+					disabled={!available}
+				>
 					{option.label}
 					{#if option.skill && option.dc !== undefined}
 						<span class="skill-indicator"
@@ -46,7 +59,7 @@
 				</button>
 			{/each}
 
-			{#if gameStore.availableOptions.length === 0}
+			{#if !hasAvailableOptions}
 				<button class="option-button" onclick={returnToNavigation}> Continue exploring </button>
 			{/if}
 		</div>
@@ -92,8 +105,15 @@
 		cursor: pointer;
 	}
 
-	.option-button:active {
+	.option-button:active:not(:disabled) {
 		opacity: 0.9;
+	}
+
+	.option-button.unavailable {
+		background: var(--color-surface);
+		color: var(--color-text-secondary);
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 
 	.skill-indicator {

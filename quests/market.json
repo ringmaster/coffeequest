@@ -2,7 +2,7 @@
   "name": "Market Square",
   "steps": [
     {
-      "id": "DS",
+      "id": "Market",
       "tags": [
         "!banned_from_market"
       ],
@@ -36,7 +36,7 @@
       ]
     },
     {
-      "id": "DS",
+      "id": "Market",
       "tags": [
         "@banned_from_market"
       ],
@@ -142,7 +142,7 @@
           "tags": [
             "!banned_from_market"
           ],
-          "pass": "DS"
+          "pass": "Market"
         },
         {
           "label": "Leave the market",
@@ -266,7 +266,7 @@
           "tags": [
             "!banned_from_market"
           ],
-          "pass": "DS"
+          "pass": "Market"
         },
         {
           "label": "Leave the market",
@@ -428,7 +428,7 @@
           "tags": [
             "!banned_from_market"
           ],
-          "pass": "DS"
+          "pass": "Market"
         },
         {
           "label": "Leave the market",
@@ -607,7 +607,7 @@
           "tags": [
             "!banned_from_market"
           ],
-          "pass": "DS"
+          "pass": "Market"
         },
         {
           "label": "Leave the market",

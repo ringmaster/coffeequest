@@ -1,14 +1,14 @@
 {
   "steps": [
     {
-      "id": "BC",
+      "id": "Church",
       "tags": [
         "quest"
       ],
       "text": "You enter the church and take a seat among it's many pews.  The silence is meditative, and you take a moment to reflect on your journey so far."
     },
     {
-      "id": "BC",
+      "id": "Church",
       "tags": [
         "!cleric_quest",
         "!cleric_quest_complete",
@@ -40,7 +40,7 @@
       ]
     },
     {
-      "id": "BC",
+      "id": "Church",
       "tags": [
         "cleric_quest",
         "!has_moon_blossom"
@@ -48,7 +48,7 @@
       "text": "The cleric looks up hopefully as you enter. \"Have you found the Moon Blossom? The elder grows weaker by the hour. Please, search the Haunted Grove to the north!\""
     },
     {
-      "id": "BC",
+      "id": "Church",
       "tags": [
         "cleric_quest",
         "has_moon_blossom"
@@ -63,14 +63,14 @@
       ]
     },
     {
-      "id": "BC",
+      "id": "Church",
       "tags": [
         "cleric_quest_complete"
       ],
       "text": "The church is peaceful. The cleric tends to the altar, occasionally glancing at you with a grateful smile. The elder rests comfortably in a nearby pew, recovering well."
     },
     {
-      "id": "DN",
+      "id": "Haunted Grove",
       "tags": [
         "cleric_quest",
         "!has_moon_blossom",
@@ -105,7 +105,7 @@
       ]
     },
     {
-      "id": "DN",
+      "id": "Haunted Grove",
       "tags": [
         "cleric_quest",
         "!has_moon_blossom",
@@ -185,7 +185,7 @@
       "log": "Delivered the Moon Blossom and saved the village elder"
     },
     {
-      "id": "BC",
+      "id": "Church",
       "tags": [
         "blessed",
         "!cleric_quest"

@@ -74,13 +74,15 @@ function calculateStepScore(step: Step, playerMetadata: string[], preferredWeigh
 
 /**
  * Select the best step for a given id based on player state
+ * Matches are case-insensitive
  */
 export function selectStepById(id: string): Step | null {
 	const playerMetadata = gameStore.state.character.metadata;
 	const preferredWeight = gameStore.config?.preferredTagWeight ?? 5;
 
-	// Filter by id
-	const matchingSteps = gameStore.steps.filter((s) => s.id === id);
+	// Filter by id (case insensitive)
+	const normalizedId = id.toLowerCase();
+	const matchingSteps = gameStore.steps.filter((s) => s.id.toLowerCase() === normalizedId);
 
 	if (matchingSteps.length === 0) {
 		return null;
@@ -109,6 +111,28 @@ export function selectStepById(id: string): Step | null {
 	return topSteps[Math.floor(Math.random() * topSteps.length)].step;
 }
 
+
+/**
+ * Check if a specific option is available to the player
+ * - Plain tags and @tags are both required (player must have)
+ * - !tags are blocked (player must NOT have)
+ * - +tags and -tags are grants/consumes (not filters)
+ * - Duplicate tags require multiple copies (e.g., ["silver", "silver"] needs 2 silver)
+ */
+export function isOptionAvailable(option: StepOption): boolean {
+	const playerMetadata = gameStore.state.character.metadata;
+	return hasRequiredTags(option.tags || [], playerMetadata);
+}
+
+/**
+ * Get all options for a step (regardless of availability)
+ */
+export function getAllOptions(step: Step): StepOption[] {
+	if (!step.options || step.options.length === 0) {
+		return [];
+	}
+	return step.options;
+}
 
 /**
  * Filter options based on player's current tags
@@ -196,6 +220,7 @@ export function resolveSkillCheck(
 
 /**
  * Navigate to a step by id (coordinate entry or direct navigation)
+ * If the id is a map coordinate, it will be resolved to a location name
  */
 export function navigateToStep(id: string): void {
 	const normalizedId = id.toUpperCase().trim();
@@ -212,7 +237,10 @@ export function navigateToStep(id: string): void {
 		return;
 	}
 
-	const step = selectStepById(normalizedId);
+	// Resolve coordinate to location name if mapping exists
+	const locationId = gameStore.resolveLocation(normalizedId);
+
+	const step = selectStepById(locationId);
 
 	if (!step) {
 		gameStore.errorMessage = "You don't see anything of interest here. Try another location.";
@@ -242,8 +270,8 @@ export function loadStep(step: Step): void {
 		text: gameStore.renderText(step.text)
 	};
 
-	// Get available options
-	gameStore.availableOptions = getAvailableOptions(step).map((opt) => ({
+	// Get all options (availability will be checked in the UI)
+	gameStore.availableOptions = getAllOptions(step).map((opt) => ({
 		...opt,
 		label: gameStore.renderText(opt.label)
 	}));

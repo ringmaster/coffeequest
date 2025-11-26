@@ -58,6 +58,7 @@ class GameStore {
 	state = $state<GameState>(createDefaultState());
 	phase = $state<GamePhase>('character_creation');
 	config = $state<GameConfig | null>(null);
+	locations = $state<Record<string, string>>({});
 	steps = $state<Step[]>([]);
 
 	// UI state
@@ -96,8 +97,9 @@ class GameStore {
 		magic: this.state.character.magic + this.statModifiers.magic
 	});
 
-	initialize(config: GameConfig, steps: Step[]): void {
+	initialize(config: GameConfig, locations: Record<string, string>, steps: Step[]): void {
 		this.config = config;
+		this.locations = locations;
 		this.steps = steps;
 
 		const saved = loadFromStorage();
@@ -209,6 +211,13 @@ class GameStore {
 
 	toggleQuestLog(): void {
 		this.showQuestLog = !this.showQuestLog;
+	}
+
+	// Resolve a coordinate to a location name (case insensitive)
+	resolveLocation(coordinate: string): string {
+		const normalized = coordinate.toUpperCase().trim();
+		const locationName = this.locations[normalized];
+		return locationName || normalized;
 	}
 }
 

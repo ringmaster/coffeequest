@@ -5,7 +5,9 @@
       "Bash(npx sv create:*)",
       "Bash(npm install:*)",
       "Bash(npm run build:*)",
-      "Bash(npm run check:*)"
+      "Bash(npm run check:*)",
+      "Bash(cat:*)",
+      "Bash(node -e:*)"
     ],
     "deny": [],
     "ask": []

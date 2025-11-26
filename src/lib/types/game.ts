@@ -43,7 +43,12 @@ export interface GameConfig {
 
 export interface StepData {
 	config: GameConfig;
+	locations?: Record<string, string>;
 	steps: Step[];
+}
+
+export interface StepDataError {
+	error: string;
 }
 
 export interface GameState {

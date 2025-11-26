@@ -2,7 +2,7 @@
   "name": "Baker's Flour",
   "steps": [
     {
-      "id": "BS",
+      "id": "Bakery",
       "tags": [],
       "vars": {
         "baked_item": [
@@ -35,7 +35,7 @@
       "log": "Agreed to fetch flour for the baker"
     },
     {
-      "id": "BS",
+      "id": "Bakery",
       "tags": [
         "@flour",
         "!baker_flour_quest"

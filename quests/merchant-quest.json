@@ -1,7 +1,7 @@
 {
   "steps": [
     {
-      "id": "AC",
+      "id": "Town Square",
       "tags": [
         "!merchant_quest"
       ],
@@ -26,14 +26,14 @@
       ]
     },
     {
-      "id": "AC",
+      "id": "Town Square",
       "tags": [
         "merchant_quest"
       ],
       "text": "The merchant is happy to see you've returned to the Town Square.  \"Have you recovered my {{valuable}} from the thieves?\", he asks, and is disappointed when you tell him you haven't.  I am pretty sure they fled to the Old Mill. If you hurry, they might still be there!"
     },
     {
-      "id": "EN",
+      "id": "Old Mill",
       "tags": [
         "@merchant_quest"
       ],
@@ -186,7 +186,7 @@
       "text": "You leave the mill without the {{valuable}}."
     },
     {
-      "id": "AC",
+      "id": "Town Square",
       "tags": [
         "@recovered_valuable"
       ],
@@ -227,7 +227,7 @@
       "log": "Returned the stolen item and earned 2 silver"
     },
     {
-      "id": "AC",
+      "id": "Town Square",
       "tags": [
         "@injured",
         "@merchant_quest",
@@ -237,7 +237,7 @@
       "log": "Returned to the merchant empty-handed"
     },
     {
-      "id": "AC",
+      "id": "Town Square",
       "tags": [
         "@coward_reputation",
         "@merchant_quest",

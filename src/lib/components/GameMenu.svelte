@@ -9,16 +9,11 @@
 
 	const debugEnabled = $derived(gameStore.hasTag('debug_mode'));
 
-	// Get unique map coordinates (2-character IDs that look like coordinates)
+	// Get map coordinates from the locations mapping
 	const mapLocations = $derived.by(() => {
-		const coordPattern = /^[A-G][NCS]$/i;
-		const locations = new Set<string>();
-		for (const step of gameStore.steps) {
-			if (coordPattern.test(step.id)) {
-				locations.add(step.id.toUpperCase());
-			}
-		}
-		return Array.from(locations).sort();
+		return Object.entries(gameStore.locations)
+			.map(([coord, name]) => ({ coord, name }))
+			.sort((a, b) => a.coord.localeCompare(b.coord));
 	});
 
 	function viewQuestLog() {
@@ -89,11 +84,12 @@
 					{#if mapLocations.length === 0}
 						<p class="empty-message">No locations found</p>
 					{:else}
-						<ul class="tag-list">
+						<ul class="location-list">
 							{#each mapLocations as location}
 								<li>
-									<button class="location-button" onclick={() => goToLocation(location)}>
-										{location}
+									<button class="location-button" onclick={() => goToLocation(location.coord)}>
+										<span class="coord">{location.coord}</span>
+										<span class="name">{location.name}</span>
 									</button>
 								</li>
 							{/each}
@@ -331,6 +327,31 @@
 	.location-button:hover {
 		background: var(--color-button);
 		color: var(--color-button-text);
+	}
+
+	.location-button .coord {
+		font-weight: bold;
+		margin-right: 8px;
+	}
+
+	.location-button .name {
+		opacity: 0.8;
+	}
+
+	.location-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.location-list .location-button {
+		width: 100%;
+		text-align: left;
+		padding: 8px 12px;
+		max-width: none;
 	}
 
 	.tag-button {
