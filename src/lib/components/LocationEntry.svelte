@@ -26,7 +26,7 @@
 			type="text"
 			bind:value={coordinates}
 			onkeydown={handleKeydown}
-			placeholder="e.g., B7"
+			placeholder="e.g., BS"
 			autocomplete="off"
 			autocapitalize="characters"
 		/>

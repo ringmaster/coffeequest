@@ -2,34 +2,56 @@ import type { Step, StepOption, StatName, SkillCheckResult, Stats } from '$lib/t
 import { gameStore } from '$lib/stores/gameState.svelte';
 
 /**
+ * Check if player has enough of each required tag
+ * Counts occurrences of each tag in the requirements and compares to player's tags
+ */
+function hasRequiredTags(tags: string[], playerMetadata: string[]): boolean {
+	// Count required tags (plain and @ tags, excluding blocked/grant/consume)
+	const requiredCounts = new Map<string, number>();
+	const blockedTags = new Set<string>();
+
+	for (const tag of tags) {
+		if (tag.startsWith('!')) {
+			blockedTags.add(tag.substring(1));
+		} else if (!tag.startsWith('+') && !tag.startsWith('-')) {
+			const required = tag.startsWith('@') ? tag.substring(1) : tag;
+			requiredCounts.set(required, (requiredCounts.get(required) || 0) + 1);
+		}
+	}
+
+	// Check blocked tags
+	for (const blocked of blockedTags) {
+		if (playerMetadata.includes(blocked)) {
+			return false;
+		}
+	}
+
+	// Count player's tags
+	const playerCounts = new Map<string, number>();
+	for (const tag of playerMetadata) {
+		playerCounts.set(tag, (playerCounts.get(tag) || 0) + 1);
+	}
+
+	// Check if player has enough of each required tag
+	for (const [tag, requiredCount] of requiredCounts) {
+		const playerCount = playerCounts.get(tag) || 0;
+		if (playerCount < requiredCount) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
  * Check if a step passes all hard filters (required and blocked tags)
  * - Plain tags and @tags are both required (player must have)
  * - !tags are blocked (player must NOT have)
  * - +tags and -tags are grants/consumes (not filters)
+ * - Duplicate tags require multiple copies (e.g., ["silver", "silver"] needs 2 silver)
  */
 function passesHardFilters(step: Step, playerMetadata: string[]): boolean {
-	for (const tag of step.tags) {
-		// Blocked tags: !tag
-		if (tag.startsWith('!')) {
-			const blocked = tag.substring(1);
-			if (playerMetadata.includes(blocked)) {
-				return false;
-			}
-			continue;
-		}
-
-		// Skip grant/consume tags - they don't filter
-		if (tag.startsWith('+') || tag.startsWith('-')) {
-			continue;
-		}
-
-		// Required tags: both @tag and plain tag
-		const required = tag.startsWith('@') ? tag.substring(1) : tag;
-		if (!playerMetadata.includes(required)) {
-			return false;
-		}
-	}
-	return true;
+	return hasRequiredTags(step.tags, playerMetadata);
 }
 
 /**
@@ -93,6 +115,7 @@ export function selectStepById(id: string): Step | null {
  * - Plain tags and @tags are both required (player must have)
  * - !tags are blocked (player must NOT have)
  * - +tags and -tags are grants/consumes (not filters)
+ * - Duplicate tags require multiple copies (e.g., ["silver", "silver"] needs 2 silver)
  */
 export function getAvailableOptions(step: Step): StepOption[] {
 	if (!step.options || step.options.length === 0) {
@@ -102,27 +125,7 @@ export function getAvailableOptions(step: Step): StepOption[] {
 	const playerMetadata = gameStore.state.character.metadata;
 
 	return step.options.filter((option) => {
-		for (const tag of option.tags || []) {
-			// Blocked
-			if (tag.startsWith('!')) {
-				if (playerMetadata.includes(tag.substring(1))) {
-					return false;
-				}
-				continue;
-			}
-
-			// Skip grant/consume tags - they don't filter
-			if (tag.startsWith('+') || tag.startsWith('-')) {
-				continue;
-			}
-
-			// Required tags: both @tag and plain tag
-			const required = tag.startsWith('@') ? tag.substring(1) : tag;
-			if (!playerMetadata.includes(required)) {
-				return false;
-			}
-		}
-		return true;
+		return hasRequiredTags(option.tags || [], playerMetadata);
 	});
 }
 

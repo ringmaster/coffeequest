@@ -1,11 +1,25 @@
 <script lang="ts">
 	import { gameStore } from '$lib/stores/gameState.svelte';
+	import { navigateToStep } from '$lib/game/engine';
 
 	let { open = $bindable(false) } = $props();
 	let showConfirmReset = $state(false);
 	let showDebugInfo = $state(false);
+	let showLocations = $state(false);
 
 	const debugEnabled = $derived(gameStore.hasTag('debug_mode'));
+
+	// Get unique map coordinates (2-character IDs that look like coordinates)
+	const mapLocations = $derived.by(() => {
+		const coordPattern = /^[A-G][NCS]$/i;
+		const locations = new Set<string>();
+		for (const step of gameStore.steps) {
+			if (coordPattern.test(step.id)) {
+				locations.add(step.id.toUpperCase());
+			}
+		}
+		return Array.from(locations).sort();
+	});
 
 	function viewQuestLog() {
 		open = false;
@@ -18,6 +32,19 @@
 
 	function closeDebugInfo() {
 		showDebugInfo = false;
+	}
+
+	function viewLocations() {
+		showLocations = true;
+	}
+
+	function closeLocations() {
+		showLocations = false;
+	}
+
+	function goToLocation(location: string) {
+		navigateToStep(location);
+		closeMenu();
 	}
 
 	function promptReset() {
@@ -38,13 +65,37 @@
 		open = false;
 		showConfirmReset = false;
 		showDebugInfo = false;
+		showLocations = false;
 	}
 </script>
 
 {#if open}
 	<div class="overlay" role="dialog" aria-modal="true" aria-labelledby="menu-title">
 		<div class="menu">
-			{#if showDebugInfo}
+			{#if showLocations}
+				<header>
+					<h2 id="menu-title">Map Locations</h2>
+					<button class="close-button" onclick={closeLocations} aria-label="Back">
+						&larr;
+					</button>
+				</header>
+				<div class="debug-content">
+					<h3>Available Coordinates ({mapLocations.length})</h3>
+					{#if mapLocations.length === 0}
+						<p class="empty-message">No locations found</p>
+					{:else}
+						<ul class="tag-list">
+							{#each mapLocations as location}
+								<li>
+									<button class="location-button" onclick={() => goToLocation(location)}>
+										{location}
+									</button>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				</div>
+			{:else if showDebugInfo}
 				<header>
 					<h2 id="menu-title">Debug Info</h2>
 					<button class="close-button" onclick={closeDebugInfo} aria-label="Back">
@@ -95,6 +146,7 @@
 					<button class="menu-item" onclick={viewQuestLog}>View Quest Log</button>
 					{#if debugEnabled}
 						<button class="menu-item" onclick={viewDebugInfo}>Debug</button>
+						<button class="menu-item" onclick={viewLocations}>Map Locations</button>
 					{/if}
 					<button class="menu-item danger" onclick={promptReset}>Reset Game</button>
 				</nav>
@@ -254,5 +306,21 @@
 		color: var(--color-text-secondary);
 		font-style: italic;
 		font-size: 14px;
+	}
+
+	.location-button {
+		background: var(--color-surface);
+		padding: 4px 10px;
+		border-radius: 4px;
+		font-size: 14px;
+		font-family: monospace;
+		border: none;
+		cursor: pointer;
+		color: var(--color-text);
+	}
+
+	.location-button:hover {
+		background: var(--color-button);
+		color: var(--color-button-text);
 	}
 </style>
