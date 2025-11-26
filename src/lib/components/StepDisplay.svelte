@@ -10,7 +10,7 @@
 	function returnToNavigation() {
 		gameStore.currentDisplayStep = null;
 		gameStore.availableOptions = [];
-		gameStore.state.currentStep = null;
+		gameStore.state.currentStepId = null;
 		gameStore.phase = 'navigation';
 		gameStore.save();
 	}

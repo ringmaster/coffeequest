@@ -3,23 +3,30 @@ import { gameStore } from '$lib/stores/gameState.svelte';
 
 /**
  * Check if a step passes all hard filters (required and blocked tags)
+ * - Plain tags and @tags are both required (player must have)
+ * - !tags are blocked (player must NOT have)
+ * - +tags and -tags are grants/consumes (not filters)
  */
 function passesHardFilters(step: Step, playerMetadata: string[]): boolean {
 	for (const tag of step.tags) {
-		// Required tags: @tag
-		if (tag.startsWith('@')) {
-			const required = tag.substring(1);
-			if (!playerMetadata.includes(required)) {
-				return false;
-			}
-		}
-
 		// Blocked tags: !tag
 		if (tag.startsWith('!')) {
 			const blocked = tag.substring(1);
 			if (playerMetadata.includes(blocked)) {
 				return false;
 			}
+			continue;
+		}
+
+		// Skip grant/consume tags - they don't filter
+		if (tag.startsWith('+') || tag.startsWith('-')) {
+			continue;
+		}
+
+		// Required tags: both @tag and plain tag
+		const required = tag.startsWith('@') ? tag.substring(1) : tag;
+		if (!playerMetadata.includes(required)) {
+			return false;
 		}
 	}
 	return true;
@@ -27,18 +34,15 @@ function passesHardFilters(step: Step, playerMetadata: string[]): boolean {
 
 /**
  * Calculate score for a step based on preferred tags
+ * @tags are preferred (scoring boost) in addition to being required
  */
 function calculateStepScore(step: Step, playerMetadata: string[], preferredWeight: number): number {
 	let score = 0;
 	for (const tag of step.tags) {
-		// Only count tags without special prefixes as preferred
-		if (
-			!tag.startsWith('@') &&
-			!tag.startsWith('!') &&
-			!tag.startsWith('+') &&
-			!tag.startsWith('-')
-		) {
-			if (playerMetadata.includes(tag)) {
+		// @tags are preferred - they get a scoring boost
+		if (tag.startsWith('@')) {
+			const preferred = tag.substring(1);
+			if (playerMetadata.includes(preferred)) {
 				score += preferredWeight;
 			}
 		}
@@ -47,21 +51,21 @@ function calculateStepScore(step: Step, playerMetadata: string[], preferredWeigh
 }
 
 /**
- * Select the best step for a given location based on player state
+ * Select the best step for a given id based on player state
  */
-export function selectStepForLocation(location: string): Step | null {
+export function selectStepById(id: string): Step | null {
 	const playerMetadata = gameStore.state.character.metadata;
 	const preferredWeight = gameStore.config?.preferredTagWeight ?? 5;
 
-	// Filter by location
-	const locationSteps = gameStore.steps.filter((s) => s.location === location);
+	// Filter by id
+	const matchingSteps = gameStore.steps.filter((s) => s.id === id);
 
-	if (locationSteps.length === 0) {
+	if (matchingSteps.length === 0) {
 		return null;
 	}
 
 	// Apply hard filters
-	const eligible = locationSteps.filter((step) => passesHardFilters(step, playerMetadata));
+	const eligible = matchingSteps.filter((step) => passesHardFilters(step, playerMetadata));
 
 	if (eligible.length === 0) {
 		return null;
@@ -83,15 +87,12 @@ export function selectStepForLocation(location: string): Step | null {
 	return topSteps[Math.floor(Math.random() * topSteps.length)].step;
 }
 
-/**
- * Get step by ID (for virtual locations)
- */
-export function getStepById(stepId: string): Step | null {
-	return gameStore.steps.find((s) => s.id === stepId) ?? null;
-}
 
 /**
  * Filter options based on player's current tags
+ * - Plain tags and @tags are both required (player must have)
+ * - !tags are blocked (player must NOT have)
+ * - +tags and -tags are grants/consumes (not filters)
  */
 export function getAvailableOptions(step: Step): StepOption[] {
 	if (!step.options || step.options.length === 0) {
@@ -102,28 +103,23 @@ export function getAvailableOptions(step: Step): StepOption[] {
 
 	return step.options.filter((option) => {
 		for (const tag of option.tags || []) {
-			// Required
-			if (tag.startsWith('@')) {
-				if (!playerMetadata.includes(tag.substring(1))) {
-					return false;
-				}
-			}
 			// Blocked
 			if (tag.startsWith('!')) {
 				if (playerMetadata.includes(tag.substring(1))) {
 					return false;
 				}
+				continue;
 			}
-			// Regular tags (must have for options)
-			if (
-				!tag.startsWith('@') &&
-				!tag.startsWith('!') &&
-				!tag.startsWith('+') &&
-				!tag.startsWith('-')
-			) {
-				if (!playerMetadata.includes(tag)) {
-					return false;
-				}
+
+			// Skip grant/consume tags - they don't filter
+			if (tag.startsWith('+') || tag.startsWith('-')) {
+				continue;
+			}
+
+			// Required tags: both @tag and plain tag
+			const required = tag.startsWith('@') ? tag.substring(1) : tag;
+			if (!playerMetadata.includes(required)) {
+				return false;
 			}
 		}
 		return true;
@@ -196,12 +192,24 @@ export function resolveSkillCheck(
 }
 
 /**
- * Navigate to a location (coordinate entry)
+ * Navigate to a step by id (coordinate entry or direct navigation)
  */
-export function navigateToLocation(location: string): void {
-	const normalizedLocation = location.toUpperCase().trim();
+export function navigateToStep(id: string): void {
+	const normalizedId = id.toUpperCase().trim();
 
-	const step = selectStepForLocation(normalizedLocation);
+	// Special debug location
+	if (normalizedId === 'Z3') {
+		if (!gameStore.hasTag('debug_mode')) {
+			gameStore.addTag('debug_mode');
+			gameStore.save();
+			gameStore.errorMessage = 'Debug mode enabled. Check the menu for debug options.';
+		} else {
+			gameStore.errorMessage = 'Debug mode is already enabled.';
+		}
+		return;
+	}
+
+	const step = selectStepById(normalizedId);
 
 	if (!step) {
 		gameStore.errorMessage = "You don't see anything of interest here. Try another location.";
@@ -222,11 +230,8 @@ export function loadStep(step: Step): void {
 	// Execute the step (process vars, tags, log)
 	executeStep(step);
 
-	// Store current step info
-	gameStore.state.currentStep = {
-		stepId: step.id,
-		location: step.location
-	};
+	// Store current step id
+	gameStore.state.currentStepId = step.id;
 
 	// Set display step with rendered text
 	gameStore.currentDisplayStep = {
@@ -255,6 +260,18 @@ export function loadStep(step: Step): void {
  * Handle option selection
  */
 export function selectOption(option: StepOption): void {
+	// Apply tag changes from the option (+ and -)
+	if (option.tags) {
+		for (const tag of option.tags) {
+			if (tag.startsWith('+')) {
+				gameStore.addTag(tag.substring(1));
+			} else if (tag.startsWith('-')) {
+				gameStore.removeTag(tag.substring(1));
+			}
+		}
+		gameStore.save();
+	}
+
 	if (option.skill && option.dc !== undefined) {
 		// This is a skill check option - use the skill from the option directly
 		gameStore.pendingSkillCheck = {
@@ -264,7 +281,7 @@ export function selectOption(option: StepOption): void {
 		gameStore.phase = 'skill_check_roll';
 	} else if (option.pass) {
 		// Direct navigation to next step
-		const nextStep = getStepById(option.pass);
+		const nextStep = selectStepById(option.pass);
 		if (nextStep) {
 			loadStep(nextStep);
 		} else {
@@ -275,7 +292,7 @@ export function selectOption(option: StepOption): void {
 		// Return to navigation (pass is null)
 		gameStore.currentDisplayStep = null;
 		gameStore.availableOptions = [];
-		gameStore.state.currentStep = null;
+		gameStore.state.currentStepId = null;
 		gameStore.phase = 'navigation';
 		gameStore.save();
 	}
@@ -317,7 +334,7 @@ export function continueAfterSkillCheck(): void {
 	gameStore.skillCheckResult = null;
 
 	if (nextStepId) {
-		const nextStep = getStepById(nextStepId);
+		const nextStep = selectStepById(nextStepId);
 		if (nextStep) {
 			loadStep(nextStep);
 		} else {
@@ -328,7 +345,7 @@ export function continueAfterSkillCheck(): void {
 		// Return to navigation
 		gameStore.currentDisplayStep = null;
 		gameStore.availableOptions = [];
-		gameStore.state.currentStep = null;
+		gameStore.state.currentStepId = null;
 		gameStore.phase = 'navigation';
 		gameStore.save();
 	}

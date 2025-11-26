@@ -3,10 +3,21 @@
 
 	let { open = $bindable(false) } = $props();
 	let showConfirmReset = $state(false);
+	let showDebugInfo = $state(false);
+
+	const debugEnabled = $derived(gameStore.hasTag('debug_mode'));
 
 	function viewQuestLog() {
 		open = false;
 		gameStore.showQuestLog = true;
+	}
+
+	function viewDebugInfo() {
+		showDebugInfo = true;
+	}
+
+	function closeDebugInfo() {
+		showDebugInfo = false;
 	}
 
 	function promptReset() {
@@ -26,13 +37,43 @@
 	function closeMenu() {
 		open = false;
 		showConfirmReset = false;
+		showDebugInfo = false;
 	}
 </script>
 
 {#if open}
 	<div class="overlay" role="dialog" aria-modal="true" aria-labelledby="menu-title">
 		<div class="menu">
-			{#if showConfirmReset}
+			{#if showDebugInfo}
+				<header>
+					<h2 id="menu-title">Debug Info</h2>
+					<button class="close-button" onclick={closeDebugInfo} aria-label="Back">
+						&larr;
+					</button>
+				</header>
+				<div class="debug-content">
+					<h3>Player Tags ({gameStore.state.character.metadata.length})</h3>
+					{#if gameStore.state.character.metadata.length === 0}
+						<p class="empty-message">No tags</p>
+					{:else}
+						<ul class="tag-list">
+							{#each gameStore.state.character.metadata as tag}
+								<li class="tag-item">{tag}</li>
+							{/each}
+						</ul>
+					{/if}
+					<h3>Quest Variables</h3>
+					{#if Object.keys(gameStore.state.questVars).length === 0}
+						<p class="empty-message">No variables</p>
+					{:else}
+						<ul class="tag-list">
+							{#each Object.entries(gameStore.state.questVars) as [key, value]}
+								<li class="tag-item"><strong>{key}:</strong> {value}</li>
+							{/each}
+						</ul>
+					{/if}
+				</div>
+			{:else if showConfirmReset}
 				<header>
 					<h2 id="menu-title">Reset Game?</h2>
 				</header>
@@ -52,6 +93,9 @@
 				</header>
 				<nav class="menu-options">
 					<button class="menu-item" onclick={viewQuestLog}>View Quest Log</button>
+					{#if debugEnabled}
+						<button class="menu-item" onclick={viewDebugInfo}>Debug</button>
+					{/if}
 					<button class="menu-item danger" onclick={promptReset}>Reset Game</button>
 				</nav>
 			{/if}
@@ -169,5 +213,46 @@
 	.danger-button {
 		background: var(--color-failure);
 		color: white;
+	}
+
+	.debug-content {
+		padding: 16px;
+		max-height: 400px;
+		overflow-y: auto;
+	}
+
+	.debug-content h3 {
+		font-size: 14px;
+		text-transform: uppercase;
+		color: var(--color-text-secondary);
+		margin-bottom: 8px;
+		margin-top: 16px;
+	}
+
+	.debug-content h3:first-child {
+		margin-top: 0;
+	}
+
+	.tag-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.tag-item {
+		background: var(--color-surface);
+		padding: 4px 10px;
+		border-radius: 4px;
+		font-size: 14px;
+		font-family: monospace;
+	}
+
+	.empty-message {
+		color: var(--color-text-secondary);
+		font-style: italic;
+		font-size: 14px;
 	}
 </style>

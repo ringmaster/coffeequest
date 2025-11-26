@@ -1,10 +1,15 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	let { children } = $props();
 </script>
 
 <svelte:head>
 	<title>Coffee Quest</title>
 	<meta name="description" content="A mobile-first adventure game played with your coffee mug" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+	<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet" />
+	{@html `<style>body { background-image: url('${base}/bg.jpg'); }</style>`}
 </svelte:head>
 
 {@render children()}
@@ -34,15 +39,7 @@
 
 	:global(html, body) {
 		height: 100%;
-		font-family:
-			-apple-system,
-			BlinkMacSystemFont,
-			'Segoe UI',
-			Roboto,
-			Oxygen,
-			Ubuntu,
-			Cantarell,
-			sans-serif;
+		font-family: 'MedievalSharp', cursive;
 		font-size: 16px;
 		line-height: 1.5;
 		background: var(--color-background);
@@ -51,6 +48,10 @@
 
 	:global(body) {
 		min-height: 100dvh;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+		background-attachment: fixed;
 	}
 
 	:global(button) {

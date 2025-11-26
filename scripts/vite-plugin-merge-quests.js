@@ -33,19 +33,17 @@ async function mergeQuests() {
 		}
 	}
 
-	// Check for duplicate step IDs
-	const stepIds = new Set();
-	const duplicates = [];
+	// Count steps by ID (duplicates are allowed for coordinate-based steps)
+	/** @type {Record<string, number>} */
+	const idCounts = {};
 	for (const step of allSteps) {
-		if (stepIds.has(step.id)) {
-			duplicates.push(step.id);
-		}
-		stepIds.add(step.id);
+		idCounts[step.id] = (idCounts[step.id] || 0) + 1;
 	}
-
-	if (duplicates.length > 0) {
-		console.error('\x1b[31mERROR: Duplicate step IDs found:\x1b[0m', duplicates);
-		return false;
+	const duplicateIds = Object.entries(idCounts)
+		.filter(([, count]) => count > 1)
+		.map(([id, count]) => `${id} (${count})`);
+	if (duplicateIds.length > 0) {
+		console.log(`\x1b[33m!\x1b[0m Shared step IDs: ${duplicateIds.join(', ')}`);
 	}
 
 	// Build output

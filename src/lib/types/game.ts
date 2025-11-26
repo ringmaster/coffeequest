@@ -25,7 +25,6 @@ export interface StepOption {
 
 export interface Step {
 	id: string;
-	location: string;
 	tags: string[];
 	vars?: Record<string, string[] | null>;
 	text: string;
@@ -50,10 +49,7 @@ export interface StepData {
 export interface GameState {
 	character: Character;
 	questVars: Record<string, string>;
-	currentStep: {
-		stepId: string;
-		location: string;
-	} | null;
+	currentStepId: string | null;
 	questLog: string[];
 }
 

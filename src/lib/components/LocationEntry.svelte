@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { navigateToLocation } from '$lib/game/engine';
+	import { navigateToStep } from '$lib/game/engine';
 	import { gameStore } from '$lib/stores/gameState.svelte';
 
 	let coordinates = $state('');
 
 	function handleSubmit() {
 		if (coordinates.trim()) {
-			navigateToLocation(coordinates);
+			navigateToStep(coordinates);
 			coordinates = '';
 		}
 	}

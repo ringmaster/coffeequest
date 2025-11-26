@@ -1,10 +1,8 @@
 {
   "name": "Baker's Flour",
-  "description": "Help the baker by fetching flour from the market",
   "steps": [
     {
-      "id": "bakery_welcome",
-      "location": "B7",
+      "id": "B7",
       "tags": [],
       "vars": {
         "baked_item": [
@@ -13,7 +11,7 @@
           "cakes"
         ]
       },
-      "text": "The baker greets you warmly. 'I'd love to serve you some {{baked_item}}, but I'm all out of flour. Could you help me?'",
+      "text": "The baker greets you warmly. \"I'd love to serve you some {{baked_item}}, but I'm all out of flour. Could you help me?\"",
       "options": [
         {
           "label": "I'll help you",
@@ -29,21 +27,19 @@
     },
     {
       "id": "bakery_accept_quest",
-      "location": "bakery_accept",
       "tags": [
         "+baker_flour_quest",
         "+quest"
       ],
-      "text": "The baker smiles gratefully. 'Wonderful! Please visit the market at D9 and get some flour.'",
+      "text": "The baker smiles gratefully. 'Wonderful! Please visit the market and get some flour.'",
       "log": "Agreed to fetch flour for the baker"
     },
     {
-      "id": "market_busy",
-      "location": "D9",
+      "id": "D9",
       "tags": [
         "@baker_flour_quest"
       ],
-      "text": "The market is bustling. You see a stall selling flour.",
+      "text": "The market is bustling today, but you make your way through the crowds to the miller's stall for flour.",
       "options": [
         {
           "label": "Buy flour for 2 silver",
@@ -73,7 +69,6 @@
     },
     {
       "id": "market_purchase",
-      "location": "market_buy",
       "tags": [
         "-silver",
         "-silver",
@@ -85,7 +80,6 @@
     },
     {
       "id": "market_negotiate_success",
-      "location": "market_deal",
       "tags": [],
       "text": "The merchant agrees to sell for just 1 silver!",
       "options": [
@@ -105,7 +99,6 @@
     },
     {
       "id": "market_purchase_discount",
-      "location": "market_buy_discount",
       "tags": [
         "-silver",
         "+flour",
@@ -117,7 +110,6 @@
     },
     {
       "id": "market_negotiate_fail",
-      "location": "market_no_deal",
       "tags": [],
       "text": "The merchant is unmoved by your haggling. Full price or nothing.",
       "options": [
@@ -138,7 +130,6 @@
     },
     {
       "id": "market_steal_success",
-      "location": "market_theft_success",
       "tags": [
         "+flour",
         "-baker_flour_quest",
@@ -149,7 +140,6 @@
     },
     {
       "id": "market_steal_caught",
-      "location": "market_theft_caught",
       "tags": [
         "+banned_from_market",
         "-baker_flour_quest"
@@ -158,8 +148,7 @@
       "log": "Got caught stealing and banned from the market"
     },
     {
-      "id": "bakery_return",
-      "location": "B7",
+      "id": "B7",
       "tags": [
         "@flour",
         "!baker_flour_quest"
@@ -175,7 +164,6 @@
     },
     {
       "id": "bakery_complete",
-      "location": "bakery_thanks",
       "tags": [
         "-flour",
         "+silver",

@@ -26,7 +26,7 @@ function createDefaultState(): GameState {
 	return {
 		character: createDefaultCharacter(),
 		questVars: {},
-		currentStep: null,
+		currentStepId: null,
 		questLog: []
 	};
 }

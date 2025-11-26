@@ -1,203 +1,250 @@
 {
-	"name": "Merchant's Stolen Valuable",
-	"description": "Help a merchant recover their stolen item from thieves at the Old Mill",
-	"steps": [
-		{
-			"id": "town_square_start",
-			"location": "A1",
-			"tags": [],
-			"text": "You arrive in the town square. A merchant looks distressed.",
-			"options": [
-				{
-					"label": "Ask what's wrong",
-					"tags": [],
-					"pass": "merchant_problem"
-				},
-				{
-					"label": "Ignore and move on",
-					"tags": [],
-					"pass": null
-				}
-			]
-		},
-		{
-			"id": "merchant_problem",
-			"location": "merchant_talk",
-			"tags": ["+merchant_quest", "+quest"],
-			"vars": {
-				"valuable": ["gemstone", "heirloom", "artifact"]
-			},
-			"text": "The merchant explains: 'Thieves stole my precious {{valuable}}! They fled to the Old Mill at C5. Please help me recover it!'",
-			"log": "The merchant asked you to recover their stolen {{valuable}}",
-			"options": [
-				{
-					"label": "I'll help you",
-					"tags": [],
-					"pass": null
-				}
-			]
-		},
-		{
-			"id": "old_mill_approach",
-			"location": "C5",
-			"tags": ["@merchant_quest"],
-			"text": "You arrive at the Old Mill. You hear voices inside.",
-			"options": [
-				{
-					"label": "Sneak in quietly",
-					"tags": [],
-					"skill": "guile",
-					"dc": 7,
-					"pass": "mill_sneak_success",
-					"fail": "mill_sneak_fail"
-				},
-				{
-					"label": "Burst in aggressively",
-					"tags": [],
-					"skill": "might",
-					"dc": 8,
-					"pass": "mill_might_success",
-					"fail": "mill_might_fail"
-				},
-				{
-					"label": "Try to talk to them",
-					"tags": [],
-					"pass": "mill_negotiate"
-				}
-			]
-		},
-		{
-			"id": "mill_sneak_success",
-			"location": "mill_sneak_win",
-			"tags": ["+recovered_valuable", "-merchant_quest", "+sneaky_reputation"],
-			"text": "You slip past the thieves unnoticed and grab the {{valuable}}!",
-			"log": "Sneaked into the mill and recovered the {{valuable}}"
-		},
-		{
-			"id": "mill_sneak_fail",
-			"location": "mill_sneak_caught",
-			"tags": [],
-			"text": "The thieves hear you! One blocks your path.",
-			"options": [
-				{
-					"label": "Fight",
-					"tags": [],
-					"skill": "might",
-					"dc": 9,
-					"pass": "mill_fight_win",
-					"fail": "mill_fight_lose"
-				},
-				{
-					"label": "Flee",
-					"tags": [],
-					"pass": "mill_flee"
-				}
-			]
-		},
-		{
-			"id": "mill_might_success",
-			"location": "mill_might_win",
-			"tags": ["+recovered_valuable", "-merchant_quest", "+warrior_reputation"],
-			"text": "You intimidate the thieves into surrendering the {{valuable}}!",
-			"log": "Intimidated the thieves and recovered the {{valuable}}"
-		},
-		{
-			"id": "mill_might_fail",
-			"location": "mill_might_lose",
-			"tags": ["-merchant_quest", "+injured"],
-			"text": "The thieves overpower you. You barely escape with your life.",
-			"log": "Failed to recover the {{valuable}} and got injured"
-		},
-		{
-			"id": "mill_negotiate",
-			"location": "mill_talk",
-			"tags": [],
-			"text": "You approach peacefully. The thieves are willing to talk.",
-			"options": [
-				{
-					"label": "Offer them 3 silver for the item",
-					"tags": ["silver", "silver", "silver"],
-					"pass": "mill_purchase"
-				},
-				{
-					"label": "Threaten them",
-					"tags": [],
-					"skill": "might",
-					"dc": 8,
-					"pass": "mill_might_success",
-					"fail": "mill_might_fail"
-				},
-				{
-					"label": "Walk away",
-					"tags": [],
-					"pass": "mill_give_up"
-				}
-			]
-		},
-		{
-			"id": "mill_purchase",
-			"location": "mill_buy",
-			"tags": ["-silver", "-silver", "-silver", "+recovered_valuable", "-merchant_quest"],
-			"text": "The thieves accept your silver and hand over the {{valuable}}.",
-			"log": "Bought the {{valuable}} from the thieves for 3 silver"
-		},
-		{
-			"id": "mill_fight_win",
-			"location": "mill_combat_win",
-			"tags": ["+recovered_valuable", "-merchant_quest", "+warrior_reputation"],
-			"text": "You defeat the thief and claim the {{valuable}}!",
-			"log": "Fought the thieves and recovered the {{valuable}}"
-		},
-		{
-			"id": "mill_fight_lose",
-			"location": "mill_combat_lose",
-			"tags": ["-merchant_quest", "+injured", "+beaten_by_thieves"],
-			"text": "The thief beats you soundly. You limp away empty-handed.",
-			"log": "Lost the fight and failed to recover the {{valuable}}"
-		},
-		{
-			"id": "mill_flee",
-			"location": "mill_escape",
-			"tags": ["-merchant_quest", "+coward_reputation"],
-			"text": "You run from the mill. The thieves laugh at your cowardice.",
-			"log": "Fled from the thieves in fear"
-		},
-		{
-			"id": "mill_give_up",
-			"location": "mill_abandon",
-			"tags": ["-merchant_quest"],
-			"text": "You leave the mill without the {{valuable}}.",
-			"log": "Gave up on recovering the {{valuable}}"
-		},
-		{
-			"id": "merchant_return_success",
-			"location": "A1",
-			"tags": ["@recovered_valuable"],
-			"text": "The merchant is overjoyed to see their {{valuable}} returned!",
-			"options": [
-				{
-					"label": "Accept reward",
-					"tags": [],
-					"pass": "merchant_reward"
-				}
-			]
-		},
-		{
-			"id": "merchant_reward",
-			"location": "merchant_thanks",
-			"tags": ["-recovered_valuable", "+silver", "+silver", "+merchant_friend"],
-			"vars": {
-				"valuable": null
-			},
-			"text": "The merchant gives you 2 silver and their eternal gratitude!",
-			"log": "Returned the stolen item and earned 2 silver"
-		},
-		{
-			"id": "merchant_return_failed",
-			"location": "A1",
-			"tags": ["@injured", "!merchant_quest", "!recovered_valuable"],
-			"text": "The merchant sees your injuries and sighs sadly. 'I appreciate you tried...'",
-			"log": "Returned to the merchant empty-handed"
-		}
-	]
+  "steps": [
+    {
+      "id": "A1",
+      "tags": [
+        "!merchant_quest"
+      ],
+      "vars": {
+        "valuable": [
+          "gemstone",
+          "heirloom",
+          "artifact"
+        ]
+      },
+      "text": "You arrive at the town square.  You see a merchant who is looking quite glum.  He explains, \"Thieves stole my precious {{valuable}}! I am pretty sure they fled to the Old Mill. Please help me recover it!\"",
+      "log": "The merchant asked you to recover their stolen {{valuable}}",
+      "options": [
+        {
+          "label": "I'll help you",
+          "tags": [
+            "+merchant_quest",
+            "+quest"
+          ],
+          "pass": null
+        }
+      ]
+    },
+    {
+      "id": "A1",
+      "tags": [
+        "merchant_quest"
+      ],
+      "text": "The merchant is happy to see you've returned to the Town Square.  \"Have you recovered my {{valuable}} from the thieves?\", he asks, and is disappointed when you tell him you haven't.  I am pretty sure they fled to the Old Mill. If you hurry, they might still be there!"
+    },
+    {
+      "id": "C5",
+      "tags": [
+        "@merchant_quest"
+      ],
+      "text": "You arrive at the Old Mill. You hear voices inside.",
+      "options": [
+        {
+          "label": "Sneak in quietly",
+          "tags": [],
+          "skill": "guile",
+          "dc": 4,
+          "pass": "mill_sneak_success",
+          "fail": "mill_sneak_fail"
+        },
+        {
+          "label": "Burst in aggressively",
+          "tags": [],
+          "skill": "might",
+          "dc": 5,
+          "pass": "mill_might_success",
+          "fail": "mill_might_fail"
+        },
+        {
+          "label": "Try to talk to them",
+          "tags": [],
+          "pass": "mill_negotiate"
+        }
+      ]
+    },
+    {
+      "id": "mill_sneak_success",
+      "tags": [
+        "+recovered_valuable",
+        "-merchant_quest",
+        "+sneaky_reputation"
+      ],
+      "text": "You slip past the thieves unnoticed and find the {{valuable}} unprotected!  You are able to grab it and leave without being seen.",
+      "log": "Sneaked into the mill and recovered the {{valuable}}"
+    },
+    {
+      "id": "mill_sneak_fail",
+      "tags": [],
+      "text": "The thieves hear you! One blocks your path.",
+      "options": [
+        {
+          "label": "Fight",
+          "tags": [],
+          "skill": "might",
+          "dc": 6,
+          "pass": "mill_fight_win",
+          "fail": "mill_fight_lose"
+        },
+        {
+          "label": "Flee",
+          "tags": [],
+          "pass": "mill_flee"
+        }
+      ]
+    },
+    {
+      "id": "mill_might_success",
+      "tags": [
+        "+recovered_valuable",
+        "-merchant_quest",
+        "+warrior_reputation"
+      ],
+      "text": "You intimidate the thieves into surrendering the {{valuable}}!",
+      "log": "Intimidated the thieves and recovered the {{valuable}}"
+    },
+    {
+      "id": "mill_might_fail",
+      "tags": [
+        "-merchant_quest",
+        "+injured"
+      ],
+      "text": "The thieves overpower you. You barely escape with your life.",
+      "log": "Failed to recover the {{valuable}} and got injured"
+    },
+    {
+      "id": "mill_negotiate",
+      "tags": [],
+      "text": "You approach peacefully. The thieves are willing to talk.",
+      "options": [
+        {
+          "label": "Offer them 3 silver for the item",
+          "tags": [
+            "silver",
+            "silver",
+            "silver"
+          ],
+          "pass": "mill_purchase"
+        },
+        {
+          "label": "Threaten them",
+          "tags": [],
+          "skill": "might",
+          "dc": 8,
+          "pass": "mill_might_success",
+          "fail": "mill_might_fail"
+        },
+        {
+          "label": "Walk away",
+          "tags": [],
+          "pass": "mill_give_up"
+        }
+      ]
+    },
+    {
+      "id": "mill_purchase",
+      "tags": [
+        "-silver",
+        "-silver",
+        "-silver",
+        "+recovered_valuable"
+      ],
+      "text": "The thieves accept your silver and hand over the {{valuable}}.",
+      "log": "Bought the {{valuable}} from the thieves for 3 silver"
+    },
+    {
+      "id": "mill_fight_win",
+      "tags": [
+        "+recovered_valuable",
+        "-merchant_quest",
+        "+warrior_reputation"
+      ],
+      "text": "You defeat the thief and claim the {{valuable}}!",
+      "log": "Fought the thieves and recovered the {{valuable}}"
+    },
+    {
+      "id": "mill_fight_lose",
+      "tags": [
+        "-merchant_quest",
+        "+injured",
+        "+beaten_by_thieves"
+      ],
+      "text": "The thief beats you soundly. You limp away empty-handed.",
+      "log": "Lost the fight and failed to recover the {{valuable}}"
+    },
+    {
+      "id": "mill_flee",
+      "tags": [
+        "-merchant_quest",
+        "+coward_reputation"
+      ],
+      "text": "You run from the mill. The thieves laugh at your cowardice.",
+      "log": "Fled from the thieves in fear"
+    },
+    {
+      "id": "mill_give_up",
+      "tags": [],
+      "text": "You leave the mill without the {{valuable}}."
+    },
+    {
+      "id": "A1",
+      "tags": [
+        "@recovered_valuable"
+      ],
+      "text": "The merchant is overjoyed to see their {{valuable}} returned!",
+      "options": [
+        {
+          "label": "Accept reward",
+          "tags": [],
+          "pass": "merchant_reward"
+        }
+      ]
+    },
+    {
+      "id": "merchant_reward",
+      "tags": [
+        "-recovered_valuable",
+        "+bag of oranges",
+        "+merchant_friend"
+      ],
+      "vars": {
+        "valuable": null
+      },
+      "text": "The merchant gives you a bag of ripe oranges and their eternal gratitude!",
+      "log": "Returned the stolen item and earned a bag of oranges"
+    },
+    {
+      "id": "merchant_reward",
+      "tags": [
+        "-recovered_valuable",
+        "+silver",
+        "+silver",
+        "+merchant_friend"
+      ],
+      "vars": {
+        "valuable": null
+      },
+      "text": "The merchant gives you 2 silver and their eternal gratitude!",
+      "log": "Returned the stolen item and earned 2 silver"
+    },
+    {
+      "id": "A1",
+      "tags": [
+        "@injured",
+        "@merchant_quest",
+        "!recovered_valuable"
+      ],
+      "text": "The merchant sees your injuries and sighs sadly. 'I appreciate you tried...'",
+      "log": "Returned to the merchant empty-handed"
+    },
+    {
+      "id": "A1",
+      "tags": [
+        "@coward_reputation",
+        "@merchant_quest",
+        "!recovered_valuable"
+      ],
+      "text": "\"You ran away?\" The merchant shakes his head in disbelief. \"Well, I guess you tried.\"",
+      "log": "Returned to the merchant empty-handed"
+    }
+  ]
 }
