@@ -47,6 +47,11 @@
 		closeMenu();
 	}
 
+	function removeTag(tag: string) {
+		gameStore.removeTag(tag);
+		gameStore.save();
+	}
+
 	function promptReset() {
 		showConfirmReset = true;
 	}
@@ -109,7 +114,11 @@
 					{:else}
 						<ul class="tag-list">
 							{#each gameStore.state.character.metadata as tag}
-								<li class="tag-item">{tag}</li>
+								<li>
+									<button class="tag-button" onclick={() => removeTag(tag)}>
+										{tag}
+									</button>
+								</li>
 							{/each}
 						</ul>
 					{/if}
@@ -322,5 +331,21 @@
 	.location-button:hover {
 		background: var(--color-button);
 		color: var(--color-button-text);
+	}
+
+	.tag-button {
+		background: var(--color-surface);
+		padding: 4px 10px;
+		border-radius: 4px;
+		font-size: 14px;
+		font-family: monospace;
+		border: none;
+		cursor: pointer;
+		color: var(--color-text);
+	}
+
+	.tag-button:hover {
+		background: var(--color-failure);
+		color: white;
 	}
 </style>

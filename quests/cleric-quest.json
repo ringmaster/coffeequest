@@ -3,8 +3,16 @@
     {
       "id": "BC",
       "tags": [
+        "quest"
+      ],
+      "text": "You enter the church and take a seat among it's many pews.  The silence is meditative, and you take a moment to reflect on your journey so far."
+    },
+    {
+      "id": "BC",
+      "tags": [
         "!cleric_quest",
-        "!cleric_quest_complete"
+        "!cleric_quest_complete",
+        "!quest"
       ],
       "vars": {
         "ailment": [

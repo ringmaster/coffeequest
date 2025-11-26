@@ -1,6 +1,30 @@
 <script lang="ts">
 	import { gameStore } from '$lib/stores/gameState.svelte';
 
+	const randomNames = [
+		'Aldric',
+		'Brynn',
+		'Cora',
+		'Darian',
+		'Elena',
+		'Finn',
+		'Greta',
+		'Hawk',
+		'Ivy',
+		'Jasper',
+		'Kira',
+		'Lorn',
+		'Mira',
+		'Nolan',
+		'Orin',
+		'Petra',
+		'Quinn',
+		'Rowan',
+		'Sage',
+		'Theron'
+	];
+
+	let characterName = $state(randomNames[Math.floor(Math.random() * randomNames.length)]);
 	let might = $state(2);
 	let guile = $state(2);
 	let magic = $state(2);
@@ -8,7 +32,7 @@
 	const startingPoints = $derived(gameStore.config?.startingPoints ?? 6);
 	const pointsUsed = $derived(might + guile + magic);
 	const pointsRemaining = $derived(startingPoints - pointsUsed);
-	const canStart = $derived(pointsRemaining === 0);
+	const canStart = $derived(pointsRemaining === 0 && characterName.trim().length > 0);
 
 	function adjustStat(stat: 'might' | 'guile' | 'magic', delta: number) {
 		const current = stat === 'might' ? might : stat === 'guile' ? guile : magic;
@@ -24,7 +48,7 @@
 
 	function beginAdventure() {
 		if (canStart) {
-			gameStore.startNewGame(might, guile, magic);
+			gameStore.startNewGame(might, guile, magic, characterName);
 		}
 	}
 </script>
@@ -32,6 +56,17 @@
 <div class="character-creation">
 	<h1>Coffee Quest</h1>
 	<h2>Create Your Character</h2>
+
+	<div class="name-row">
+		<label for="character-name">Name</label>
+		<input
+			id="character-name"
+			type="text"
+			bind:value={characterName}
+			placeholder="Enter your name"
+			autocomplete="off"
+		/>
+	</div>
 
 	<div class="stat-row">
 		<span class="stat-label">Might</span>
@@ -122,6 +157,34 @@
 	h2 {
 		font-size: 20px;
 		margin-bottom: 24px;
+	}
+
+	.name-row {
+		width: 100%;
+		margin-bottom: 24px;
+	}
+
+	.name-row label {
+		display: block;
+		font-size: 16px;
+		margin-bottom: 8px;
+		color: var(--color-text-secondary);
+	}
+
+	.name-row input {
+		width: 100%;
+		padding: 12px 16px;
+		font-size: 18px;
+		border: 2px solid var(--color-border);
+		border-radius: 8px;
+		background: var(--color-background);
+		color: var(--color-text);
+		box-sizing: border-box;
+	}
+
+	.name-row input:focus {
+		outline: none;
+		border-color: var(--color-button);
 	}
 
 	.stat-row {

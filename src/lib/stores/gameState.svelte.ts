@@ -116,11 +116,12 @@ class GameStore {
 		}
 	}
 
-	startNewGame(might: number, guile: number, magic: number): void {
+	startNewGame(might: number, guile: number, magic: number, characterName: string): void {
 		this.state = createDefaultState();
 		this.state.character.might = might;
 		this.state.character.guile = guile;
 		this.state.character.magic = magic;
+		this.state.questVars.character_name = characterName.trim();
 		this.phase = 'navigation';
 		this.save();
 	}
