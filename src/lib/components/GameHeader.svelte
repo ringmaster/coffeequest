@@ -59,17 +59,15 @@
 			title="Inventory"
 		>
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<!-- Bag body -->
-				<path d="M6 9c-1 3-1.5 6 0 9 1 2 3 3 6 3s5-1 6-3c1.5-3 1-6 0-9"></path>
-				<!-- Gathered top -->
-				<path d="M6 9c0-2 1-3 2-3.5"></path>
-				<path d="M18 9c0-2-1-3-2-3.5"></path>
-				<path d="M8 5.5c1-1 2.5-1.5 4-1.5s3 .5 4 1.5"></path>
-				<!-- Tie around neck -->
-				<ellipse cx="12" cy="7" rx="3.5" ry="1"></ellipse>
-				<!-- Hanging ties -->
-				<path d="M10 8c-.5.5-1 2-1.5 3"></path>
-				<path d="M14 8c.5.5 1 2 1.5 3"></path>
+				<!-- Splayed opening at top -->
+				<path d="M8 4c1.5 1 2.5 1.5 4 1.5s2.5-.5 4-1.5"></path>
+				<!-- Rope tie constricting neck -->
+				<ellipse cx="12" cy="7" rx="2.5" ry=".7"></ellipse>
+				<!-- Teardrop body - narrow at neck, wide flat bottom -->
+				<path d="M9.5 7.5C7 10 5 14 5 18c0 1.5 1 2.5 2.5 3h9c1.5-.5 2.5-1.5 2.5-3 0-4-2-8-4.5-10.5"></path>
+				<!-- Rope tails -->
+				<path d="M10 7.5c-.5 1.5-1 2.5-2 3.5"></path>
+				<path d="M14 7.5c.5 1.5 1 2.5 2 3.5"></path>
 			</svg>
 			{#if inventoryCount > 0}
 				<span class="badge">{inventoryCount}</span>
