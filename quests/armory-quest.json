@@ -1,0 +1,1058 @@
+{
+  "steps": [
+    {
+      "id": "Guardhouse",
+      "tags": [
+        "!quest",
+        "!done:armory"
+      ],
+      "vars": {
+        "guilty": [
+          "guard",
+          "smith",
+          "madam"
+        ],
+        "captain": [
+          "Captain Marta",
+          "Captain Elara",
+          "Captain Sera"
+        ],
+        "guard": [
+          "Vance",
+          "Garrett",
+          "Colm"
+        ],
+        "smith": [
+          "Tomas",
+          "Henrik",
+          "Aldric"
+        ],
+        "madam": [
+          "Madam Lira",
+          "Madam Vesper",
+          "Madam Corine"
+        ]
+      },
+      "text": "When you arrive at the guardhouse, a stern woman in guard livery catches your eye and gestures you toward a quiet corner. \"I'm {{captain}},\" she says, voice low. \"I have a problem that requires... discretion. Weapons have gone missing from the Armory. Not enough to raise alarms, but I've noticed. I suspect someone in town, but I can't investigate openly without tipping them off.\"",
+      "options": [
+        "I can look into it::accept_armory_quest",
+        "Sounds like guard business to me"
+      ]
+    },
+    {
+      "id": "accept_armory_quest",
+      "tags": [
+        "+q:armory",
+        "+quest",
+        "+q:guilty_{{guilty}}",
+        "inv:armory_key"
+      ],
+      "text": "{{captain}} nods curtly. \"Search the Armory first—see what you can find. Then follow wherever the evidence leads. Report back to me when you know who's responsible.\" She presses a key into your hand.",
+      "log": "Agreed to investigate missing weapons for {{captain}}"
+    },
+    {
+      "id": "Guardhouse",
+      "tags": [
+        "q:armory",
+        "!q:searched"
+      ],
+      "text": "{{captain}} raises an eyebrow. \"The Armory, remember? That's where you should start.\""
+    },
+    {
+      "id": "Guardhouse",
+      "tags": [
+        "q:armory",
+        "q:searched",
+        "!q:lead_blacksmith",
+        "!q:lead_seamstress",
+        "!q:lead_tavern"
+      ],
+      "text": "{{captain}} looks up as you enter. \"Anything to report?\" You shake your head—you haven't followed up on any leads yet. \"Then get to it. The Blacksmith, the Seamstress, the Tavern—someone knows something.\""
+    },
+    {
+      "id": "Armory",
+      "tags": [
+        "@q:armory",
+        "!q:searched"
+      ],
+      "text": "The Armory is quiet, racks of weapons standing in neat rows. You begin your search.",
+      "options": [
+        {
+          "label": "Search thoroughly",
+          "tags": [],
+          "skill": "guile",
+          "dc": 3,
+          "pass": "armory_search_success",
+          "fail": "armory_search_partial"
+        }
+      ]
+    },
+    {
+      "id": "armory_search_success",
+      "tags": [
+        "+q:searched",
+        "@q:guilty_guard"
+      ],
+      "text": "You find several things of interest: inventory logs with clumsy falsifications in what looks like a guard's hand, a scrap of fine blue fabric caught on a crate corner—a guard's off-duty cloak, perhaps—and a crumpled note reading \"usual place, after dark\" signed with a military shorthand.",
+      "log": "Found evidence in the Armory pointing toward a guard: falsified logs, blue cloak fabric, and a coded note"
+    },
+    {
+      "id": "armory_search_success",
+      "tags": [
+        "+q:searched",
+        "@q:guilty_smith"
+      ],
+      "text": "You find several things of interest: fresh forge residue near the emptied weapon racks—someone's been working metal here recently—distinctive hammer marks on a damaged crate, and a scrap of leather bearing a smith's brand. The thief knows metalwork.",
+      "log": "Found evidence in the Armory pointing toward a smith: forge residue, hammer marks, and branded leather"
+    },
+    {
+      "id": "armory_search_success",
+      "tags": [
+        "+q:searched",
+        "@q:guilty_madam"
+      ],
+      "text": "You find several things of interest: inventory logs falsified in an elegant hand, a faint trace of expensive perfume on an empty rack—out of place in a military space—and a scrap of fine embroidered fabric. Someone with expensive tastes has been here.",
+      "log": "Found evidence in the Armory: falsified logs in elegant script, perfume traces, and embroidered fabric"
+    },
+    {
+      "id": "armory_search_partial",
+      "tags": [
+        "+q:searched",
+        "@q:guilty_guard"
+      ],
+      "text": "Your search turns up inventory logs with obvious falsifications and a scrap of fine blue fabric caught on a crate—looks like a guard's off-duty cloak. A patrol forces you to move on before you can find more.",
+      "log": "Found partial evidence: falsified logs and blue cloak fabric"
+    },
+    {
+      "id": "armory_search_partial",
+      "tags": [
+        "+q:searched",
+        "@q:guilty_smith"
+      ],
+      "text": "Your search turns up fresh forge residue near the emptied racks and distinctive hammer marks on a crate. A patrol forces you to move on before you can find more.",
+      "log": "Found partial evidence: forge residue and hammer marks"
+    },
+    {
+      "id": "armory_search_partial",
+      "tags": [
+        "+q:searched",
+        "@q:guilty_madam"
+      ],
+      "text": "Your search turns up inventory logs falsified in an elegant hand and a faint trace of expensive perfume. A patrol forces you to move on before you can find more.",
+      "log": "Found partial evidence: elegant falsifications and perfume traces"
+    },
+    {
+      "id": "Armory",
+      "tags": [
+        "q:armory",
+        "q:searched"
+      ],
+      "text": "You've already searched the Armory. The clues suggest the Blacksmith, Seamstress, or Tavern might yield more information."
+    },
+    {
+      "id": "Blacksmith",
+      "tags": [
+        "@q:searched",
+        "!q:lead_blacksmith",
+        "q:armory",
+        "@q:guilty_guard"
+      ],
+      "text": "The blacksmith, {{smith}}, looks up from his anvil as you enter. When you mention the missing weapons and the filed forge marks, his face goes pale. He sets down his hammer with shaking hands.",
+      "options": [
+        {
+          "label": "Press him for information",
+          "tags": [],
+          "skill": "guile",
+          "dc": 3,
+          "pass": "blacksmith_talks_guard",
+          "fail": "blacksmith_scared_guard"
+        },
+        {
+          "label": "Intimidate him",
+          "tags": [],
+          "skill": "might",
+          "dc": 4,
+          "pass": "blacksmith_talks_guard",
+          "fail": "blacksmith_clams_up"
+        },
+        "Leave him be"
+      ]
+    },
+    {
+      "id": "blacksmith_talks_guard",
+      "tags": [
+        "+q:lead_blacksmith"
+      ],
+      "text": "\"It's {{guard}},\" {{smith}} whispers. \"One of the guards. He's been bringing me weapons for 'off-books repairs'—filing off the marks so they can't be traced. I didn't want any part of it, but he threatened my shop. Please, I'm not the criminal here.\"",
+      "log": "{{smith}} identified {{guard}} as the one filing forge marks off stolen weapons"
+    },
+    {
+      "id": "blacksmith_scared_guard",
+      "tags": [
+        "+q:lead_blacksmith"
+      ],
+      "text": "{{smith}} glances around nervously. \"Look, I'll tell you, but you didn't hear it from me. A guard named {{guard}} has been bringing weapons to have the marks filed off. That's all I know. Please—don't tell him I talked.\"",
+      "log": "{{smith}} reluctantly named {{guard}} as involved in the weapon theft"
+    },
+    {
+      "id": "Blacksmith",
+      "tags": [
+        "@q:searched",
+        "!q:lead_blacksmith",
+        "q:armory",
+        "@q:guilty_smith"
+      ],
+      "text": "The blacksmith, {{smith}}, looks up from his anvil as you enter. When you mention the missing weapons and the forge residue found at the Armory, something flickers in his eyes. Fear? Guilt?",
+      "options": [
+        {
+          "label": "Press him for information",
+          "tags": [],
+          "skill": "guile",
+          "dc": 4,
+          "pass": "blacksmith_slips_smith",
+          "fail": "blacksmith_deflects_smith"
+        },
+        {
+          "label": "Intimidate him",
+          "tags": [],
+          "skill": "might",
+          "dc": 5,
+          "pass": "blacksmith_cracks_smith",
+          "fail": "blacksmith_clams_up"
+        },
+        "Leave him be"
+      ]
+    },
+    {
+      "id": "blacksmith_slips_smith",
+      "tags": [
+        "+q:lead_blacksmith"
+      ],
+      "text": "{{smith}}'s story doesn't add up. First he claims he hasn't touched military steel in months, then mentions \"that last batch of short swords.\" His hands tremble as he contradicts himself. \"I—I misspoke. I don't know anything about missing weapons.\" But his eyes say otherwise.",
+      "log": "{{smith}} contradicted himself about military weapons—he's hiding something"
+    },
+    {
+      "id": "blacksmith_deflects_smith",
+      "tags": [
+        "+q:lead_blacksmith"
+      ],
+      "text": "{{smith}} is evasive, answering questions with questions. But when you mention the distinctive hammer marks from the Armory, he freezes for just a moment. \"Could be anyone's marks,\" he mutters. \"All smiths' work looks similar.\" He's nervous about something.",
+      "log": "{{smith}} became nervous when shown the hammer marks—suspicious"
+    },
+    {
+      "id": "blacksmith_cracks_smith",
+      "tags": [
+        "+q:lead_blacksmith"
+      ],
+      "text": "You get in {{smith}}'s face, and he crumbles. \"Fine! Yes, I've been... supplementing my income. The Guard doesn't pay smiths what they're worth. But I'm just the supplier—I don't move the goods myself!\" He catches himself, realizing he's said too much.",
+      "log": "{{smith}} admitted to stealing weapons under pressure"
+    },
+    {
+      "id": "Blacksmith",
+      "tags": [
+        "@q:searched",
+        "!q:lead_blacksmith",
+        "q:armory",
+        "@q:guilty_madam"
+      ],
+      "text": "The blacksmith, {{smith}}, looks up from his anvil as you enter. When you mention the missing weapons, he frowns thoughtfully.",
+      "options": [
+        {
+          "label": "Ask if he's heard anything",
+          "tags": [],
+          "skill": "guile",
+          "dc": 3,
+          "pass": "blacksmith_talks_madam",
+          "fail": "blacksmith_vague_madam"
+        },
+        {
+          "label": "Offer silver for information",
+          "tags": [
+            "inv:silver"
+          ],
+          "pass": "blacksmith_paid_madam"
+        },
+        "Leave him be"
+      ]
+    },
+    {
+      "id": "blacksmith_talks_madam",
+      "tags": [
+        "+q:lead_blacksmith"
+      ],
+      "text": "{{smith}} leans in. \"I hear things, working this close to the Guard. Word is there's a fence operating out of the Seamstress shop. {{madam}} runs more than a tailoring business, if you take my meaning. High-class clientele... high-class stolen goods, too.\"",
+      "log": "{{smith}} pointed toward {{madam}}'s shop as a fencing operation"
+    },
+    {
+      "id": "blacksmith_vague_madam",
+      "tags": [
+        "+q:lead_blacksmith"
+      ],
+      "text": "{{smith}} shrugs. \"I don't know much about the weapons, but...\" He hesitates. \"There's talk about the Seamstress shop. Expensive things going in and out at odd hours. Might be nothing. Might be worth a look.\"",
+      "log": "{{smith}} hinted at suspicious activity at the Seamstress shop"
+    },
+    {
+      "id": "blacksmith_paid_madam",
+      "tags": [
+        "-inv:silver",
+        "+q:lead_blacksmith"
+      ],
+      "text": "The silver loosens {{smith}}'s tongue. \"You want to know where stolen goods move in this town? {{madam}}'s place. It's not just seamstresses she's running—it's a whole fencing operation. The perfume and lace are cover for moving merchandise.\"",
+      "log": "Paid {{smith}} for information pointing to {{madam}} as a fence"
+    },
+    {
+      "id": "blacksmith_clams_up",
+      "text": "{{smith}} backs away, knocking over a bucket of water. \"I don't know anything! Get out of my shop!\" He won't talk now—you've spooked him too badly.",
+      "log": "Intimidated {{smith}} too much—he won't talk"
+    },
+    {
+      "id": "Blacksmith",
+      "tags": [
+        "q:armory",
+        "q:lead_blacksmith"
+      ],
+      "text": "{{smith}} sees you and quickly looks away, busying himself with his forge. You've learned what you can here."
+    },
+    {
+      "id": "Blacksmith",
+      "tags": [
+        "q:armory",
+        "!q:searched"
+      ],
+      "text": "{{smith}} works the bellows, coaxing heat from the coals. You should search the Armory first before questioning anyone."
+    },
+    {
+      "id": "Seamstress",
+      "tags": [
+        "@q:searched",
+        "!q:lead_seamstress",
+        "q:armory",
+        "@q:guilty_guard"
+      ],
+      "text": "You show the scrap of blue fabric to {{madam}} at the front counter. She examines it with professional interest, rubbing it between her fingers.",
+      "options": [
+        {
+          "label": "Ask if she recognizes it",
+          "tags": [],
+          "pass": "seamstress_recognizes_guard"
+        },
+        {
+          "label": "Offer silver for information",
+          "tags": [
+            "inv:silver"
+          ],
+          "pass": "seamstress_paid_guard"
+        }
+      ]
+    },
+    {
+      "id": "seamstress_recognizes_guard",
+      "text": "{{madam}} purses her lips. \"Fine wool, this. Not cheap.\" She glances toward the stairs. \"We see all sorts here, love. Memory's not what it used to be...\"",
+      "options": [
+        {
+          "label": "Offer silver to refresh her memory",
+          "tags": [
+            "inv:silver"
+          ],
+          "pass": "seamstress_paid_guard"
+        },
+        {
+          "label": "Suggest the guards might be interested in her 'alterations' business",
+          "tags": [],
+          "skill": "guile",
+          "dc": 5,
+          "pass": "seamstress_threatened_guard",
+          "fail": "seamstress_offended"
+        },
+        "Leave"
+      ]
+    },
+    {
+      "id": "seamstress_paid_guard",
+      "tags": [
+        "-inv:silver",
+        "+q:lead_seamstress"
+      ],
+      "text": "The silver vanishes into her bodice. \"There's a guardsman—{{guard}}, I think—comes by regular. Had that exact cloak mended last month. Tore it climbing out a window, if you take my meaning.\" She winks. \"Spends freely for a man on guard wages.\"",
+      "log": "Paid for information at the Seamstress—{{guard}} owns the cloak and spends beyond his means"
+    },
+    {
+      "id": "seamstress_threatened_guard",
+      "tags": [
+        "+q:lead_seamstress"
+      ],
+      "text": "{{madam}}'s eyes narrow, but she smiles. \"Clever. Fine—there's a guardsman, {{guard}}, owns that cloak. Comes by more than his wages should allow. Spends freely, tips poorly.\" She turns back to her embroidery. \"Now get out of my establishment.\"",
+      "log": "Pressured {{madam}} into identifying {{guard}} as the cloak's owner"
+    },
+    {
+      "id": "Seamstress",
+      "tags": [
+        "@q:searched",
+        "!q:lead_seamstress",
+        "q:armory",
+        "@q:guilty_smith"
+      ],
+      "text": "You ask {{madam}} at the front counter if she's noticed anything unusual lately—anyone spending beyond their means, perhaps.",
+      "options": [
+        {
+          "label": "Press for details",
+          "tags": [],
+          "skill": "guile",
+          "dc": 3,
+          "pass": "seamstress_talks_smith",
+          "fail": "seamstress_vague_smith"
+        },
+        {
+          "label": "Offer silver for information",
+          "tags": [
+            "inv:silver"
+          ],
+          "pass": "seamstress_paid_smith"
+        }
+      ]
+    },
+    {
+      "id": "seamstress_talks_smith",
+      "tags": [
+        "+q:lead_seamstress"
+      ],
+      "text": "{{madam}} leans in conspiratorially. \"Since you ask... {{smith}} the blacksmith has been flush lately. New clothes, generous tips. A smith's wage doesn't stretch that far, love. Either he's found gold in his forge or he's found another source of income.\"",
+      "log": "{{madam}} noted that {{smith}} has been spending beyond a smith's means"
+    },
+    {
+      "id": "seamstress_vague_smith",
+      "tags": [
+        "+q:lead_seamstress"
+      ],
+      "text": "{{madam}} is coy, but drops a hint. \"The blacksmith's been looking prosperous. New boots, new belt. Funny how a man who works metal all day suddenly has coin to spare...\"",
+      "log": "{{madam}} hinted that {{smith}} has new wealth"
+    },
+    {
+      "id": "seamstress_paid_smith",
+      "tags": [
+        "-inv:silver",
+        "+q:lead_seamstress"
+      ],
+      "text": "The silver loosens {{madam}}'s tongue. \"{{smith}}, the blacksmith, has been spending like a lord lately. One of my girls says he's been boasting about a 'side business.' Military contracts, he calls it—but I don't think the Guard is signing off on his work.\"",
+      "log": "Paid {{madam}} for information—{{smith}} has been boasting about military 'side business'"
+    },
+    {
+      "id": "Seamstress",
+      "tags": [
+        "@q:searched",
+        "!q:lead_seamstress",
+        "q:armory",
+        "@q:guilty_madam"
+      ],
+      "text": "You show the embroidered fabric to {{madam}} at the front counter. Her eyes flicker with recognition before her expression smooths into professional blankness. \"Pretty work. Can't say I recognize it.\"",
+      "options": [
+        {
+          "label": "Press her—it matches her shop's style",
+          "tags": [],
+          "skill": "guile",
+          "dc": 5,
+          "pass": "seamstress_caught_madam",
+          "fail": "seamstress_deflects_madam"
+        },
+        {
+          "label": "Talk to the girls instead",
+          "tags": [],
+          "pass": "seamstress_girls_madam"
+        }
+      ]
+    },
+    {
+      "id": "seamstress_caught_madam",
+      "tags": [
+        "+q:lead_seamstress"
+      ],
+      "text": "\"This is your work,\" you say flatly. \"Same stitch pattern, same thread. Expensive. Military weapons are expensive too.\" {{madam}}'s smile doesn't waver, but her eyes go cold. \"I don't know what you think you know, but you're playing a dangerous game.\"",
+      "log": "Confronted {{madam}} with evidence—she didn't deny the connection"
+    },
+    {
+      "id": "seamstress_deflects_madam",
+      "tags": [
+        "+q:lead_seamstress"
+      ],
+      "text": "{{madam}} waves dismissively. \"Lots of seamstresses in this town, love.\" But one of her girls catches your eye as you turn to leave and mouths: \"Back room. Late nights.\" Something's happening here that {{madam}} doesn't want you to know.",
+      "log": "{{madam}} deflected questions, but one of her girls hinted at late-night activity"
+    },
+    {
+      "id": "seamstress_girls_madam",
+      "tags": [
+        "+q:lead_seamstress"
+      ],
+      "text": "You wait until {{madam}} is occupied and approach one of the younger women. She's nervous, glancing at the back room. \"Packages,\" she whispers. \"Late at night. Wrapped in cloth, heavy. {{madam}} handles them personally. We're not supposed to ask questions.\"",
+      "log": "One of {{madam}}'s girls described suspicious late-night packages"
+    },
+    {
+      "id": "seamstress_offended",
+      "text": "{{madam}} laughs coldly. \"Threaten me? Love, I know things about half the guards in this town. Get out before I have my girls escort you.\" Two rather muscular \"seamstresses\" appear at the doorway.",
+      "log": "Failed to get information from {{madam}}"
+    },
+    {
+      "id": "Seamstress",
+      "tags": [
+        "q:armory",
+        "q:lead_seamstress"
+      ],
+      "text": "{{madam}} spots you and waves dismissively. You've learned what you can here."
+    },
+    {
+      "id": "Seamstress",
+      "tags": [
+        "q:armory",
+        "!q:searched"
+      ],
+      "text": "A painted sign advertises alterations and \"private fittings by appointment.\" You should search the Armory before canvassing the town."
+    },
+    {
+      "id": "Tavern",
+      "tags": [
+        "@q:searched",
+        "!q:lead_tavern",
+        "q:armory"
+      ],
+      "text": "If someone's making illicit deals, the Tavern's a likely spot. You settle into a shadowy corner to watch.",
+      "options": [
+        {
+          "label": "Wait and observe",
+          "tags": [],
+          "skill": "guile",
+          "dc": 4,
+          "pass": "tavern_stakeout_success",
+          "fail": "tavern_stakeout_partial"
+        }
+      ]
+    },
+    {
+      "id": "tavern_stakeout_success",
+      "tags": [
+        "+q:lead_tavern",
+        "@q:guilty_guard"
+      ],
+      "text": "Hours pass. Finally, {{guard}} enters in a blue cloak, glancing around before meeting two rough-looking men in the back. You catch fragments: \"next shipment,\" \"double the usual,\" \"the fence in Millbrook.\" He passes them a bundle wrapped in cloth. Weapons, from the shape.",
+      "log": "Observed {{guard}} selling weapons to criminals at the Tavern"
+    },
+    {
+      "id": "tavern_stakeout_success",
+      "tags": [
+        "+q:lead_tavern",
+        "@q:guilty_smith"
+      ],
+      "text": "Hours pass. Finally, {{smith}} arrives, forge soot still on his hands. He meets with two well-dressed merchants in the back. You catch fragments: \"clean steel,\" \"no questions,\" \"usual price.\" Coin changes hands, and he passes over something wrapped in a leather apron. The shape is unmistakable—blades.",
+      "log": "Observed {{smith}} selling weapons to fences at the Tavern"
+    },
+    {
+      "id": "tavern_stakeout_success",
+      "tags": [
+        "+q:lead_tavern",
+        "@q:guilty_madam"
+      ],
+      "text": "Hours pass. Finally, one of {{madam}}'s girls arrives—the same one who hinted about the packages. She meets a hooded figure in the back, passing over a heavy bundle and accepting a purse in return. \"Tell {{madam}} the buyer wants double next month,\" the figure says. Weapons dealing, run through the Seamstress shop.",
+      "log": "Observed one of {{madam}}'s girls selling weapons on her behalf at the Tavern"
+    },
+    {
+      "id": "tavern_stakeout_partial",
+      "tags": [
+        "+q:lead_tavern",
+        "@q:guilty_guard"
+      ],
+      "text": "You wait for hours, nursing a single ale. A guardsman in a blue cloak—{{guard}}—arrives and meets with some rough types in back, but you can't get close enough to hear. Still, you've seen the exchange.",
+      "log": "Spotted {{guard}} meeting with suspicious individuals at the Tavern"
+    },
+    {
+      "id": "tavern_stakeout_partial",
+      "tags": [
+        "+q:lead_tavern",
+        "@q:guilty_smith"
+      ],
+      "text": "You wait for hours, nursing a single ale. {{smith}} arrives and meets with some well-dressed strangers, but you can't get close enough to hear. Still, you saw something change hands.",
+      "log": "Spotted {{smith}} meeting with suspicious individuals at the Tavern"
+    },
+    {
+      "id": "tavern_stakeout_partial",
+      "tags": [
+        "+q:lead_tavern",
+        "@q:guilty_madam"
+      ],
+      "text": "You wait for hours, nursing a single ale. One of {{madam}}'s girls arrives and meets with a hooded figure, but you can't get close enough to hear. Still, you saw a heavy bundle change hands.",
+      "log": "Spotted one of {{madam}}'s girls in a suspicious exchange at the Tavern"
+    },
+    {
+      "id": "Tavern",
+      "tags": [
+        "q:armory",
+        "q:lead_tavern"
+      ],
+      "text": "The Tavern carries on its usual business. You've seen what you needed to see."
+    },
+    {
+      "id": "Tavern",
+      "tags": [
+        "q:armory",
+        "!q:searched"
+      ],
+      "text": "Pipe smoke hangs in layers beneath the rafters. You should search the Armory before starting a stakeout."
+    },
+    {
+      "id": "Guardhouse",
+      "tags": [
+        "@q:lead_blacksmith",
+        "q:armory"
+      ],
+      "text": "{{captain}} looks up as you enter. \"You've been busy. What have you found?\"",
+      "options": [
+        "Accuse {{guard}}, the guardsman::accuse_guard",
+        "Accuse {{smith}}, the blacksmith::accuse_smith",
+        "Accuse {{madam}}::accuse_madam",
+        "I need to investigate more"
+      ]
+    },
+    {
+      "id": "Guardhouse",
+      "tags": [
+        "@q:lead_seamstress",
+        "!q:lead_blacksmith",
+        "q:armory"
+      ],
+      "text": "{{captain}} looks up as you enter. \"You've been busy. What have you found?\"",
+      "options": [
+        "Accuse {{guard}}, the guardsman::accuse_guard",
+        "Accuse {{smith}}, the blacksmith::accuse_smith",
+        "Accuse {{madam}}::accuse_madam",
+        "I need to investigate more"
+      ]
+    },
+    {
+      "id": "Guardhouse",
+      "tags": [
+        "@q:lead_tavern",
+        "!q:lead_blacksmith",
+        "!q:lead_seamstress",
+        "q:armory"
+      ],
+      "text": "{{captain}} looks up as you enter. \"You've been busy. What have you found?\"",
+      "options": [
+        "Accuse {{guard}}, the guardsman::accuse_guard",
+        "Accuse {{smith}}, the blacksmith::accuse_smith",
+        "Accuse {{madam}}::accuse_madam",
+        "I need to investigate more"
+      ]
+    },
+    {
+      "id": "accuse_guard",
+      "tags": [
+        "@q:guilty_guard",
+        "@q:lead_blacksmith",
+        "@q:lead_seamstress",
+        "@q:lead_tavern"
+      ],
+      "text": "You lay out everything: {{smith}}'s testimony about the filed weapons, {{madam}} identifying the cloak, and what you witnessed at the Tavern. {{captain}}'s expression hardens. \"Overwhelming. He won't be able to deny any of it.\"",
+      "options": [
+        "Let her handle the arrest::arrest_guard_overwhelming"
+      ]
+    },
+    {
+      "id": "arrest_guard_overwhelming",
+      "tags": [
+        "-quest",
+        "+done:armory",
+        "+inv:silver",
+        "+inv:silver",
+        "+inv:silver",
+        "+ally:guard"
+      ],
+      "text": "{{captain}} summons two guards she trusts and has {{guard}} seized before he can reach the door. His protests die when she recites the evidence. \"The Guard is in your debt,\" she tells you. \"Thorough work.\"",
+      "log": "Presented overwhelming evidence—{{guard}} arrested. Earned 3 silver and the Guard's favor"
+    },
+    {
+      "id": "accuse_guard",
+      "tags": [
+        "@q:guilty_guard",
+        "@q:lead_blacksmith",
+        "@q:lead_seamstress",
+        "!q:lead_tavern"
+      ],
+      "text": "You present your findings: {{smith}}'s testimony and {{madam}} connecting {{guard}} to the evidence. {{captain}} nods. \"Solid. Enough to act on.\"",
+      "options": [
+        "Let her handle the arrest::arrest_guard_solid"
+      ]
+    },
+    {
+      "id": "accuse_guard",
+      "tags": [
+        "@q:guilty_guard",
+        "@q:lead_blacksmith",
+        "@q:lead_tavern",
+        "!q:lead_seamstress"
+      ],
+      "text": "You present your findings: {{smith}}'s testimony and what you witnessed at the Tavern. {{captain}} nods. \"Solid. Enough to act on.\"",
+      "options": [
+        "Let her handle the arrest::arrest_guard_solid"
+      ]
+    },
+    {
+      "id": "accuse_guard",
+      "tags": [
+        "@q:guilty_guard",
+        "@q:lead_seamstress",
+        "@q:lead_tavern",
+        "!q:lead_blacksmith"
+      ],
+      "text": "You present your findings: {{madam}}'s identification and what you witnessed at the Tavern. {{captain}} nods. \"Solid. Enough to act on.\"",
+      "options": [
+        "Let her handle the arrest::arrest_guard_solid"
+      ]
+    },
+    {
+      "id": "arrest_guard_solid",
+      "tags": [
+        "-quest",
+        "+done:armory",
+        "+inv:silver",
+        "+inv:silver"
+      ],
+      "text": "{{captain}} confronts {{guard}} with the evidence. He tries to bluster, but the weight of testimony breaks him. \"Good work,\" the captain tells you as they lead him away. \"Clean arrest.\"",
+      "log": "Presented solid evidence—{{guard}} arrested. Earned 2 silver"
+    },
+    {
+      "id": "accuse_guard",
+      "tags": [
+        "@q:guilty_guard",
+        "@q:lead_blacksmith",
+        "!q:lead_seamstress",
+        "!q:lead_tavern"
+      ],
+      "text": "You tell {{captain}} about {{smith}}'s testimony. She frowns. \"One witness? That's thin. He'll deny it.\"",
+      "options": [
+        "It's what I have::arrest_guard_weak"
+      ]
+    },
+    {
+      "id": "accuse_guard",
+      "tags": [
+        "@q:guilty_guard",
+        "@q:lead_seamstress",
+        "!q:lead_blacksmith",
+        "!q:lead_tavern"
+      ],
+      "text": "You tell {{captain}} about {{madam}} identifying {{guard}}'s cloak. She frowns. \"A scrap of cloth? That's thin.\"",
+      "options": [
+        "It's what I have::arrest_guard_weak"
+      ]
+    },
+    {
+      "id": "accuse_guard",
+      "tags": [
+        "@q:guilty_guard",
+        "@q:lead_tavern",
+        "!q:lead_blacksmith",
+        "!q:lead_seamstress"
+      ],
+      "text": "You tell {{captain}} about seeing {{guard}} meet with suspicious figures. She frowns. \"You saw him talking to people? That's thin.\"",
+      "options": [
+        "It's what I have::arrest_guard_weak"
+      ]
+    },
+    {
+      "id": "arrest_guard_weak",
+      "tags": [
+        "-quest",
+        "+done:armory",
+        "+inv:silver"
+      ],
+      "text": "{{captain}} confronts {{guard}}. He denies everything loudly—but she sees the lie in his eyes. \"Suspended pending investigation,\" she tells him. He storms out, shooting you a murderous look. \"He'll probably run,\" the captain sighs. \"But at least he's out of my armory.\"",
+      "log": "Presented weak evidence—{{guard}} suspended but not arrested. Earned 1 silver"
+    },
+    {
+      "id": "accuse_guard",
+      "tags": [
+        "!q:guilty_guard"
+      ],
+      "text": "You accuse {{guard}}, presenting your evidence. {{captain}} listens, then shakes her head. \"It doesn't add up. {{guard}} has an alibi for half these incidents—he was on patrol with me.\" She looks at you with disappointment. \"You've accused the wrong person. The real thief is still out there, and now they know someone's looking.\"",
+      "options": [
+        "I need to reconsider::accusation_wrong"
+      ]
+    },
+    {
+      "id": "accuse_smith",
+      "tags": [
+        "@q:guilty_smith",
+        "@q:lead_blacksmith",
+        "@q:lead_seamstress",
+        "@q:lead_tavern"
+      ],
+      "text": "You lay out everything: {{smith}}'s nervous contradictions, {{madam}}'s observations about his new wealth, and the damning exchange you witnessed at the Tavern. {{captain}} nods grimly. \"The blacksmith. I wouldn't have guessed, but this is overwhelming.\"",
+      "options": [
+        "Let her handle the arrest::arrest_smith_overwhelming"
+      ]
+    },
+    {
+      "id": "arrest_smith_overwhelming",
+      "tags": [
+        "-quest",
+        "+done:armory",
+        "+inv:silver",
+        "+inv:silver",
+        "+inv:silver",
+        "+ally:guard"
+      ],
+      "text": "{{captain}} dispatches guards to the forge. {{smith}} tries to run but doesn't get far. The evidence is irrefutable. \"Excellent work,\" the captain tells you. \"The Guard won't forget this.\"",
+      "log": "Presented overwhelming evidence—{{smith}} arrested. Earned 3 silver and the Guard's favor"
+    },
+    {
+      "id": "accuse_smith",
+      "tags": [
+        "@q:guilty_smith",
+        "@q:lead_blacksmith",
+        "@q:lead_seamstress",
+        "!q:lead_tavern"
+      ],
+      "text": "You present your findings: {{smith}}'s contradictions and {{madam}}'s observations about his spending. {{captain}} nods. \"Solid circumstantial evidence. Worth acting on.\"",
+      "options": [
+        "Let her handle the arrest::arrest_smith_solid"
+      ]
+    },
+    {
+      "id": "accuse_smith",
+      "tags": [
+        "@q:guilty_smith",
+        "@q:lead_blacksmith",
+        "@q:lead_tavern",
+        "!q:lead_seamstress"
+      ],
+      "text": "You present your findings: {{smith}}'s nervous behavior and the exchange you witnessed at the Tavern. {{captain}} nods. \"Solid. Enough to act on.\"",
+      "options": [
+        "Let her handle the arrest::arrest_smith_solid"
+      ]
+    },
+    {
+      "id": "accuse_smith",
+      "tags": [
+        "@q:guilty_smith",
+        "@q:lead_seamstress",
+        "@q:lead_tavern",
+        "!q:lead_blacksmith"
+      ],
+      "text": "You present your findings: {{madam}}'s observations and the exchange you witnessed at the Tavern. {{captain}} nods. \"Solid. Enough to act on.\"",
+      "options": [
+        "Let her handle the arrest::arrest_smith_solid"
+      ]
+    },
+    {
+      "id": "arrest_smith_solid",
+      "tags": [
+        "-quest",
+        "+done:armory",
+        "+inv:silver",
+        "+inv:silver"
+      ],
+      "text": "{{captain}} sends guards to the forge. {{smith}} breaks down when confronted, confessing to everything. \"Good work,\" the captain tells you. \"Clean arrest.\"",
+      "log": "Presented solid evidence—{{smith}} arrested. Earned 2 silver"
+    },
+    {
+      "id": "accuse_smith",
+      "tags": [
+        "@q:guilty_smith",
+        "@q:lead_blacksmith",
+        "!q:lead_seamstress",
+        "!q:lead_tavern"
+      ],
+      "text": "You describe {{smith}}'s nervous behavior and contradictions. {{captain}} frowns. \"That's suspicious, but not proof.\"",
+      "options": [
+        "It's what I have::arrest_smith_weak"
+      ]
+    },
+    {
+      "id": "accuse_smith",
+      "tags": [
+        "@q:guilty_smith",
+        "@q:lead_seamstress",
+        "!q:lead_blacksmith",
+        "!q:lead_tavern"
+      ],
+      "text": "You tell {{captain}} about {{smith}}'s new wealth. She frowns. \"A man spending money isn't evidence of theft.\"",
+      "options": [
+        "It's what I have::arrest_smith_weak"
+      ]
+    },
+    {
+      "id": "accuse_smith",
+      "tags": [
+        "@q:guilty_smith",
+        "@q:lead_tavern",
+        "!q:lead_blacksmith",
+        "!q:lead_seamstress"
+      ],
+      "text": "You describe seeing {{smith}} at the Tavern making an exchange. {{captain}} frowns. \"Could have been legitimate business.\"",
+      "options": [
+        "It's what I have::arrest_smith_weak"
+      ]
+    },
+    {
+      "id": "arrest_smith_weak",
+      "tags": [
+        "-quest",
+        "+done:armory",
+        "+inv:silver"
+      ],
+      "text": "{{captain}} has {{smith}} brought in for questioning. Under pressure, he cracks—but only partially. He admits to \"a few pieces\" but claims he was coerced. The captain isn't satisfied. \"We'll get the full truth eventually. Thanks for pointing us in the right direction.\"",
+      "log": "Presented weak evidence—{{smith}} partially confessed. Earned 1 silver"
+    },
+    {
+      "id": "accuse_smith",
+      "tags": [
+        "!q:guilty_smith"
+      ],
+      "text": "You accuse {{smith}}, presenting your evidence. {{captain}} listens, then frowns. \"I know {{smith}}. He's been supplying the Guard for years. This evidence is circumstantial at best.\" She sends a guard to check his forge—nothing incriminating is found. \"You've wasted time on the wrong person.\"",
+      "options": [
+        "I need to reconsider::accusation_wrong"
+      ]
+    },
+    {
+      "id": "accuse_madam",
+      "tags": [
+        "@q:guilty_madam",
+        "@q:lead_blacksmith",
+        "@q:lead_seamstress",
+        "@q:lead_tavern"
+      ],
+      "text": "You lay out everything: {{smith}}'s tip about the fencing operation, what you learned at the Seamstress shop, and the exchange you witnessed at the Tavern. {{captain}}'s eyes widen. \"{{madam}}? She's been running a fence right under our noses?\"",
+      "options": [
+        "Let her handle the arrest::arrest_madam_overwhelming"
+      ]
+    },
+    {
+      "id": "arrest_madam_overwhelming",
+      "tags": [
+        "-quest",
+        "+done:armory",
+        "+inv:silver",
+        "+inv:silver",
+        "+inv:silver",
+        "+ally:guard"
+      ],
+      "text": "{{captain}} leads the raid personally. {{madam}} is caught with a cache of stolen weapons in her back room. \"I underestimated you,\" the captain admits. \"The Guard owes you a debt.\"",
+      "log": "Presented overwhelming evidence—{{madam}} arrested. Earned 3 silver and the Guard's favor"
+    },
+    {
+      "id": "accuse_madam",
+      "tags": [
+        "@q:guilty_madam",
+        "@q:lead_blacksmith",
+        "@q:lead_seamstress",
+        "!q:lead_tavern"
+      ],
+      "text": "You present your findings: {{smith}}'s tip and the suspicious activity at the Seamstress shop. {{captain}} nods slowly. \"Solid enough to warrant a search.\"",
+      "options": [
+        "Let her handle it::arrest_madam_solid"
+      ]
+    },
+    {
+      "id": "accuse_madam",
+      "tags": [
+        "@q:guilty_madam",
+        "@q:lead_blacksmith",
+        "@q:lead_tavern",
+        "!q:lead_seamstress"
+      ],
+      "text": "You present your findings: {{smith}}'s tip and the exchange you witnessed at the Tavern. {{captain}} nods. \"Enough to act on.\"",
+      "options": [
+        "Let her handle it::arrest_madam_solid"
+      ]
+    },
+    {
+      "id": "accuse_madam",
+      "tags": [
+        "@q:guilty_madam",
+        "@q:lead_seamstress",
+        "@q:lead_tavern",
+        "!q:lead_blacksmith"
+      ],
+      "text": "You present your findings: what you learned at the Seamstress shop and the exchange you witnessed at the Tavern. {{captain}} nods. \"Solid. Worth a raid.\"",
+      "options": [
+        "Let her handle it::arrest_madam_solid"
+      ]
+    },
+    {
+      "id": "arrest_madam_solid",
+      "tags": [
+        "-quest",
+        "+done:armory",
+        "+inv:silver",
+        "+inv:silver"
+      ],
+      "text": "{{captain}} raids the Seamstress shop and finds the weapons cache. {{madam}} is led away in irons, her composure finally cracking. \"Good work,\" the captain tells you.",
+      "log": "Presented solid evidence—{{madam}} arrested. Earned 2 silver"
+    },
+    {
+      "id": "accuse_madam",
+      "tags": [
+        "@q:guilty_madam",
+        "@q:lead_blacksmith",
+        "!q:lead_seamstress",
+        "!q:lead_tavern"
+      ],
+      "text": "You tell {{captain}} about {{smith}}'s tip regarding the fencing operation. She frowns. \"Hearsay from a blacksmith about a seamstress? That's thin.\"",
+      "options": [
+        "It's what I have::arrest_madam_weak"
+      ]
+    },
+    {
+      "id": "accuse_madam",
+      "tags": [
+        "@q:guilty_madam",
+        "@q:lead_seamstress",
+        "!q:lead_blacksmith",
+        "!q:lead_tavern"
+      ],
+      "text": "You describe the suspicious activity at the Seamstress shop. {{captain}} frowns. \"Nervous girls and late-night packages? Could be anything.\"",
+      "options": [
+        "It's what I have::arrest_madam_weak"
+      ]
+    },
+    {
+      "id": "accuse_madam",
+      "tags": [
+        "@q:guilty_madam",
+        "@q:lead_tavern",
+        "!q:lead_blacksmith",
+        "!q:lead_seamstress"
+      ],
+      "text": "You describe seeing {{madam}}'s girl making an exchange at the Tavern. {{captain}} frowns. \"One of her employees doing something suspicious? That's not much.\"",
+      "options": [
+        "It's what I have::arrest_madam_weak"
+      ]
+    },
+    {
+      "id": "arrest_madam_weak",
+      "tags": [
+        "-quest",
+        "+done:armory",
+        "+inv:silver"
+      ],
+      "text": "{{captain}} searches the Seamstress shop but {{madam}} has been warned—the cache is gone, moved in the night. They arrest her anyway on suspicion, but the case is weak. \"She'll probably walk,\" the captain sighs. \"But at least we disrupted the operation.\"",
+      "log": "Presented weak evidence—{{madam}} arrested but case is weak. Earned 1 silver"
+    },
+    {
+      "id": "accuse_madam",
+      "tags": [
+        "!q:guilty_madam"
+      ],
+      "text": "You accuse {{madam}}, presenting your evidence. {{captain}} listens, then shakes her head. \"I know that place has a... reputation, but {{madam}} runs a tight ship. She wouldn't risk her business on weapons smuggling.\" A search of the shop turns up nothing incriminating. \"Wrong suspect.\"",
+      "options": [
+        "I need to reconsider::accusation_wrong"
+      ]
+    },
+    {
+      "id": "accusation_wrong",
+      "tags": [
+        "-quest",
+        "+done:armory"
+      ],
+      "text": "{{captain}} dismisses you with a wave. \"The trail's gone cold now. Whoever's really behind this has had time to cover their tracks.\" She turns away. No reward, no thanks—just the knowledge that you failed.",
+      "log": "Accused the wrong person—the real thief escaped"
+    }
+  ]
+}

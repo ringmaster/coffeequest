@@ -38,6 +38,50 @@ The toolbar should be updated with two icon buttons:
 ### Removed Elements
 - The current stats display in the toolbar should be removed in favor of the user icon panel
 
+## Variable Substitution in Tags
+
+Variable substitution (e.g., `{{guilty}}`) must be processed in tag strings, not just `text` fields. This enables dynamic quest branching based on randomly-selected variables.
+
+### Use Case: Randomized Guilty Party
+
+```json
+{
+  "id": "accept_armory_quest",
+  "vars": {
+    "guilty": ["blacksmith", "vance", "seamstress"]
+  },
+  "tags": ["+q:armory", "+quest", "+q:guilty_{{guilty}}"],
+  "text": "The captain hands you the key..."
+}
+```
+
+When the player accepts this quest, `{{guilty}}` resolves to one of the three values (e.g., "vance"), and the tag `+q:guilty_vance` is added to the player's state.
+
+Subsequent steps filter on the resolved tag:
+
+```json
+{
+  "id": "Armory",
+  "tags": ["@q:armory", "@q:guilty_vance"],
+  "text": "A guard's signet ring lies wedged between two crates..."
+}
+```
+
+```json
+{
+  "id": "Armory",
+  "tags": ["@q:armory", "@q:guilty_blacksmith"],
+  "text": "A smith's hammer is hidden beneath the straw..."
+}
+```
+
+### Implementation Notes
+
+- Variable substitution should run on all tag strings (both in step `tags` arrays and option `tags` arrays)
+- Substitution happens at the moment the step is executed, using the current variable state
+- Variables set in a step's `vars` block persist for the remainder of the quest (existing behavior)
+- This enables "whodunit" quests where the culprit is randomly selected at quest start
+
 ## Tag Prefixes
 
 | Prefix | Purpose | Display | Special Behavior |
