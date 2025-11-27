@@ -34,7 +34,8 @@
 		</span>
 	</div>
 	<div class="meta">
-		<span class="steps">Steps: {gameStore.state.character.stepsCompleted}</span>
+		<span class="level">Lv {gameStore.level}</span>
+		<span class="xp">XP: {gameStore.state.character.xp}</span>
 		<button class="menu-button" onclick={openMenu} aria-label="Open Menu">
 			&#9776;
 		</button>
@@ -74,7 +75,13 @@
 		gap: 12px;
 	}
 
-	.steps {
+	.level {
+		font-size: 14px;
+		font-weight: bold;
+		color: var(--color-text);
+	}
+
+	.xp {
 		font-size: 14px;
 		color: var(--color-text-secondary);
 	}

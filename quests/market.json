@@ -6,7 +6,45 @@
       "tags": [
         "!banned_from_market"
       ],
-      "text": "The market square hums with commerce. Colorful awnings shade a dozen stalls, and the smell of spices mingles with woodsmoke. Merchants call out their wares as you survey your options.",
+      "vars": {
+        "market_atmosphere": [
+          "The market square hums with commerce",
+          "The market bustles with midday crowds",
+          "Merchants haggle and customers browse throughout the market",
+          "The market is alive with activity",
+          "Commerce flows through the market like a river",
+          "The market thrums with the energy of a dozen deals in progress",
+          "Voices rise and fall across the crowded market square",
+          "The market swirls with color and noise"
+        ],
+        "market_sights": [
+          "Colorful awnings shade a dozen stalls",
+          "Canvas tents and wooden carts crowd the square",
+          "Stalls line the cobblestones in neat rows",
+          "Merchants have claimed every spare foot of space",
+          "Bright banners flutter above the vendors' booths",
+          "The square is packed with carts, tables, and eager sellers",
+          "Weathered awnings cast welcome shade over the goods below"
+        ],
+        "market_smells": [
+          "the smell of spices mingles with woodsmoke",
+          "the aroma of fresh bread drifts from somewhere nearby",
+          "scents of leather and lamp oil hang in the air",
+          "the sharp tang of fish competes with sweeter perfumes",
+          "woodsmoke and roasting meat flavor the breeze",
+          "a hundred smells blend into something uniquely 'market'",
+          "the air carries hints of exotic spices and common cooking"
+        ],
+        "market_sounds": [
+          "Merchants call out their wares as you survey your options",
+          "Vendors compete to catch your eye and your coin",
+          "The clamor of commerce surrounds you",
+          "Shopkeepers beckon to passersby with practiced enthusiasm",
+          "A cacophony of sales pitches fills the air",
+          "Every merchant seems convinced you need exactly what they're selling"
+        ]
+      },
+      "text": "{{market_atmosphere}}. {{market_sights}}, and {{market_smells}}. {{market_sounds}}.",
       "options": [
         {
           "label": "Visit the provisioner's stall",
@@ -261,6 +299,7 @@
           ],
           "pass": "apothecary_curse"
         },
+        "Ask about removing a curse::apothecary_not_cursed",
         {
           "label": "Browse other stalls",
           "tags": [
@@ -323,6 +362,16 @@
           "tags": [],
           "pass": "stall_apothecary"
         }
+      ]
+    },
+    {
+      "id": "apothecary_not_cursed",
+      "tags": [],
+      "text": "The apothecary eyes you suspiciously. Are you planning to get into trouble?  It'll cost 5 silver to lift any curse you might be afflicted with.",
+      "options": [
+        "Review the apothecary's other items::stall_apothecary",
+        "Check out the other stalls::Market",
+        "Leave the market"
       ]
     },
     {

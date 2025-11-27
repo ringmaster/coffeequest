@@ -1,0 +1,424 @@
+{
+  "steps": [
+    {
+      "id": "Town Square",
+      "tags": [
+        "quest"
+      ],
+      "text": "The town square bustles with its usual activity, but the people here are too busy going about their day to pay mind to the likes of you."
+    },
+    {
+      "id": "Town Square",
+      "tags": [
+        "quest"
+      ],
+      "text": "A merchant argues with a customer over the price of cloth near the square's central fountain. Children chase a dog between the stalls. Life continues, indifferent to your passage."
+    },
+    {
+      "id": "Town Square",
+      "tags": [
+        "quest"
+      ],
+      "text": "The fountain burbles in the center of the town square. An old man feeds pigeons on a bench, muttering to himself. No one pays you any attention."
+    },
+    {
+      "id": "Guardhouse",
+      "tags": [
+        "quest"
+      ],
+      "text": "At the guardhouse, guards glance up from their dice game, assess you as neither threat nor victim, and return to their wager."
+    },
+    {
+      "id": "Guardhouse",
+      "tags": [
+        "quest"
+      ],
+      "text": "A guard yawns on a stool outside the guardhouse door, pike propped against the wall. His eyes track you briefly, then drift closed again."
+    },
+    {
+      "id": "Guardhouse",
+      "tags": [
+        "quest"
+      ],
+      "text": "Laughter erupts from inside the guardhouse—someone's telling a story about the captain's wife. The guards are too amused to notice you."
+    },
+    {
+      "id": "Inn",
+      "tags": [
+        "quest"
+      ],
+      "text": "The innkeeper polishes the same mug he's been polishing for an hour, lost in thought. The few guests in the inn's common room keep to themselves."
+    },
+    {
+      "id": "Inn",
+      "tags": [
+        "quest"
+      ],
+      "text": "A cat stretches on the inn's windowsill, soaking up a patch of sun. The common room sits mostly empty, chairs upturned on tables."
+    },
+    {
+      "id": "Inn",
+      "tags": [
+        "quest"
+      ],
+      "text": "The smell of last night's stew lingers in the inn. A serving girl sweeps the same corner repeatedly, clearly avoiding some other task."
+    },
+    {
+      "id": "Church",
+      "tags": [
+        "quest"
+      ],
+      "text": "Candles flicker in the church's dim nave. A priest murmurs prayers at the altar, oblivious to your presence. The pews sit empty."
+    },
+    {
+      "id": "Church",
+      "tags": [
+        "quest"
+      ],
+      "text": "Incense smoke curls toward the church's vaulted ceiling. An acolyte arranges flowers at the shrine, humming a hymn under her breath."
+    },
+    {
+      "id": "Church",
+      "tags": [
+        "quest"
+      ],
+      "text": "Stained glass casts colored light across the church's stone floor. A penitent kneels in the corner, shoulders shaking silently. This feels like a private moment."
+    },
+    {
+      "id": "Graveyard",
+      "tags": [
+        "quest"
+      ],
+      "text": "Weathered stones lean at odd angles throughout the graveyard, their inscriptions worn to whispers. The dead offer no conversation today."
+    },
+    {
+      "id": "Graveyard",
+      "tags": [
+        "quest"
+      ],
+      "text": "A crow watches you from atop a mausoleum in the graveyard, head cocked. It caws once, unimpressed, and takes flight."
+    },
+    {
+      "id": "Graveyard",
+      "tags": [
+        "quest"
+      ],
+      "text": "Someone has left fresh wildflowers on a small grave. The wind stirs the petals, but nothing else moves in the graveyard."
+    },
+    {
+      "id": "Bakery",
+      "tags": [
+        "quest"
+      ],
+      "text": "The baker slides loaves from the oven, flour dusting her arms to the elbow. She doesn't look up. The bakery smells wonderful but buying bread would cost coin you could spend elsewhere."
+    },
+    {
+      "id": "Bakery",
+      "tags": [
+        "quest"
+      ],
+      "text": "A line of customers stretches out the bakery door, each clutching copper coins. The baker's apprentice works the counter with harried efficiency."
+    },
+    {
+      "id": "Bakery",
+      "tags": [
+        "quest"
+      ],
+      "text": "The ovens radiate heat into the small bakery. A fly buzzes lazily around the pastry display. The baker shoos it away without breaking rhythm."
+    },
+    {
+      "id": "Mud Pit",
+      "tags": [
+        "quest"
+      ],
+      "text": "The Mud Pit sits quiet today—no races, no crowds, just a churned expanse of earth baking in the sun. A few idlers lounge in the shade, but there's nothing happening worth watching."
+    },
+    {
+      "id": "Mud Pit",
+      "tags": [
+        "quest"
+      ],
+      "text": "Without races to draw a crowd, the Mud Pit is nearly deserted. A lone drunk sleeps against the fence. The bookies and gamblers have found other diversions today."
+    },
+    {
+      "id": "Mud Pit",
+      "tags": [
+        "quest"
+      ],
+      "text": "The Mud Pit's trampled ground is hardening under the afternoon sun. Someone's dog roots through discarded food scraps near the empty paddocks. The excitement here comes and goes with the races."
+    },
+    {
+      "id": "Farmhouse",
+      "tags": [
+        "quest"
+      ],
+      "text": "Chickens peck at nothing in particular outside the farmhouse. A dog lifts its head, decides you're uninteresting, and goes back to sleep."
+    },
+    {
+      "id": "Farmhouse",
+      "tags": [
+        "quest"
+      ],
+      "text": "The farmer's wife beats a rug on the farmhouse porch, raising clouds of dust. She squints at you, then returns to her work."
+    },
+    {
+      "id": "Farmhouse",
+      "tags": [
+        "quest"
+      ],
+      "text": "A goat chews thoughtfully on a fence post near the farmhouse. Somewhere inside, a baby wails. The farm has problems enough without adding yours."
+    },
+    {
+      "id": "Stables",
+      "tags": [
+        "quest"
+      ],
+      "text": "Horses doze in their stalls at the stables, tails flicking at flies. A stable hand forks hay in the corner, humming tunelessly."
+    },
+    {
+      "id": "Stables",
+      "tags": [
+        "quest"
+      ],
+      "text": "The smell of horse and leather fills the stables. A mare nickers softly as you pass, hoping for an apple you don't have."
+    },
+    {
+      "id": "Stables",
+      "tags": [
+        "quest"
+      ],
+      "text": "A groom curries a fine stallion in the stables, speaking to it in low, soothing tones. Neither acknowledges your presence."
+    },
+    {
+      "id": "Haunted Grove",
+      "tags": [
+        "quest"
+      ],
+      "text": "The trees grow thick in this grove the locals call haunted, their branches intertwined overhead. Something rustles in the undergrowth, then goes still. Watching, perhaps."
+    },
+    {
+      "id": "Haunted Grove",
+      "tags": [
+        "quest"
+      ],
+      "text": "Mist clings to the ground in the Haunted Grove despite the hour. The birdsong that filled the forest stops abruptly at the grove's edge."
+    },
+    {
+      "id": "Haunted Grove",
+      "tags": [
+        "quest"
+      ],
+      "text": "You could swear you hear whispering in the Haunted Grove, but the words scatter when you try to listen. The trees keep their counsel."
+    },
+    {
+      "id": "Armory",
+      "tags": [
+        "quest"
+      ],
+      "text": "Blades and pole-arms line the armory walls in neat rows. The armorer looks you over, notes your purse, and returns to sharpening a wealthy knight's sword."
+    },
+    {
+      "id": "Armory",
+      "tags": [
+        "quest"
+      ],
+      "text": "A squire struggles to lift a halberd twice his height in the armory. The armorer watches with the patience of someone who's seen this before."
+    },
+    {
+      "id": "Armory",
+      "tags": [
+        "quest"
+      ],
+      "text": "Steel gleams under careful lamplight in the armory. The armorer tests an edge with his thumb, frowns, and returns the blade to the grinding wheel."
+    },
+    {
+      "id": "Old Mill",
+      "tags": [
+        "quest"
+      ],
+      "text": "The old mill's waterwheel turns slowly, groaning with each rotation. The miller hauls sacks of grain, too busy to notice visitors."
+    },
+    {
+      "id": "Old Mill",
+      "tags": [
+        "quest"
+      ],
+      "text": "Flour dust hangs in the air at the old mill, catching the light through gaps in the wooden walls. The mill's rhythm is almost hypnotic."
+    },
+    {
+      "id": "Old Mill",
+      "tags": [
+        "quest"
+      ],
+      "text": "A cat prowls the rafters of the old mill, eyes fixed on something in the grain stores. The miller's war against rats is eternal."
+    },
+    {
+      "id": "Library",
+      "tags": [
+        "quest"
+      ],
+      "text": "Dust motes drift through shafts of light in the library. The librarian peers at you over half-moon spectacles, finger pressed to her lips before you can speak."
+    },
+    {
+      "id": "Library",
+      "tags": [
+        "quest"
+      ],
+      "text": "A scholar snores softly in the library, face pressed into an open tome. The librarian regards him with weary resignation."
+    },
+    {
+      "id": "Library",
+      "tags": [
+        "quest"
+      ],
+      "text": "Row upon row of books stretch into shadow in the library. Somewhere deep in the stacks, pages turn. You're not alone here, but you might as well be."
+    },
+    {
+      "id": "Blacksmith",
+      "tags": [
+        "quest"
+      ],
+      "text": "Sparks fly as the blacksmith works a glowing blade. The heat is oppressive, the rhythm of hammer on steel hypnotic. He's too focused to take custom work right now."
+    },
+    {
+      "id": "Blacksmith",
+      "tags": [
+        "quest"
+      ],
+      "text": "The blacksmith's apprentice works the bellows, face slick with sweat. Neither smith nor apprentice looks up from their labor."
+    },
+    {
+      "id": "Blacksmith",
+      "tags": [
+        "quest"
+      ],
+      "text": "A customer waits impatiently at the blacksmith's for a repair, tapping his foot. The smith ignores him with practiced ease. You'd be waiting even longer."
+    },
+    {
+      "id": "Seamstress",
+      "tags": [
+        "quest"
+      ],
+      "text": "A painted sign advertises alterations and \"private fittings by appointment\" at the seamstress shop. The women lounging by the window seem overdressed for needlework. One catches your eye and smiles, but you'd need more silver—and more time—than you have."
+    },
+    {
+      "id": "Seamstress",
+      "tags": [
+        "quest"
+      ],
+      "text": "Laughter spills from an upstairs window at the seamstress shop. A matronly woman minds the front counter, embroidering something with exaggerated focus. \"Appointments only, love.\""
+    },
+    {
+      "id": "Seamstress",
+      "tags": [
+        "quest"
+      ],
+      "text": "A merchant emerges from the back room of the seamstress shop, adjusting his collar and avoiding eye contact. The \"seamstress\" sees him out with professional warmth. She sizes you up, then shrugs. Busy day."
+    },
+    {
+      "id": "Tavern",
+      "tags": [
+        "quest"
+      ],
+      "text": "Pipe smoke hangs in layers beneath the tavern's rafters. A bard plucks a melancholy tune in the corner. The regulars nurse their drinks, uninterested in strangers."
+    },
+    {
+      "id": "Tavern",
+      "tags": [
+        "quest"
+      ],
+      "text": "Someone's telling a joke at the tavern bar—you catch only the punchline and scattered laughter. The barkeep slides drinks with practiced efficiency."
+    },
+    {
+      "id": "Tavern",
+      "tags": [
+        "quest"
+      ],
+      "text": "A card game in the tavern corner has drawn a crowd of onlookers. Coin changes hands. Accusations of cheating seem imminent."
+    },
+    {
+      "id": "Port",
+      "tags": [
+        "quest"
+      ],
+      "text": "Gulls wheel overhead at the port, crying at the fishing boats. Dockworkers haul cargo under the watchful eyes of merchant captains. None of it concerns you."
+    },
+    {
+      "id": "Port",
+      "tags": [
+        "quest"
+      ],
+      "text": "The tide is out at the port, leaving boats listing in the mud. Sailors mend nets and swap lies. The sea will return when it's ready."
+    },
+    {
+      "id": "Port",
+      "tags": [
+        "quest"
+      ],
+      "text": "A ship is making ready to depart from the port—sailors scramble in the rigging while officers bark orders. You're not on the manifest."
+    },
+    {
+      "id": "Island",
+      "tags": [
+        "quest"
+      ],
+      "text": "Waves lap against the rocky shore of the island. The interior is dense with brush and the occasional ruin, but nothing stirs."
+    },
+    {
+      "id": "Island",
+      "tags": [
+        "quest"
+      ],
+      "text": "A heron stands motionless in the shallows near the island shore, waiting for fish. It regards you with one yellow eye, unalarmed."
+    },
+    {
+      "id": "Island",
+      "tags": [
+        "quest"
+      ],
+      "text": "Wind sighs through the scrub grass on the island. It feels abandoned, though you can't shake the sense of being observed."
+    },
+    {
+      "id": "Forest",
+      "tags": [
+        "quest"
+      ],
+      "text": "Sunlight filters through the forest canopy in dappled patches. Birdsong echoes somewhere deeper in. The forest keeps its secrets close."
+    },
+    {
+      "id": "Forest",
+      "tags": [
+        "quest"
+      ],
+      "text": "A deer freezes at your approach in the forest, then bounds away through the undergrowth. You're clearly not welcome here."
+    },
+    {
+      "id": "Forest",
+      "tags": [
+        "quest"
+      ],
+      "text": "Mushrooms cluster at the base of an ancient oak in the forest. Edible or deadly? Hard to say. The forest offers no guidance."
+    },
+    {
+      "id": "Field",
+      "tags": [
+        "quest"
+      ],
+      "text": "Wheat sways in golden waves under the afternoon sun in the field. A scarecrow presides over the emptiness, its button eyes fixed on the horizon."
+    },
+    {
+      "id": "Field",
+      "tags": [
+        "quest"
+      ],
+      "text": "Grasshoppers leap away from your footsteps as you cross the field. In the distance, someone's scythe catches the light. Harvest will come soon."
+    },
+    {
+      "id": "Field",
+      "tags": [
+        "quest"
+      ],
+      "text": "The field stretches flat and endless, broken only by a lone tree offering shade to no one. Heat shimmers off the grain."
+    }
+  ]
+}

@@ -1211,7 +1211,7 @@ This example demonstrates a complete mini-quest showcasing all mechanics:
     {
       "id": "mill_sneak_success",
       "location": "mill_sneak_win",
-      "tags": ["+recovered_valuable", "-merchant_quest", "+sneaky_reputation"],
+      "tags": ["+recovered_valuable", "-merchant_quest", "+sneaky"],
       "text": "You slip past the thieves unnoticed and grab the {{valuable}}!",
       "log": "Sneaked into the mill and recovered the {{valuable}}"
     },

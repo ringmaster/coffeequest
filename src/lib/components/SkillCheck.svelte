@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { gameStore } from '$lib/stores/gameState.svelte';
-	import { executeSkillCheck, continueAfterSkillCheck } from '$lib/game/engine';
-	import type { StatName } from '$lib/types/game';
+	import { executeSkillCheck, continueAfterSkillCheck, isStatName } from '$lib/game/engine';
+	import type { StatName, SkillSource } from '$lib/types/game';
 
 	function handleRoll() {
 		executeSkillCheck();
@@ -16,22 +16,41 @@
 		guile: 'Guile',
 		magic: 'Magic'
 	};
+
+	/**
+	 * Format a skill source for display
+	 */
+	function formatSource(source: SkillSource): string {
+		if (isStatName(source)) {
+			return statLabels[source];
+		}
+		// Format tag name: capitalize first letter, replace underscores with spaces
+		return source.charAt(0).toUpperCase() + source.slice(1).replace(/_/g, ' ');
+	}
+
+	/**
+	 * Format skill sources into a readable string
+	 */
+	function formatSkillLabel(skill: SkillSource | SkillSource[]): string {
+		const sources = Array.isArray(skill) ? skill : [skill];
+		return sources.map(formatSource).join(' + ');
+	}
 </script>
 
 <div class="skill-check">
 	{#if gameStore.phase === 'skill_check_roll'}
-		{@const selectedStat = gameStore.pendingSkillCheck?.selectedStat}
+		{@const skill = gameStore.pendingSkillCheck?.option.skill}
 		{@const dc = gameStore.pendingSkillCheck?.option.dc}
 		<h3>
-			Rolling {selectedStat ? statLabels[selectedStat] : ''} Check
+			Rolling {skill ? formatSkillLabel(skill) : ''} Check
 		</h3>
 		<p class="dc">Target: {dc}</p>
 		<button class="roll-button" onclick={handleRoll}> Roll Dice </button>
 	{:else if gameStore.phase === 'skill_check_result' && gameStore.skillCheckResult}
 		{@const result = gameStore.skillCheckResult}
-		{@const selectedStat = gameStore.pendingSkillCheck?.selectedStat}
+		{@const skill = gameStore.pendingSkillCheck?.option.skill}
 		<h3>
-			{selectedStat ? statLabels[selectedStat] : ''} Check vs DC {result.dc}
+			{skill ? formatSkillLabel(skill) : ''} Check vs DC {result.dc}
 		</h3>
 
 		<div class="result-breakdown">
@@ -39,16 +58,14 @@
 				<span>Rolled:</span>
 				<span class="roll-value">{result.roll}</span>
 			</div>
-			<div class="result-row">
-				<span>{selectedStat ? statLabels[selectedStat] : ''}:</span>
-				<span>+{result.statValue}</span>
-			</div>
-			{#if result.modifier > 0}
-				<div class="result-row">
-					<span>Bonus:</span>
-					<span>+{result.modifier}</span>
-				</div>
-			{/if}
+			{#each result.bonuses as bonus}
+				{#if bonus.value > 0}
+					<div class="result-row">
+						<span>{formatSource(bonus.source)}:</span>
+						<span>+{bonus.value}</span>
+					</div>
+				{/if}
+			{/each}
 			<div class="result-row total">
 				<span>Total:</span>
 				<span>{result.total}</span>

@@ -1,5 +1,111 @@
-import type { Step, StepOption, StatName, SkillCheckResult, Stats } from '$lib/types/game';
+import type { Step, StepOption, StatName, SkillCheckResult, SkillBonus, SkillSource, RawStepOption, RawStep, OptionPresetsEntry } from '$lib/types/game';
 import { gameStore } from '$lib/stores/gameState.svelte';
+
+/**
+ * Parse a string shorthand option into a full StepOption object
+ * "Label::step_id" → { label: "Label", tags: [], pass: "step_id" }
+ * "Label" → { label: "Label", tags: [], pass: null }
+ */
+function parseShorthandOption(shorthand: string): StepOption {
+	const delimiterIndex = shorthand.indexOf('::');
+	if (delimiterIndex === -1) {
+		return {
+			label: shorthand,
+			tags: [],
+			pass: null
+		};
+	}
+	return {
+		label: shorthand.substring(0, delimiterIndex),
+		tags: [],
+		pass: shorthand.substring(delimiterIndex + 2)
+	};
+}
+
+/**
+ * Expand a raw option (string or object) into a full StepOption
+ */
+export function expandOption(raw: RawStepOption): StepOption {
+	if (typeof raw === 'string') {
+		return parseShorthandOption(raw);
+	}
+	// Ensure tags array exists
+	return {
+		...raw,
+		tags: raw.tags || []
+	};
+}
+
+/**
+ * Expand all options in a raw step, resolving presets and shorthand
+ */
+export function expandStepOptions(
+	rawStep: RawStep,
+	presets: Record<string, RawStepOption[]>
+): Step {
+	const step: Step = {
+		id: rawStep.id,
+		tags: rawStep.tags,
+		text: rawStep.text
+	};
+
+	if (rawStep.vars) step.vars = rawStep.vars;
+	if (rawStep.log) step.log = rawStep.log;
+
+	if (rawStep.options === undefined) {
+		return step;
+	}
+
+	// Resolve preset reference
+	let rawOptions: RawStepOption[];
+	if (typeof rawStep.options === 'string') {
+		const preset = presets[rawStep.options];
+		if (!preset) {
+			console.warn(`Unknown option preset: ${rawStep.options}`);
+			rawOptions = [];
+		} else {
+			rawOptions = preset;
+		}
+	} else {
+		rawOptions = rawStep.options;
+	}
+
+	// Expand each option
+	step.options = rawOptions.map(expandOption);
+
+	return step;
+}
+
+/**
+ * Check if an entry is an option_presets definition (not a step)
+ */
+export function isPresetsEntry(entry: RawStep | OptionPresetsEntry): entry is OptionPresetsEntry {
+	return 'option_presets' in entry;
+}
+
+/**
+ * Process raw step data: extract presets and expand all steps
+ */
+export function processStepData(
+	rawSteps: (RawStep | OptionPresetsEntry)[],
+	topLevelPresets?: Record<string, RawStepOption[]>
+): { steps: Step[]; presets: Record<string, RawStepOption[]> } {
+	// Collect all presets (top-level and from entries)
+	const presets: Record<string, RawStepOption[]> = { ...topLevelPresets };
+	const steps: Step[] = [];
+
+	for (const entry of rawSteps) {
+		if (isPresetsEntry(entry)) {
+			// Merge presets (later definitions overwrite)
+			Object.assign(presets, entry.option_presets);
+		} else {
+			// Process step
+			steps.push(expandStepOptions(entry, presets));
+		}
+	}
+
+	return { steps, presets };
+}
 
 /**
  * Check if player has enough of each required tag
@@ -51,7 +157,7 @@ function hasRequiredTags(tags: string[], playerMetadata: string[]): boolean {
  * - Duplicate tags require multiple copies (e.g., ["silver", "silver"] needs 2 silver)
  */
 function passesHardFilters(step: Step, playerMetadata: string[]): boolean {
-	return hasRequiredTags(step.tags, playerMetadata);
+	return hasRequiredTags(step.tags || [], playerMetadata);
 }
 
 /**
@@ -60,7 +166,7 @@ function passesHardFilters(step: Step, playerMetadata: string[]): boolean {
  */
 function calculateStepScore(step: Step, playerMetadata: string[], preferredWeight: number): number {
 	let score = 0;
-	for (const tag of step.tags) {
+	for (const tag of step.tags || []) {
 		// @tags are preferred - they get a scoring boost
 		if (tag.startsWith('@')) {
 			const preferred = tag.substring(1);
@@ -77,7 +183,7 @@ function calculateStepScore(step: Step, playerMetadata: string[], preferredWeigh
  * Matches are case-insensitive
  */
 export function selectStepById(id: string): Step | null {
-	const playerMetadata = gameStore.state.character.metadata;
+	const playerMetadata = gameStore.effectiveMetadata;
 	const preferredWeight = gameStore.config?.preferredTagWeight ?? 5;
 
 	// Filter by id (case insensitive)
@@ -120,7 +226,7 @@ export function selectStepById(id: string): Step | null {
  * - Duplicate tags require multiple copies (e.g., ["silver", "silver"] needs 2 silver)
  */
 export function isOptionAvailable(option: StepOption): boolean {
-	const playerMetadata = gameStore.state.character.metadata;
+	const playerMetadata = gameStore.effectiveMetadata;
 	return hasRequiredTags(option.tags || [], playerMetadata);
 }
 
@@ -146,7 +252,7 @@ export function getAvailableOptions(step: Step): StepOption[] {
 		return [];
 	}
 
-	const playerMetadata = gameStore.state.character.metadata;
+	const playerMetadata = gameStore.effectiveMetadata;
 
 	return step.options.filter((option) => {
 		return hasRequiredTags(option.tags || [], playerMetadata);
@@ -170,7 +276,7 @@ export function executeStep(step: Step): string {
 	}
 
 	// Apply tag changes (+ and -)
-	for (const tag of step.tags) {
+	for (const tag of step.tags || []) {
 		if (tag.startsWith('+')) {
 			gameStore.addTag(tag.substring(1));
 		} else if (tag.startsWith('-')) {
@@ -194,24 +300,68 @@ export function executeStep(step: Step): string {
 	return gameStore.renderText(step.text);
 }
 
+const STAT_NAMES: StatName[] = ['might', 'guile', 'magic'];
+
 /**
- * Resolve a skill check
+ * Check if a string is a stat name
+ */
+export function isStatName(source: string): source is StatName {
+	return STAT_NAMES.includes(source as StatName);
+}
+
+/**
+ * Calculate expected total bonus from skill sources (for difficulty display)
+ */
+export function calculateSkillBonus(skill: SkillSource | SkillSource[]): number {
+	const sources = Array.isArray(skill) ? skill : [skill];
+	return sources.reduce((sum, source) => sum + calculateSourceBonus(source).value, 0);
+}
+
+/**
+ * Calculate bonus from a single skill source (stat or tag)
+ * Stats add their value + modifiers; tags add +2 per copy
+ */
+function calculateSourceBonus(source: SkillSource): SkillBonus {
+	if (isStatName(source)) {
+		// It's a stat - add stat value + any modifiers
+		const statValue = gameStore.state.character[source];
+		const modifier = gameStore.statModifiers[source];
+		return {
+			source,
+			value: statValue + modifier
+		};
+	} else {
+		// It's a tag - add +2 per copy the player has
+		const tagCount = gameStore.countTag(source);
+		return {
+			source,
+			value: tagCount * 2
+		};
+	}
+}
+
+/**
+ * Resolve a skill check with one or more skill sources
  */
 export function resolveSkillCheck(
-	stat: StatName,
-	dc: number,
-	statModifiers: Stats
+	skill: SkillSource | SkillSource[],
+	dc: number
 ): SkillCheckResult {
 	const roll = Math.floor(Math.random() * 6) + 1;
-	const statValue = gameStore.state.character[stat];
-	const modifier = statModifiers[stat];
-	const total = roll + statValue + modifier;
+
+	// Normalize to array
+	const sources = Array.isArray(skill) ? skill : [skill];
+
+	// Calculate all bonuses
+	const bonuses: SkillBonus[] = sources.map(calculateSourceBonus);
+	const totalBonus = bonuses.reduce((sum, b) => sum + b.value, 0);
+	const total = roll + totalBonus;
 	const success = total >= dc;
 
 	return {
 		roll,
-		statValue,
-		modifier,
+		bonuses,
+		totalBonus,
 		total,
 		dc,
 		success
@@ -304,10 +454,9 @@ export function selectOption(option: StepOption): void {
 	}
 
 	if (option.skill && option.dc !== undefined) {
-		// This is a skill check option - use the skill from the option directly
+		// This is a skill check option
 		gameStore.pendingSkillCheck = {
-			option,
-			selectedStat: option.skill
+			option
 		};
 		gameStore.phase = 'skill_check_roll';
 	} else if (option.pass) {
@@ -333,15 +482,12 @@ export function selectOption(option: StepOption): void {
  * Execute the skill check roll
  */
 export function executeSkillCheck(): void {
-	if (!gameStore.pendingSkillCheck?.selectedStat || !gameStore.pendingSkillCheck.option.dc) {
+	const option = gameStore.pendingSkillCheck?.option;
+	if (!option?.skill || option.dc === undefined) {
 		return;
 	}
 
-	const result = resolveSkillCheck(
-		gameStore.pendingSkillCheck.selectedStat,
-		gameStore.pendingSkillCheck.option.dc,
-		gameStore.statModifiers
-	);
+	const result = resolveSkillCheck(option.skill, option.dc);
 
 	gameStore.skillCheckResult = result;
 	gameStore.phase = 'skill_check_result';

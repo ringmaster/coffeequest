@@ -22,22 +22,19 @@
         ]
       },
       "text": "You enter the church and find a worried cleric pacing near the altar. \"Thank the heavens you've come! A terrible {{ailment}} has struck the village elder. I need a rare ingredient to cure them - Moon Blossom, which only grows in the Haunted Grove. Will you help?\"",
-      "log": "The cleric asked you to find Moon Blossom to cure the elder's {{ailment}}",
       "options": [
-        {
-          "label": "I will find the Moon Blossom",
-          "tags": [
-            "+cleric_quest",
-            "+quest"
-          ],
-          "pass": null
-        },
-        {
-          "label": "I cannot help right now",
-          "tags": [],
-          "pass": null
-        }
+        "I will find the Moon Blossom::cleric_accept_quest",
+        "I cannot help right now"
       ]
+    },
+    {
+      "id": "cleric_accept_quest",
+      "tags": [
+        "+cleric_quest",
+        "+quest"
+      ],
+      "text": "The cleric smiles gratefully. \"Thank you! Please hurry, the elder's condition worsens by the hour.\"",
+      "log": "Agreed to find the Moon Blossom for the cleric"
     },
     {
       "id": "Church",

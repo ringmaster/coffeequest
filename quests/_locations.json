@@ -1,8 +1,23 @@
 {
   "AC": "Town Square",
+  "AN": "Guardhouse",
+  "AS": "Inn",
   "BC": "Church",
+  "BN": "Graveyard",
   "BS": "Bakery",
-  "DS": "Market",
+  "CC": "Farmhouse",
+  "CN": "Mud Pit",
+  "CS": "Stables",
+  "DC": "Armory",
   "DN": "Haunted Grove",
-  "EN": "Old Mill"
+  "DS": "Market",
+  "EC": "Library",
+  "EN": "Old Mill",
+  "ES": "Blacksmith",
+  "FC": "Seamstress",
+  "FN": "Tavern",
+  "FS": "Port",
+  "GN": "Island",
+  "GC": "Forest",
+  "GS": "Field"
 }

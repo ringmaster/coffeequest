@@ -13,7 +13,7 @@
 	const mapLocations = $derived.by(() => {
 		return Object.entries(gameStore.locations)
 			.map(([coord, name]) => ({ coord, name }))
-			.sort((a, b) => a.coord.localeCompare(b.coord));
+			.sort((a, b) => a.name.localeCompare(b.name));
 	});
 
 	function viewQuestLog() {

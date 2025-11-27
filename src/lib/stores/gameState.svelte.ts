@@ -6,8 +6,12 @@ import type {
 	StepOption,
 	GameConfig,
 	StatName,
-	SkillCheckResult
+	SkillCheckResult,
+	RawStep,
+	OptionPresetsEntry,
+	RawStepOption
 } from '$lib/types/game';
+import { processStepData } from '$lib/game/engine';
 
 const STORAGE_KEY = 'coffeequest_save';
 const MAX_LOG_ENTRIES = 100;
@@ -18,6 +22,7 @@ function createDefaultCharacter(): Character {
 		guile: 2,
 		magic: 2,
 		stepsCompleted: 0,
+		xp: 0,
 		metadata: []
 	};
 }
@@ -66,7 +71,6 @@ class GameStore {
 	availableOptions = $state<StepOption[]>([]);
 	pendingSkillCheck = $state<{
 		option: StepOption;
-		selectedStat: StatName | null;
 	} | null>(null);
 	skillCheckResult = $state<SkillCheckResult | null>(null);
 	showQuestLog = $state<boolean>(false);
@@ -97,9 +101,33 @@ class GameStore {
 		magic: this.state.character.magic + this.statModifiers.magic
 	});
 
-	initialize(config: GameConfig, locations: Record<string, string>, steps: Step[]): void {
+	// Level is derived from XP (level up every 5 XP)
+	level = $derived(Math.floor(this.state.character.xp / 5) + 1);
+
+	/**
+	 * Get effective metadata including virtual level tags.
+	 * Level tags are added as multiples equal to the player's level.
+	 */
+	effectiveMetadata = $derived.by(() => {
+		const metadata = [...this.state.character.metadata];
+		// Add virtual "level" tags equal to current level
+		for (let i = 0; i < this.level; i++) {
+			metadata.push('level');
+		}
+		return metadata;
+	});
+
+	initialize(
+		config: GameConfig,
+		locations: Record<string, string>,
+		rawSteps: (RawStep | OptionPresetsEntry)[],
+		topLevelPresets?: Record<string, RawStepOption[]>
+	): void {
 		this.config = config;
 		this.locations = locations;
+
+		// Process raw steps: expand presets and shorthand options
+		const { steps } = processStepData(rawSteps, topLevelPresets);
 		this.steps = steps;
 
 		const saved = loadFromStorage();
@@ -163,6 +191,10 @@ class GameStore {
 		const index = this.state.character.metadata.indexOf(tag);
 		if (index > -1) {
 			this.state.character.metadata.splice(index, 1);
+			// Special handling for "quest" tag - grants XP when removed
+			if (tag === 'quest') {
+				this.state.character.xp++;
+			}
 			return true;
 		}
 		return false;

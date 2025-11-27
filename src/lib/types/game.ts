@@ -11,18 +11,38 @@ export interface Character {
 	guile: number;
 	magic: number;
 	stepsCompleted: number;
+	xp: number;
 	metadata: string[];
 }
+
+// Skill check source can be a stat name or a tag name
+// Stats (might/guile/magic) add their value; tags add +2 per copy
+export type SkillSource = string;
 
 export interface StepOption {
 	label: string;
 	tags: string[];
-	skill?: StatName;
+	skill?: SkillSource | SkillSource[];
 	dc?: number;
 	pass: string | null;
 	fail?: string;
+	hidden?: boolean;
 }
 
+// Raw option can be a string shorthand or full object
+export type RawStepOption = string | StepOption;
+
+// Raw step as stored in quest files (before expansion)
+export interface RawStep {
+	id: string;
+	tags: string[];
+	vars?: Record<string, string[] | null>;
+	text: string;
+	log?: string;
+	options?: RawStepOption[] | string; // Can be array or preset name
+}
+
+// Processed step with expanded options
 export interface Step {
 	id: string;
 	tags: string[];
@@ -30,6 +50,11 @@ export interface Step {
 	text: string;
 	log?: string;
 	options?: StepOption[];
+}
+
+// Option presets entry in step data
+export interface OptionPresetsEntry {
+	option_presets: Record<string, RawStepOption[]>;
 }
 
 export interface GameConfig {
@@ -44,7 +69,8 @@ export interface GameConfig {
 export interface StepData {
 	config: GameConfig;
 	locations?: Record<string, string>;
-	steps: Step[];
+	option_presets?: Record<string, RawStepOption[]>;
+	steps: (RawStep | OptionPresetsEntry)[];
 }
 
 export interface StepDataError {
@@ -58,11 +84,16 @@ export interface GameState {
 	questLog: string[];
 }
 
+export interface SkillBonus {
+	source: string; // stat name or tag name
+	value: number;
+}
+
 export interface SkillCheckResult {
 	roll: number;
-	statValue: number;
-	modifier: number;
-	total: number;
+	bonuses: SkillBonus[]; // breakdown of all bonuses
+	totalBonus: number; // sum of all bonuses
+	total: number; // roll + totalBonus
 	dc: number;
 	success: boolean;
 }

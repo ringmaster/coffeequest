@@ -159,6 +159,8 @@ async function mergeQuests() {
 
 		const allSteps = [];
 		const questMeta = [];
+		/** @type {Record<string, any[]>} */
+		const mergedPresets = {};
 
 		for (const file of questFiles.sort()) {
 			const filePath = join(QUESTS_DIR, file);
@@ -172,7 +174,14 @@ async function mergeQuests() {
 			const quest = questResult.data;
 
 			if (quest.steps && Array.isArray(quest.steps)) {
-				allSteps.push(...quest.steps);
+				// Extract option_presets entries and merge them
+				for (const step of quest.steps) {
+					if (step.option_presets && typeof step.option_presets === 'object') {
+						Object.assign(mergedPresets, step.option_presets);
+					} else {
+						allSteps.push(step);
+					}
+				}
 				questMeta.push({
 					file,
 					name: quest.name || file,
@@ -198,6 +207,7 @@ async function mergeQuests() {
 		const output = {
 			config,
 			locations,
+			...(Object.keys(mergedPresets).length > 0 && { option_presets: mergedPresets }),
 			steps: allSteps
 		};
 

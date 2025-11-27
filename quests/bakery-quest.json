@@ -3,7 +3,9 @@
   "steps": [
     {
       "id": "Bakery",
-      "tags": [],
+      "tags": [
+        "!baker_flour_quest"
+      ],
       "vars": {
         "baked_item": [
           "bread",
@@ -37,8 +39,17 @@
     {
       "id": "Bakery",
       "tags": [
+        "!flour",
+        "baker_flour_quest"
+      ],
+      "text": "The baker is delighted to see you return, but is disapointed to see you don't have any flour.",
+      "options": "Explore elsewhere"
+    },
+    {
+      "id": "Bakery",
+      "tags": [
         "@flour",
-        "!baker_flour_quest"
+        "baker_flour_quest"
       ],
       "text": "The baker is delighted to see you return with flour. 'Thank you! Here's some silver for your trouble.'",
       "options": [
@@ -55,7 +66,8 @@
         "-flour",
         "+silver",
         "+assisted_baker",
-        "-baker_flour_quest"
+        "-baker_flour_quest",
+        "-quest"
       ],
       "text": "The baker hands you a silver coin and smiles warmly.",
       "log": "Delivered flour to baker and earned silver"

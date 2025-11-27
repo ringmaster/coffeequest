@@ -33,7 +33,7 @@
                 return;
             }
 
-            gameStore.initialize(data.config, data.locations || {}, data.steps);
+            gameStore.initialize(data.config, data.locations || {}, data.steps, data.option_presets);
             loading = false;
         } catch (e) {
             error = e instanceof Error ? e.message : "Unknown error";
