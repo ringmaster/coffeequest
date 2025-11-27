@@ -40,18 +40,16 @@
 	<div class="toolbar-icons">
 		<button
 			class="icon-button"
-			onclick={openQuestLog}
-			aria-label="Open quest log"
-			title="Quest Log"
+			onclick={openCharacterSheet}
+			aria-label="Open character sheet"
+			title="Character"
 		>
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-				<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-				<path d="M8 7h8"></path>
-				<path d="M8 11h8"></path>
+				<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+				<circle cx="12" cy="7" r="4"></circle>
 			</svg>
-			{#if questLogCount > 0}
-				<span class="badge">{questLogCount}</span>
+			{#if hasStatusEffects}
+				<span class="status-indicator"></span>
 			{/if}
 		</button>
 		<button
@@ -72,16 +70,18 @@
 		</button>
 		<button
 			class="icon-button"
-			onclick={openCharacterSheet}
-			aria-label="Open character sheet"
-			title="Character"
+			onclick={openQuestLog}
+			aria-label="Open quest log"
+			title="Quest Log"
 		>
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-				<circle cx="12" cy="7" r="4"></circle>
+				<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+				<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+				<path d="M8 7h8"></path>
+				<path d="M8 11h8"></path>
 			</svg>
-			{#if hasStatusEffects}
-				<span class="status-indicator"></span>
+			{#if questLogCount > 0}
+				<span class="badge">{questLogCount}</span>
 			{/if}
 		</button>
 	</div>
