@@ -79,7 +79,7 @@
       "tags": [
         "@q:entity_prankster"
       ],
-      "text": "\"A poacher? Using my scarecrow to spook me off my own land?\" {{farmer.name}}'s jaw tightens. \"I want {{farmer.him}} caught. The Church won't care about some trespasser\u2014they'll say I'm imagining things. But you found proof. Confront the wretch, or I will.\"",
+      "text": "\"A poacher? I haven't seen anyone out there.  I'm telling you, if it was just a poacher, I'd take care of him myself!\" {{farmer.name}}'s jaw tightens. \"I want it gone, whatever it is. The Church won't care whether it's some trespasser or a spirit\u2014they'll say I'm imagining things. But whatever you say... Confront the wretch, or I will.\"",
       "log": "{{farmer.name}} wants to confront the poacher directly"
     },
     {
@@ -230,7 +230,7 @@
       ],
       "text": "A man scrambles out from a covered pit at the scarecrow's base, bow in hand, eyes wild. \"Wait! Wait\u2014don't turn me in.\" He's a poacher, using the scarecrow legend to keep the farmer away from prime hunting ground. He looks desperate enough to deal.",
       "options": [
-        "You're coming with me::capture_poacher",
+        "You're coming with me::poacher_to_farmer",
         "What's it worth to you?::poacher_bribe",
         "Get out of here and don't come back::release_poacher"
       ]
@@ -435,6 +435,9 @@
     },
     {
       "id": "church_prankster_push",
+      "tags": [
+        "+q:visited_church_prankster"
+      ],
       "text": "The priest waves a hand dismissively. \"Then tell him. But don't expect us to hunt down every trespasser in the fields. We have genuine spiritual matters to attend to.\" He turns back to his candles. The Church won't help with this.",
       "log": "The Church dismissed the poacher as not their concern"
     },
@@ -617,6 +620,9 @@
     },
     {
       "id": "church_spirit_defer_end",
+      "tags": [
+        "+q:farmer_deferred_spirit"
+      ],
       "text": "You leave the farmer to anxious waiting. The spirit's fate now rests with the Church."
     },
     {
@@ -683,6 +689,9 @@
     },
     {
       "id": "church_dark_defer_end",
+      "tags": [
+        "+q:farmer_deferred_dark"
+      ],
       "text": "You leave the farmer to uneasy waiting. Whatever the Church decides, {{farmer.name}} won't rest easy until that shadow is gone entirely."
     },
     {
@@ -889,7 +898,7 @@
         "!q:poacher_bribed",
         "+q:visited_church_prankster"
       ],
-      "text": "The priest listens to your tale with polite skepticism. \"A poacher? Using fear of spirits to hunt in peace?\" He chuckles. \"Clever, in a base sort of way. But this is a matter for the farmer, not the Church. The old {{farmer.name}} sees ghosts where there are only men. Our gods protect us from true evil\u2014a poacher is merely a nuisance.\"",
+      "text": "The priest listens to your tale with polite skepticism. \"A poacher? Using fear of spirits to hunt in peace?\" He chuckles. \"Clever, in a base sort of way. But this is a matter for the farmer, not the Church. Old {{farmer.name}} sees ghosts where there are only men. Our gods protect us from true evil\u2014a poacher is merely a nuisance.\"",
       "options": [
         "Thank you for your time",
         "The farmer deserves to know he's not mad::church_prankster_push"
