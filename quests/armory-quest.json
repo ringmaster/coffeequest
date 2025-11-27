@@ -45,7 +45,7 @@
         "+q:armory",
         "+quest",
         "+q:guilty_{{guilty}}",
-        "inv:armory_key"
+        "+inv:armory_key"
       ],
       "text": "{{captain}} nods curtly. \"Search the Armory first—see what you can find. Then follow wherever the evidence leads. Report back to me when you know who's responsible.\" She presses a key into your hand.",
       "log": "Agreed to investigate missing weapons for {{captain}}"
@@ -53,7 +53,7 @@
     {
       "id": "Guardhouse",
       "tags": [
-        "q:armory",
+        "@q:armory",
         "!q:searched"
       ],
       "text": "{{captain}} raises an eyebrow. \"The Armory, remember? That's where you should start.\""
@@ -61,8 +61,8 @@
     {
       "id": "Guardhouse",
       "tags": [
-        "q:armory",
-        "q:searched",
+        "@q:armory",
+        "@q:searched",
         "!q:lead_blacksmith",
         "!q:lead_seamstress",
         "!q:lead_tavern"
@@ -270,6 +270,7 @@
           "tags": [
             "inv:silver"
           ],
+          "hidden": true,
           "pass": "blacksmith_paid_madam"
         },
         "Leave him be"
@@ -724,9 +725,10 @@
         "!q:lead_seamstress",
         "!q:lead_tavern"
       ],
-      "text": "You tell {{captain}} about {{smith}}'s testimony. She frowns. \"One witness? That's thin. He'll deny it.\"",
+      "text": "You tell {{captain}} about {{smith}}'s testimony. She frowns. \"One witness? That's thin. He'll deny it. Have you tried the Seamstress shop? {{madam}} sees everyone who comes through town.\"",
       "options": [
-        "It's what I have::arrest_guard_weak"
+        "It's what I have::arrest_guard_weak",
+        "I'll keep investigating"
       ]
     },
     {
@@ -737,9 +739,10 @@
         "!q:lead_blacksmith",
         "!q:lead_tavern"
       ],
-      "text": "You tell {{captain}} about {{madam}} identifying {{guard}}'s cloak. She frowns. \"A scrap of cloth? That's thin.\"",
+      "text": "You tell {{captain}} about {{madam}} identifying {{guard}}'s cloak. She frowns. \"A scrap of cloth? That's thin. The Tavern's where deals get made in this town—might be worth watching.\"",
       "options": [
-        "It's what I have::arrest_guard_weak"
+        "It's what I have::arrest_guard_weak",
+        "I'll keep investigating"
       ]
     },
     {
@@ -750,9 +753,10 @@
         "!q:lead_blacksmith",
         "!q:lead_seamstress"
       ],
-      "text": "You tell {{captain}} about seeing {{guard}} meet with suspicious figures. She frowns. \"You saw him talking to people? That's thin.\"",
+      "text": "You tell {{captain}} about seeing {{guard}} meet with suspicious figures. She frowns. \"You saw him talking to people? That's thin. {{smith}} at the forge might know something—he does repair work for the Guard.\"",
       "options": [
-        "It's what I have::arrest_guard_weak"
+        "It's what I have::arrest_guard_weak",
+        "I'll keep investigating"
       ]
     },
     {
@@ -859,9 +863,10 @@
         "!q:lead_seamstress",
         "!q:lead_tavern"
       ],
-      "text": "You describe {{smith}}'s nervous behavior and contradictions. {{captain}} frowns. \"That's suspicious, but not proof.\"",
+      "text": "You describe {{smith}}'s nervous behavior and contradictions. {{captain}} frowns. \"That's suspicious, but not proof. {{madam}} at the Seamstress shop hears all the gossip—she might know if he's been spending beyond his means.\"",
       "options": [
-        "It's what I have::arrest_smith_weak"
+        "It's what I have::arrest_smith_weak",
+        "I'll keep investigating"
       ]
     },
     {
@@ -872,9 +877,10 @@
         "!q:lead_blacksmith",
         "!q:lead_tavern"
       ],
-      "text": "You tell {{captain}} about {{smith}}'s new wealth. She frowns. \"A man spending money isn't evidence of theft.\"",
+      "text": "You tell {{captain}} about {{smith}}'s new wealth. She frowns. \"A man spending money isn't evidence of theft. If he's selling stolen goods, the Tavern's where those deals happen.\"",
       "options": [
-        "It's what I have::arrest_smith_weak"
+        "It's what I have::arrest_smith_weak",
+        "I'll keep investigating"
       ]
     },
     {
@@ -885,9 +891,10 @@
         "!q:lead_blacksmith",
         "!q:lead_seamstress"
       ],
-      "text": "You describe seeing {{smith}} at the Tavern making an exchange. {{captain}} frowns. \"Could have been legitimate business.\"",
+      "text": "You describe seeing {{smith}} at the Tavern making an exchange. {{captain}} frowns. \"Could have been legitimate business. Have you confronted him directly? See how he reacts when you mention the evidence from the Armory.\"",
       "options": [
-        "It's what I have::arrest_smith_weak"
+        "It's what I have::arrest_smith_weak",
+        "I'll keep investigating"
       ]
     },
     {
@@ -994,9 +1001,10 @@
         "!q:lead_seamstress",
         "!q:lead_tavern"
       ],
-      "text": "You tell {{captain}} about {{smith}}'s tip regarding the fencing operation. She frowns. \"Hearsay from a blacksmith about a seamstress? That's thin.\"",
+      "text": "You tell {{captain}} about {{smith}}'s tip regarding the fencing operation. She frowns. \"Hearsay from a blacksmith about a seamstress? That's thin. Why not visit the shop yourself? See if the girls will talk when {{madam}}'s not watching.\"",
       "options": [
-        "It's what I have::arrest_madam_weak"
+        "It's what I have::arrest_madam_weak",
+        "I'll keep investigating"
       ]
     },
     {
@@ -1007,9 +1015,10 @@
         "!q:lead_blacksmith",
         "!q:lead_tavern"
       ],
-      "text": "You describe the suspicious activity at the Seamstress shop. {{captain}} frowns. \"Nervous girls and late-night packages? Could be anything.\"",
+      "text": "You describe the suspicious activity at the Seamstress shop. {{captain}} frowns. \"Nervous girls and late-night packages? Could be anything. The Tavern's where stolen goods change hands—might catch her people in the act.\"",
       "options": [
-        "It's what I have::arrest_madam_weak"
+        "It's what I have::arrest_madam_weak",
+        "I'll keep investigating"
       ]
     },
     {
@@ -1020,9 +1029,10 @@
         "!q:lead_blacksmith",
         "!q:lead_seamstress"
       ],
-      "text": "You describe seeing {{madam}}'s girl making an exchange at the Tavern. {{captain}} frowns. \"One of her employees doing something suspicious? That's not much.\"",
+      "text": "You describe seeing {{madam}}'s girl making an exchange at the Tavern. {{captain}} frowns. \"One of her employees doing something suspicious? That's not much. Talk to {{smith}}—if {{madam}}'s fencing weapons, the smiths would know.\"",
       "options": [
-        "It's what I have::arrest_madam_weak"
+        "It's what I have::arrest_madam_weak",
+        "I'll keep investigating"
       ]
     },
     {
