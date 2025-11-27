@@ -128,6 +128,7 @@ export function processStepData(
 /**
  * Check if player has enough of each required tag
  * Counts occurrences of each tag in the requirements and compares to player's tags
+ * Tags containing {{variables}} are rendered before comparison
  */
 function hasRequiredTags(tags: string[], playerMetadata: string[]): boolean {
 	// Count required tags (plain and @ tags, excluding blocked/grant/consume)
@@ -136,9 +137,13 @@ function hasRequiredTags(tags: string[], playerMetadata: string[]): boolean {
 
 	for (const tag of tags) {
 		if (tag.startsWith('!')) {
-			blockedTags.add(tag.substring(1));
+			// Render variables in blocked tags
+			const renderedTag = gameStore.renderText(tag.substring(1));
+			blockedTags.add(renderedTag);
 		} else if (!tag.startsWith('+') && !tag.startsWith('-')) {
-			const required = tag.startsWith('@') ? tag.substring(1) : tag;
+			// Render variables in required tags
+			const baseTag = tag.startsWith('@') ? tag.substring(1) : tag;
+			const required = gameStore.renderText(baseTag);
 			requiredCounts.set(required, (requiredCounts.get(required) || 0) + 1);
 		}
 	}
@@ -181,13 +186,14 @@ function passesHardFilters(step: Step, playerMetadata: string[]): boolean {
 /**
  * Calculate score for a step based on preferred tags
  * @tags are preferred (scoring boost) in addition to being required
+ * Tags containing {{variables}} are rendered before comparison
  */
 function calculateStepScore(step: Step, playerMetadata: string[], preferredWeight: number): number {
 	let score = 0;
 	for (const tag of step.tags || []) {
 		// @tags are preferred - they get a scoring boost
 		if (tag.startsWith('@')) {
-			const preferred = tag.substring(1);
+			const preferred = gameStore.renderText(tag.substring(1));
 			if (playerMetadata.includes(preferred)) {
 				score += preferredWeight;
 			}
@@ -285,10 +291,23 @@ function isObjectArray(arr: unknown[]): arr is Record<string, string>[] {
 }
 
 /**
- * Execute a step: process variables, apply tag changes, add to log
+ * Execute a step: apply tag changes, process variables, add to log
  */
 export function executeStep(step: Step): string {
-	// Process variables first
+	// Apply tag changes first (+ and -), with variable interpolation
+	// This must happen before variable changes so tags like "-inv:{{valuable}}"
+	// can reference variables before they're cleared
+	for (const tag of step.tags || []) {
+		if (tag.startsWith('+')) {
+			const renderedTag = gameStore.renderText(tag.substring(1));
+			gameStore.addTag(renderedTag);
+		} else if (tag.startsWith('-')) {
+			const renderedTag = gameStore.renderText(tag.substring(1));
+			gameStore.removeTag(renderedTag);
+		}
+	}
+
+	// Process variables after tags
 	if (step.vars) {
 		for (const [varName, options] of Object.entries(step.vars)) {
 			if (options === null) {
@@ -309,15 +328,6 @@ export function executeStep(step: Step): string {
 					gameStore.setVariable(varName, selected as string);
 				}
 			}
-		}
-	}
-
-	// Apply tag changes (+ and -)
-	for (const tag of step.tags || []) {
-		if (tag.startsWith('+')) {
-			gameStore.addTag(tag.substring(1));
-		} else if (tag.startsWith('-')) {
-			gameStore.removeTag(tag.substring(1));
 		}
 	}
 
@@ -479,13 +489,15 @@ export function loadStep(step: Step): void {
  * Handle option selection
  */
 export function selectOption(option: StepOption): void {
-	// Apply tag changes from the option (+ and -)
+	// Apply tag changes from the option (+ and -), with variable interpolation
 	if (option.tags) {
 		for (const tag of option.tags) {
 			if (tag.startsWith('+')) {
-				gameStore.addTag(tag.substring(1));
+				const renderedTag = gameStore.renderText(tag.substring(1));
+				gameStore.addTag(renderedTag);
 			} else if (tag.startsWith('-')) {
-				gameStore.removeTag(tag.substring(1));
+				const renderedTag = gameStore.renderText(tag.substring(1));
+				gameStore.removeTag(renderedTag);
 			}
 		}
 		gameStore.save();

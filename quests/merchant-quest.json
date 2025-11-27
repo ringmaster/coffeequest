@@ -90,7 +90,7 @@
     {
       "id": "mill_sneak_success",
       "tags": [
-        "+q:recovered_valuable",
+        "+inv:{{valuable}}",
         "+trait:sneaky"
       ],
       "text": "You slip past the thieves unnoticed and find the {{valuable}} unprotected!  You are able to grab it and leave without being seen.",
@@ -119,7 +119,7 @@
     {
       "id": "mill_might_success",
       "tags": [
-        "+q:recovered_valuable",
+        "+inv:{{valuable}}",
         "+trait:warrior"
       ],
       "text": "You intimidate the thieves into surrendering the {{valuable}}!",
@@ -168,7 +168,7 @@
         "-inv:silver",
         "-inv:silver",
         "-inv:silver",
-        "+q:recovered_valuable"
+        "+inv:{{valuable}}"
       ],
       "text": "The thieves accept your silver and hand over the {{valuable}}.",
       "log": "Bought the {{valuable}} from the thieves for 3 silver"
@@ -176,7 +176,7 @@
     {
       "id": "mill_fight_win",
       "tags": [
-        "+q:recovered_valuable",
+        "+inv:{{valuable}}",
         "+trait:warrior"
       ],
       "text": "You defeat the thief and claim the {{valuable}}!",
@@ -207,7 +207,7 @@
     {
       "id": "Town Square",
       "tags": [
-        "@q:recovered_valuable"
+        "@inv:{{valuable}}"
       ],
       "text": "The {{victim.occupation}} is overjoyed to see {{victim.his}} {{valuable}} returned!",
       "options": [
@@ -221,6 +221,7 @@
     {
       "id": "merchant_reward",
       "tags": [
+        "-inv:{{valuable}}",
         "+inv:orange",
         "+inv:orange",
         "+inv:orange",
@@ -236,6 +237,7 @@
     {
       "id": "merchant_reward",
       "tags": [
+        "-inv:{{valuable}}",
         "+inv:silver",
         "+inv:silver",
         "-quest",
@@ -252,7 +254,7 @@
       "tags": [
         "@status:injured",
         "@q:merchant",
-        "!q:recovered_valuable",
+        "!inv:{{valuable}}",
         "-quest",
         "+done:merchant"
       ],
@@ -264,7 +266,7 @@
       "tags": [
         "@trait:coward",
         "@q:merchant",
-        "!q:recovered_valuable",
+        "!inv:{{valuable}}",
         "-quest",
         "+done:merchant"
       ],
