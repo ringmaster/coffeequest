@@ -67,6 +67,10 @@
 		showDebugInfo = false;
 		showLocations = false;
 	}
+
+	function reloadApp() {
+		window.location.reload();
+	}
 </script>
 
 {#if open}
@@ -153,6 +157,7 @@
 						<button class="menu-item" onclick={viewDebugInfo}>Debug</button>
 						<button class="menu-item" onclick={viewLocations}>Map Locations</button>
 					{/if}
+					<button class="menu-item" onclick={reloadApp}>Reload Quest Data</button>
 					<button class="menu-item danger" onclick={promptReset}>Reset Game</button>
 				</nav>
 			{/if}

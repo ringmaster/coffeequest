@@ -20,6 +20,10 @@
 		characterSheetOpen = true;
 	}
 
+	function openQuestLog() {
+		gameStore.showQuestLog = true;
+	}
+
 	// Count total inventory items for badge
 	const inventoryCount = $derived(
 		gameStore.inventoryItems.reduce((sum, item) => sum + item.count, 0)
@@ -27,10 +31,29 @@
 
 	// Check if there are any status effects (for badge indicator)
 	const hasStatusEffects = $derived(gameStore.statuses.length > 0);
+
+	// Count quest log entries for badge
+	const questLogCount = $derived(gameStore.state.questLog.length);
 </script>
 
 <header class="game-header">
 	<div class="toolbar-icons">
+		<button
+			class="icon-button"
+			onclick={openQuestLog}
+			aria-label="Open quest log"
+			title="Quest Log"
+		>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+				<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+				<path d="M8 7h8"></path>
+				<path d="M8 11h8"></path>
+			</svg>
+			{#if questLogCount > 0}
+				<span class="badge">{questLogCount}</span>
+			{/if}
+		</button>
 		<button
 			class="icon-button"
 			onclick={openInventory}
@@ -38,10 +61,10 @@
 			title="Inventory"
 		>
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-				<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-				<path d="M8 7h8"></path>
-				<path d="M8 11h8"></path>
+				<path d="M8 2C6 2 4 3 4 5v14c0 2 2 4 4 4h8c2 0 4-2 4-4V5c0-2-2-3-4-3H8z"></path>
+				<path d="M8 2c0 2 2 3 4 3s4-1 4-3"></path>
+				<line x1="12" y1="11" x2="12" y2="17"></line>
+				<line x1="9" y1="14" x2="15" y2="14"></line>
 			</svg>
 			{#if inventoryCount > 0}
 				<span class="badge">{inventoryCount}</span>
