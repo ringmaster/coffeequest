@@ -32,11 +32,17 @@ export interface StepOption {
 // Raw option can be a string shorthand or full object
 export type RawStepOption = string | StepOption;
 
+// Variable value options:
+// - string[] for simple random selection: ["a", "b", "c"]
+// - Record<string, string>[] for correlated variables: [{ "name": "Bob", "pronoun": "he" }]
+// - null to clear the variable
+export type VarOptions = string[] | Record<string, string>[] | null;
+
 // Raw step as stored in quest files (before expansion)
 export interface RawStep {
 	id: string;
 	tags: string[];
-	vars?: Record<string, string[] | null>;
+	vars?: Record<string, VarOptions>;
 	text: string;
 	log?: string;
 	options?: RawStepOption[] | string; // Can be array or preset name
@@ -46,7 +52,7 @@ export interface RawStep {
 export interface Step {
 	id: string;
 	tags: string[];
-	vars?: Record<string, string[] | null>;
+	vars?: Record<string, VarOptions>;
 	text: string;
 	log?: string;
 	options?: StepOption[];
@@ -103,4 +109,5 @@ export type GamePhase =
 	| 'navigation'
 	| 'display_step'
 	| 'skill_check_roll'
-	| 'skill_check_result';
+	| 'skill_check_result'
+	| 'level_up';

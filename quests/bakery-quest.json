@@ -4,7 +4,8 @@
     {
       "id": "Bakery",
       "tags": [
-        "!baker_flour_quest"
+        "!q:baker_flour",
+        "!done:baker_flour"
       ],
       "vars": {
         "baked_item": [
@@ -30,7 +31,7 @@
     {
       "id": "bakery_accept_quest",
       "tags": [
-        "+baker_flour_quest",
+        "+q:baker_flour",
         "+quest"
       ],
       "text": "The baker smiles gratefully. 'Wonderful! Please visit the market and get some flour.'",
@@ -39,8 +40,8 @@
     {
       "id": "Bakery",
       "tags": [
-        "!flour",
-        "baker_flour_quest"
+        "!inv:flour",
+        "q:baker_flour"
       ],
       "text": "The baker is delighted to see you return, but is disapointed to see you don't have any flour.",
       "options": "Explore elsewhere"
@@ -48,8 +49,8 @@
     {
       "id": "Bakery",
       "tags": [
-        "@flour",
-        "baker_flour_quest"
+        "@inv:flour",
+        "q:baker_flour"
       ],
       "text": "The baker is delighted to see you return with flour. 'Thank you! Here's some silver for your trouble.'",
       "options": [
@@ -63,11 +64,11 @@
     {
       "id": "bakery_complete",
       "tags": [
-        "-flour",
-        "+silver",
-        "+assisted_baker",
-        "-baker_flour_quest",
-        "-quest"
+        "-inv:flour",
+        "+inv:silver",
+        "+trait:assisted_baker",
+        "-quest",
+        "+done:baker_flour"
       ],
       "text": "The baker hands you a silver coin and smiles warmly.",
       "log": "Delivered flour to baker and earned silver"

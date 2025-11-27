@@ -1,37 +1,66 @@
 <script lang="ts">
 	import { gameStore } from '$lib/stores/gameState.svelte';
 	import GameMenu from './GameMenu.svelte';
+	import InventoryPanel from './InventoryPanel.svelte';
+	import CharacterSheet from './CharacterSheet.svelte';
 
 	let menuOpen = $state(false);
+	let inventoryOpen = $state(false);
+	let characterSheetOpen = $state(false);
 
 	function openMenu() {
 		menuOpen = true;
 	}
+
+	function openInventory() {
+		inventoryOpen = true;
+	}
+
+	function openCharacterSheet() {
+		characterSheetOpen = true;
+	}
+
+	// Count total inventory items for badge
+	const inventoryCount = $derived(
+		gameStore.inventoryItems.reduce((sum, item) => sum + item.count, 0)
+	);
+
+	// Check if there are any status effects (for badge indicator)
+	const hasStatusEffects = $derived(gameStore.statuses.length > 0);
 </script>
 
 <header class="game-header">
-	<div class="stats">
-		<span class="stat">
-			<strong>M:</strong>
-			{gameStore.effectiveStats.might}
-			{#if gameStore.statModifiers.might > 0}
-				<span class="modifier">+{gameStore.statModifiers.might}</span>
+	<div class="toolbar-icons">
+		<button
+			class="icon-button"
+			onclick={openInventory}
+			aria-label="Open inventory"
+			title="Inventory"
+		>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+				<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+				<path d="M8 7h8"></path>
+				<path d="M8 11h8"></path>
+			</svg>
+			{#if inventoryCount > 0}
+				<span class="badge">{inventoryCount}</span>
 			{/if}
-		</span>
-		<span class="stat">
-			<strong>G:</strong>
-			{gameStore.effectiveStats.guile}
-			{#if gameStore.statModifiers.guile > 0}
-				<span class="modifier">+{gameStore.statModifiers.guile}</span>
+		</button>
+		<button
+			class="icon-button"
+			onclick={openCharacterSheet}
+			aria-label="Open character sheet"
+			title="Character"
+		>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+				<circle cx="12" cy="7" r="4"></circle>
+			</svg>
+			{#if hasStatusEffects}
+				<span class="status-indicator"></span>
 			{/if}
-		</span>
-		<span class="stat">
-			<strong>Ma:</strong>
-			{gameStore.effectiveStats.magic}
-			{#if gameStore.statModifiers.magic > 0}
-				<span class="modifier">+{gameStore.statModifiers.magic}</span>
-			{/if}
-		</span>
+		</button>
 	</div>
 	<div class="meta">
 		<span class="level">Lv {gameStore.level}</span>
@@ -43,6 +72,8 @@
 </header>
 
 <GameMenu bind:open={menuOpen} />
+<InventoryPanel bind:open={inventoryOpen} />
+<CharacterSheet bind:open={characterSheetOpen} />
 
 <style>
 	.game-header {
@@ -54,19 +85,57 @@
 		border-bottom: 1px solid var(--color-border);
 	}
 
-	.stats {
+	.toolbar-icons {
 		display: flex;
-		gap: 16px;
-		font-size: 14px;
+		gap: 8px;
 	}
 
-	.stat {
-		font-family: monospace;
+	.icon-button {
+		position: relative;
+		width: 44px;
+		height: 44px;
+		border: none;
+		border-radius: 8px;
+		background: var(--color-button);
+		color: var(--color-button-text);
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 10px;
 	}
 
-	.modifier {
-		color: var(--color-success);
-		font-size: 12px;
+	.icon-button svg {
+		width: 24px;
+		height: 24px;
+	}
+
+	.badge {
+		position: absolute;
+		top: -4px;
+		right: -4px;
+		min-width: 18px;
+		height: 18px;
+		padding: 0 5px;
+		border-radius: 9px;
+		background: var(--color-primary, #4a90d9);
+		color: white;
+		font-size: 11px;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.status-indicator {
+		position: absolute;
+		top: -2px;
+		right: -2px;
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background: #c62828;
+		border: 2px solid var(--color-surface);
 	}
 
 	.meta {

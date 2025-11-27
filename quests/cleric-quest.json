@@ -10,8 +10,8 @@
     {
       "id": "Church",
       "tags": [
-        "!cleric_quest",
-        "!cleric_quest_complete",
+        "!q:cleric",
+        "!done:cleric",
         "!quest"
       ],
       "vars": {
@@ -30,7 +30,7 @@
     {
       "id": "cleric_accept_quest",
       "tags": [
-        "+cleric_quest",
+        "+q:cleric",
         "+quest"
       ],
       "text": "The cleric smiles gratefully. \"Thank you! Please hurry, the elder's condition worsens by the hour.\"",
@@ -39,16 +39,34 @@
     {
       "id": "Church",
       "tags": [
-        "cleric_quest",
-        "!has_moon_blossom"
+        "@q:cleric",
+        "!inv:moon_blossom"
       ],
       "text": "The cleric looks up hopefully as you enter. \"Have you found the Moon Blossom? The elder grows weaker by the hour. Please, search the Haunted Grove to the north!\""
     },
     {
       "id": "Church",
       "tags": [
-        "cleric_quest",
-        "has_moon_blossom"
+        "@q:cleric",
+        "!inv:moon_blossom",
+        "@q:grove_searched"
+      ],
+      "text": "The cleric looks up hopefully as you enter, but his face drops when you tell him you couldn't find the Moon Blossom. \"Please, keep searching the Haunted Grove. The elder's life depends on it.\"",
+      "options": [
+        {
+          "label": "Continue exploring",
+          "tags": [
+            "-q:grove_searched"
+          ],
+          "pass": null
+        }
+      ]
+    },
+    {
+      "id": "Church",
+      "tags": [
+        "@q:cleric",
+        "@inv:moon_blossom"
       ],
       "text": "The cleric's eyes light up when she sees the glowing flower in your hands. \"You found it! Quickly, let me prepare the remedy!\"",
       "options": [
@@ -62,16 +80,16 @@
     {
       "id": "Church",
       "tags": [
-        "cleric_quest_complete"
+        "done:cleric"
       ],
       "text": "The church is peaceful. The cleric tends to the altar, occasionally glancing at you with a grateful smile. The elder rests comfortably in a nearby pew, recovering well."
     },
     {
       "id": "Haunted Grove",
       "tags": [
-        "cleric_quest",
-        "!has_moon_blossom",
-        "!grove_searched"
+        "@q:cleric",
+        "!inv:moon_blossom",
+        "!q:grove_searched"
       ],
       "text": "You arrive at the Haunted Grove. Twisted trees block out the moonlight, and an eerie mist clings to the ground. You spot a faint glow deeper in the grove - could that be the Moon Blossom?",
       "options": [
@@ -104,9 +122,9 @@
     {
       "id": "Haunted Grove",
       "tags": [
-        "cleric_quest",
-        "!has_moon_blossom",
-        "grove_searched"
+        "@q:cleric",
+        "!inv:moon_blossom",
+        "q:grove_searched"
       ],
       "text": "You return to the Haunted Grove. The mist seems thinner now that you know the way. You can see the faint glow of the Moon Blossom ahead.",
       "options": [
@@ -139,8 +157,8 @@
     {
       "id": "grove_find_blossom",
       "tags": [
-        "+has_moon_blossom",
-        "-grove_searched"
+        "+inv:moon_blossom",
+        "-q:grove_searched"
       ],
       "text": "You reach a small clearing where a single Moon Blossom glows with ethereal light. You carefully pluck it, feeling its warmth pulse gently in your hands.",
       "log": "Found the Moon Blossom in the Haunted Grove"
@@ -148,32 +166,32 @@
     {
       "id": "grove_get_lost",
       "tags": [
-        "+grove_searched"
+        "+q:grove_searched"
       ],
       "text": "The mist confuses your senses. You wander in circles for what feels like hours before finding your way back to the grove's edge. The flower still eludes you."
     },
     {
       "id": "grove_magic_backfire",
       "tags": [
-        "+grove_searched"
+        "+q:grove_searched"
       ],
       "text": "Your magical senses are overwhelmed by the grove's supernatural energy. Disoriented, you stumble back to the edge of the grove empty-handed."
     },
     {
       "id": "grove_thorns",
       "tags": [
-        "+grove_searched",
-        "+scratched"
+        "+q:grove_searched",
+        "+status:scratched"
       ],
       "text": "The undergrowth fights back! Thorny vines scratch at your arms and face, forcing you to retreat. You'll need to try a different approach."
     },
     {
       "id": "cleric_cure_elder",
       "tags": [
-        "-cleric_quest",
-        "-has_moon_blossom",
-        "+cleric_quest_complete",
-        "+blessed"
+        "-inv:moon_blossom",
+        "-quest",
+        "+done:cleric",
+        "+status:blessed"
       ],
       "vars": {
         "ailment": null
@@ -184,8 +202,8 @@
     {
       "id": "Church",
       "tags": [
-        "blessed",
-        "!cleric_quest"
+        "status:blessed",
+        "!q:cleric"
       ],
       "text": "The church feels warm and welcoming. Your blessing from the cleric gives you a sense of peace whenever you visit."
     }

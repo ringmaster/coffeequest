@@ -2,6 +2,24 @@ import type { Step, StepOption, StatName, SkillCheckResult, SkillBonus, SkillSou
 import { gameStore } from '$lib/stores/gameState.svelte';
 
 /**
+ * Transition to navigation phase, but check for level up first.
+ * If the player leveled up, go to level_up phase instead.
+ */
+function transitionToNavigation(): void {
+	gameStore.currentDisplayStep = null;
+	gameStore.availableOptions = [];
+	gameStore.state.currentStepId = null;
+
+	if (gameStore.leveledUp) {
+		gameStore.leveledUp = false;
+		gameStore.phase = 'level_up';
+	} else {
+		gameStore.phase = 'navigation';
+	}
+	gameStore.save();
+}
+
+/**
  * Parse a string shorthand option into a full StepOption object
  * "Label::step_id" → { label: "Label", tags: [], pass: "step_id" }
  * "Label" → { label: "Label", tags: [], pass: null }
@@ -260,6 +278,13 @@ export function getAvailableOptions(step: Step): StepOption[] {
 }
 
 /**
+ * Check if an array contains object entries (for correlated variables)
+ */
+function isObjectArray(arr: unknown[]): arr is Record<string, string>[] {
+	return arr.length > 0 && typeof arr[0] === 'object' && arr[0] !== null;
+}
+
+/**
  * Execute a step: process variables, apply tag changes, add to log
  */
 export function executeStep(step: Step): string {
@@ -269,8 +294,20 @@ export function executeStep(step: Step): string {
 			if (options === null) {
 				gameStore.clearVariable(varName);
 			} else if (Array.isArray(options) && options.length > 0) {
-				const randomValue = options[Math.floor(Math.random() * options.length)];
-				gameStore.setVariable(varName, randomValue);
+				const randomIndex = Math.floor(Math.random() * options.length);
+				const selected = options[randomIndex];
+
+				if (isObjectArray(options)) {
+					// Correlated variables: set each key-value pair with namespace prefix
+					// e.g., "npc": [{"occupation": "merchant"}] → sets "npc.occupation"
+					const obj = selected as Record<string, string>;
+					for (const [key, value] of Object.entries(obj)) {
+						gameStore.setVariable(`${varName}.${key}`, value);
+					}
+				} else {
+					// Simple string array: set the variable to the selected string
+					gameStore.setVariable(varName, selected as string);
+				}
 			}
 		}
 	}
@@ -375,7 +412,7 @@ export function resolveSkillCheck(
 export function navigateToStep(id: string): void {
 	const normalizedId = id.toUpperCase().trim();
 
-	// Special debug location
+	// Special debug locations
 	if (normalizedId === 'Z3') {
 		if (!gameStore.hasTag('debug_mode')) {
 			gameStore.addTag('debug_mode');
@@ -384,6 +421,14 @@ export function navigateToStep(id: string): void {
 		} else {
 			gameStore.errorMessage = 'Debug mode is already enabled.';
 		}
+		return;
+	}
+
+	if (normalizedId === 'Z4') {
+		// Debug: trigger level up
+		gameStore.grantXP(5); // Grant enough XP to guarantee a level up
+		gameStore.phase = 'level_up';
+		gameStore.save();
 		return;
 	}
 
@@ -426,13 +471,6 @@ export function loadStep(step: Step): void {
 		label: gameStore.renderText(opt.label)
 	}));
 
-	// Check for stat increase
-	const increasedStat = gameStore.checkStatIncrease();
-	if (increasedStat) {
-		// Could show a notification here
-		console.log(`${increasedStat} increased!`);
-	}
-
 	gameStore.phase = 'display_step';
 	gameStore.save();
 }
@@ -470,11 +508,7 @@ export function selectOption(option: StepOption): void {
 		}
 	} else {
 		// Return to navigation (pass is null)
-		gameStore.currentDisplayStep = null;
-		gameStore.availableOptions = [];
-		gameStore.state.currentStepId = null;
-		gameStore.phase = 'navigation';
-		gameStore.save();
+		transitionToNavigation();
 	}
 }
 
@@ -520,10 +554,15 @@ export function continueAfterSkillCheck(): void {
 		}
 	} else {
 		// Return to navigation
-		gameStore.currentDisplayStep = null;
-		gameStore.availableOptions = [];
-		gameStore.state.currentStepId = null;
-		gameStore.phase = 'navigation';
-		gameStore.save();
+		transitionToNavigation();
 	}
+}
+
+/**
+ * Complete level up by increasing chosen stat and returning to navigation
+ */
+export function completeLevelUp(stat: StatName): void {
+	gameStore.increaseStat(stat);
+	gameStore.phase = 'navigation';
+	gameStore.save();
 }

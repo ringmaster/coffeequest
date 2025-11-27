@@ -1,9 +1,9 @@
 {
   "steps": [
-    
+
     {
       "id": "Stables",
-      "tags": ["!quest", "!stable_hand_quest_complete"],
+      "tags": ["!quest", "!done:stable_hand"],
       "vars": {
         "stable_hand": ["young stable hand", "nervous groom", "freckled stable boy"],
         "horse": ["Dusty", "Bramble", "Copper"],
@@ -27,20 +27,20 @@
 
     {
       "id": "accept_stable_quest",
-      "tags": ["+stable_hand_quest", "+quest"],
+      "tags": ["+q:stable_hand", "+quest"],
       "text": "Relief floods the {{stable_hand}}'s face. \"Thank you! {{rival}} keeps his operation at the Mud Pit east of town. Once you find {{horse}}, meet me at the Tavern—that's where the bet was made, and that's where we'll settle this.\"",
       "log": "Agreed to help the {{stable_hand}} find their missing horse, {{horse}}"
     },
 
     {
       "id": "Stables",
-      "tags": ["stable_hand_quest", "!horse_recovered", "!mud_pit_failed"],
+      "tags": ["q:stable_hand", "!q:horse_recovered", "!q:mud_pit_failed"],
       "text": "The {{stable_hand}} looks up hopefully as you enter, then their face falls. \"Still no sign of {{horse}}? Please hurry—the race is soon. {{rival}} must have her at the Mud Pit.\""
     },
 
     {
       "id": "Stables",
-      "tags": ["@horse_recovered", "stable_hand_quest"],
+      "tags": ["@q:horse_recovered", "q:stable_hand"],
       "text": "The {{stable_hand}} gasps with joy when they see {{horse}}. \"You found her!\" They quickly check the mare over, beaming. \"The Tavern—we need to get there before the race. Will you come?\"",
       "options": [
         "Let's finish this::stable_to_tavern"
@@ -54,7 +54,7 @@
 
     {
       "id": "Stables",
-      "tags": ["@mud_pit_failed", "stable_hand_quest"],
+      "tags": ["@q:mud_pit_failed", "q:stable_hand"],
       "text": "The {{stable_hand}} reads the bad news on your face. \"You couldn't get her?\" Their shoulders slump. \"I need to go to the Tavern and face the bookie. Will you at least come with me?\"",
       "options": [
         "I'll come::stable_to_tavern_fail",
@@ -71,7 +71,7 @@
 
     {
       "id": "Mud Pit",
-      "tags": ["@stable_hand_quest", "!horse_recovered", "!mud_pit_failed"],
+      "tags": ["@q:stable_hand", "!q:horse_recovered", "!q:mud_pit_failed"],
       "text": "The Mud Pit earns its name—a churned expanse of earth surrounded by makeshift fencing where rough types watch animals race. You spot {{rival}} near a covered paddock, arms crossed.",
       "options": [
         {
@@ -93,7 +93,7 @@
         },
         {
           "label": "Pay for information (2 silver)",
-          "tags": ["silver", "silver"],
+          "tags": ["inv:silver", "inv:silver"],
           "pass": "mud_buy_info"
         }
       ]
@@ -101,7 +101,7 @@
 
     {
       "id": "mud_sneak_success",
-      "tags": ["+horse_recovered", "+rival_exposed"],
+      "tags": ["+q:horse_recovered", "+q:rival_exposed"],
       "text": "You slip behind the paddock and find {{horse}} hidden under a tarp, still wearing the {{stable_hand}}'s livery. Nearby lies a forged withdrawal notice in {{rival}}'s handwriting—proof he planned this. You lead {{horse}} away unseen.",
       "log": "Sneaked into the Mud Pit and recovered {{horse}} with evidence of {{rival}}'s cheating"
     },
@@ -132,14 +132,14 @@
 
     {
       "id": "mud_fight_win",
-      "tags": ["+horse_recovered", "+warrior"],
+      "tags": ["+q:horse_recovered", "+trait:warrior"],
       "text": "You put the thug down hard. In the confusion, you find {{horse}} and lead her out while {{rival}} watches from a safe distance—he knows when he's outmatched.",
       "log": "Fought through {{rival}}'s men and recovered {{horse}}"
     },
 
     {
       "id": "mud_fight_lose",
-      "tags": ["+mud_pit_failed", "+injured"],
+      "tags": ["+q:mud_pit_failed", "+status:injured"],
       "text": "The thugs beat you badly and toss you in the mud. By the time you can stand, {{horse}} has been moved somewhere you'll never find.",
       "log": "Got beaten at the Mud Pit trying to recover {{horse}}"
     },
@@ -163,7 +163,7 @@
 
     {
       "id": "mud_sneak_second",
-      "tags": ["+horse_recovered"],
+      "tags": ["+q:horse_recovered"],
       "text": "Moving more carefully this time, you slip past the distracted guards and find {{horse}} in the paddock. You lead her out through a gap in the fencing.",
       "log": "Recovered {{horse}} from the Mud Pit on a second attempt"
     },
@@ -174,7 +174,7 @@
       "options": [
         {
           "label": "Pay someone outside for help (2 silver)",
-          "tags": ["silver", "silver"],
+          "tags": ["inv:silver", "inv:silver"],
           "pass": "mud_buy_outside"
         },
         "Give up::mud_give_up"
@@ -183,7 +183,7 @@
 
     {
       "id": "mud_buy_outside",
-      "tags": ["-silver", "-silver"],
+      "tags": ["-inv:silver", "-inv:silver"],
       "text": "You find a sympathetic stable boy outside who knows the layout. For 2 silver, he agrees to create a distraction.",
       "log": "Paid 2 silver for help getting back into the Mud Pit",
       "options": [
@@ -200,21 +200,21 @@
 
     {
       "id": "mud_final_fail",
-      "tags": ["+mud_pit_failed", "+injured"],
+      "tags": ["+q:mud_pit_failed", "+status:injured"],
       "text": "Despite the distraction, {{rival}}'s men catch you again. This time they're thorough. They beat you and make clear what happens if you return. {{horse}} is beyond your reach.",
       "log": "Failed to recover {{horse}} from the Mud Pit"
     },
 
     {
       "id": "mud_flee",
-      "tags": ["+mud_pit_failed", "+coward"],
+      "tags": ["+q:mud_pit_failed", "+trait:coward"],
       "text": "You bolt before the thugs can grab you properly. Safer, but {{horse}} remains in {{rival}}'s hands.",
       "log": "Fled from {{rival}}'s men at the Mud Pit"
     },
 
     {
       "id": "mud_give_up",
-      "tags": ["+mud_pit_failed"],
+      "tags": ["+q:mud_pit_failed"],
       "text": "You decide this isn't worth broken bones. The {{stable_hand}} will have to face the consequences alone.",
       "log": "Gave up trying to recover {{horse}}"
     },
@@ -243,7 +243,7 @@
 
     {
       "id": "mud_accept_wager",
-      "tags": ["+gambler"],
+      "tags": ["+trait:gambler"],
       "text": "{{rival}}'s grin widens. \"Bold. I like that.\" He rattles the dice. \"High roll wins.\"",
       "log": "Accepted {{rival}}'s dice wager",
       "options": [
@@ -260,21 +260,21 @@
 
     {
       "id": "mud_bet_win",
-      "tags": ["+horse_recovered"],
+      "tags": ["+q:horse_recovered"],
       "text": "The dice clatter across the table. Your roll beats his. {{rival}}'s smirk dies. \"Fine. Back paddock, under the tarp.\" He waves you off as you collect {{horse}}.",
       "log": "Won the dice wager and recovered {{horse}}"
     },
 
     {
       "id": "mud_bet_lose",
-      "tags": ["+mud_pit_failed"],
+      "tags": ["+q:mud_pit_failed"],
       "text": "The dice betray you. {{rival}} scoops them up with a laugh. \"Bad luck. Now get out of my Pit—and tell that stable brat the horse ran off.\"",
       "log": "Lost the dice wager to {{rival}}"
     },
 
     {
       "id": "mud_threaten_success",
-      "tags": ["+horse_recovered", "+warrior"],
+      "tags": ["+q:horse_recovered", "+trait:warrior"],
       "text": "You grab {{rival}} by the collar and lift him off his feet. His bravado crumbles fast. \"Back paddock! Under the tarp! Take the damned horse!\" You drop him and find {{horse}} exactly where he said.",
       "log": "Intimidated {{rival}} into revealing {{horse}}'s location"
     },
@@ -290,7 +290,7 @@
 
     {
       "id": "mud_gather_info",
-      "tags": ["+rival_exposed"],
+      "tags": ["+q:rival_exposed"],
       "text": "You chat up some regulars. A drunk admits he heard {{rival}} bragging about \"fixing\" an upcoming race by hiding the competition. Better yet, he saw {{rival}} writing a fake withdrawal notice—solid proof of cheating.",
       "log": "Learned about {{rival}}'s cheating scheme from Mud Pit regulars",
       "options": [
@@ -308,7 +308,7 @@
 
     {
       "id": "mud_informed_sneak",
-      "tags": ["+horse_recovered"],
+      "tags": ["+q:horse_recovered"],
       "text": "Knowing exactly where to look, you find {{horse}} in the covered paddock. You grab the forged withdrawal notice as evidence before leading her to safety.",
       "log": "Recovered {{horse}} and evidence of {{rival}}'s cheating"
     },
@@ -320,7 +320,7 @@
         "Confront {{rival}} directly::mud_confront",
         {
           "label": "Pay for information (2 silver)",
-          "tags": ["silver", "silver"],
+          "tags": ["inv:silver", "inv:silver"],
           "pass": "mud_buy_info"
         },
         "Leave::mud_leave"
@@ -329,7 +329,7 @@
 
     {
       "id": "mud_buy_info",
-      "tags": ["-silver", "-silver", "+rival_exposed"],
+      "tags": ["-inv:silver", "-inv:silver", "+q:rival_exposed"],
       "text": "Silver opens mouths. A stable boy tells you {{horse}} is in the covered paddock and that {{rival}} has been bragging about sabotaging the race. He even shows you where {{rival}} hid the forged notice.",
       "log": "Paid 2 silver for information about {{rival}}'s scheme",
       "options": [
@@ -370,7 +370,7 @@
 
     {
       "id": "mud_blackmail_success",
-      "tags": ["+horse_recovered"],
+      "tags": ["+q:horse_recovered"],
       "text": "{{rival}}'s confidence wavers at the mention of the bookie. Cheating is one thing—getting caught is another. \"Fine. Take the damned horse.\" He throws the lead rope at you.",
       "log": "Pressured {{rival}} into returning {{horse}} by threatening exposure"
     },
@@ -394,20 +394,20 @@
 
     {
       "id": "mud_force_with_evidence",
-      "tags": ["+horse_recovered"],
+      "tags": ["+q:horse_recovered"],
       "text": "Between the evidence and your physical presence, {{rival}} decides this isn't worth the trouble. \"Take her,\" he mutters, stepping aside. You lead {{horse}} out with proof of his scheming.",
       "log": "Recovered {{horse}} by confronting {{rival}} with evidence"
     },
 
     {
       "id": "Mud Pit",
-      "tags": ["stable_hand_quest", "horse_recovered"],
+      "tags": ["q:stable_hand", "q:horse_recovered"],
       "text": "The Mud Pit carries on its seedy business. You have no reason to linger here with {{horse}} recovered."
     },
 
     {
       "id": "Mud Pit",
-      "tags": ["stable_hand_quest", "mud_pit_failed"],
+      "tags": ["q:stable_hand", "q:mud_pit_failed"],
       "text": "The Mud Pit. {{rival}}'s men watch you with hostile eyes. There's nothing more you can do here."
     },
 
@@ -415,12 +415,12 @@
 
     {
       "id": "Tavern",
-      "tags": ["@horse_recovered", "@rival_exposed", "stable_hand_quest"],
+      "tags": ["@q:horse_recovered", "@q:rival_exposed", "q:stable_hand"],
       "text": "The {{stable_hand}} rushes to the bookie's table with you close behind. The bookie listens skeptically as the {{stable_hand}} explains—until you produce the forged withdrawal notice. The bookie's expression turns dangerous. \"{{rival}} tried to fix my race?\" He turns to the {{stable_hand}}. \"The bet stands. And when that horse wins, you get triple odds.\" He glances at you. \"You want in on this? I'll give you fair odds on {{horse}}.\"",
       "options": [
         {
           "label": "Bet 2 silver on {{horse}}",
-          "tags": ["silver", "silver"],
+          "tags": ["inv:silver", "inv:silver"],
           "pass": "tavern_bet_evidence"
         },
         "Just watch the race::tavern_race_evidence_no_bet"
@@ -429,7 +429,7 @@
 
     {
       "id": "tavern_bet_evidence",
-      "tags": ["-silver", "-silver", "+gambler"],
+      "tags": ["-inv:silver", "-inv:silver", "+trait:gambler"],
       "text": "You slide 2 silver across the table. The bookie nods approvingly. \"Let's see what that horse can do.\"",
       "log": "Bet 2 silver on {{horse}} to win",
       "options": [
@@ -439,26 +439,26 @@
 
     {
       "id": "tavern_race_evidence_bet",
-      "tags": ["-horse_recovered", "-rival_exposed", "-stable_hand_quest", "-quest", "+stable_hand_quest_complete", "+silver", "+silver", "+silver", "+silver", "+silver", "+silver", "+bookie_ally"],
+      "tags": ["-quest", "+done:stable_hand", "+inv:silver", "+inv:silver", "+inv:silver", "+inv:silver", "+inv:silver", "+inv:silver", "+ally:bookie"],
       "text": "{{horse}} runs beautifully, easily claiming victory. The bookie pays triple to the {{stable_hand}}, then counts out your winnings—4 silver profit on top of your stake. \"For exposing that cheat. {{rival}}'s banned from my tables for life. You ever need a fair game, come to me.\"",
       "log": "Exposed {{rival}}'s cheating, bet on {{horse}}, and won big—earned 6 silver and the bookie's favor"
     },
 
     {
       "id": "tavern_race_evidence_no_bet",
-      "tags": ["-horse_recovered", "-rival_exposed", "-stable_hand_quest", "-quest", "+stable_hand_quest_complete", "+silver", "+silver", "+silver", "+bookie_ally"],
+      "tags": ["-quest", "+done:stable_hand", "+inv:silver", "+inv:silver", "+inv:silver", "+ally:bookie"],
       "text": "{{horse}} runs beautifully, easily claiming victory. The bookie pays triple to the {{stable_hand}}, then presses silver into your palm. \"For exposing that cheat. {{rival}}'s banned from my tables for life. You ever need a fair game, come to me.\"",
       "log": "Exposed {{rival}}'s cheating and helped the {{stable_hand}} win big—earned 3 silver and the bookie's favor"
     },
 
     {
       "id": "Tavern",
-      "tags": ["@horse_recovered", "!rival_exposed", "stable_hand_quest"],
+      "tags": ["@q:horse_recovered", "!q:rival_exposed", "q:stable_hand"],
       "text": "The {{stable_hand}} finds the bookie and explains that {{horse}} was... delayed. The bookie raises an eyebrow but allows the race to proceed. He notices you watching. \"You want to place a bet? {{horse}} is running at 2-to-1.\"",
       "options": [
         {
           "label": "Bet 2 silver on {{horse}}",
-          "tags": ["silver", "silver"],
+          "tags": ["inv:silver", "inv:silver"],
           "pass": "tavern_bet_normal"
         },
         "Just watch the race::tavern_race_normal_no_bet"
@@ -467,7 +467,7 @@
 
     {
       "id": "tavern_bet_normal",
-      "tags": ["-silver", "-silver", "+gambler"],
+      "tags": ["-inv:silver", "-inv:silver", "+trait:gambler"],
       "text": "You put down 2 silver on {{horse}}. The {{stable_hand}} looks nervous but hopeful.",
       "log": "Bet 2 silver on {{horse}} to win",
       "options": [
@@ -477,21 +477,21 @@
 
     {
       "id": "tavern_race_normal_bet",
-      "tags": ["-horse_recovered", "-stable_hand_quest", "-quest", "+stable_hand_quest_complete", "+silver", "+silver", "+silver", "+silver", "+silver", "+silver"],
+      "tags": ["-quest", "+done:stable_hand", "+inv:silver", "+inv:silver", "+inv:silver", "+inv:silver", "+inv:silver", "+inv:silver"],
       "text": "{{horse}} wins handily! The {{stable_hand}} collects their winnings with tears of relief, and the bookie counts out your 4 silver profit. The {{stable_hand}} grins at you. \"Glad you had faith in her too!\"",
       "log": "Helped the {{stable_hand}} win their bet and won 4 silver of your own—earned 6 silver total"
     },
 
     {
       "id": "tavern_race_normal_no_bet",
-      "tags": ["-horse_recovered", "-stable_hand_quest", "-quest", "+stable_hand_quest_complete", "+silver", "+silver"],
+      "tags": ["-quest", "+done:stable_hand", "+inv:silver", "+inv:silver"],
       "text": "{{horse}} wins handily. The {{stable_hand}} collects their winnings with tears of relief. They press silver into your hand. \"I couldn't have done this without you. Thank you—truly.\"",
       "log": "Helped the {{stable_hand}} win their bet—earned 2 silver"
     },
 
     {
       "id": "Tavern",
-      "tags": ["@mud_pit_failed", "stable_hand_quest"],
+      "tags": ["@q:mud_pit_failed", "q:stable_hand"],
       "text": "The {{stable_hand}} slumps at a table near the bookie, waiting for a race they can't enter. The forfeit is called. Their wages change hands. They look up at you with hollow eyes. \"You tried. I know you did.\"",
       "options": [
         "I'm sorry::tavern_apologize"
@@ -500,14 +500,14 @@
 
     {
       "id": "tavern_apologize",
-      "tags": ["-mud_pit_failed", "-stable_hand_quest", "-quest", "+stable_hand_quest_complete"],
+      "tags": ["-quest", "+done:stable_hand"],
       "text": "The {{stable_hand}} waves off your apology. \"My own fault for betting in the first place.\" They stare into their empty cup. There's nothing more to say.",
       "log": "Failed to recover the horse—watched the {{stable_hand}} lose everything"
     },
 
     {
       "id": "Tavern",
-      "tags": ["stable_hand_quest", "!horse_recovered", "!mud_pit_failed"],
+      "tags": ["q:stable_hand", "!q:horse_recovered", "!q:mud_pit_failed"],
       "text": "The Tavern buzzes with its usual crowd. A bookie takes wagers in the corner. The {{stable_hand}} isn't here—they're at the Stables, waiting for news about {{horse}}."
     }
 

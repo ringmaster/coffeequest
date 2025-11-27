@@ -3,8 +3,8 @@
     {
       "id": "Town Square",
       "tags": [
-        "!merchant_quest",
-        "!merchant_quest_complete"
+        "!q:merchant",
+        "!done:merchant"
       ],
       "vars": {
         "valuable": [
@@ -12,15 +12,30 @@
           "heirloom",
           "artifact"
         ],
-        "occupation": [
-          "merchant",
-          "trader",
-          "shopkeeper",
-          "seamstress",
-          "priest"
+        "victim": [
+          {
+            "occupation": "merchant",
+            "gender": "male"
+          },
+          {
+            "occupation": "trader",
+            "gender": "male"
+          },
+          {
+            "occupation": "shopkeeper",
+            "gender": "male"
+          },
+          {
+            "occupation": "seamstress",
+            "gender": "female"
+          },
+          {
+            "occupation": "priest",
+            "gender": "male"
+          }
         ]
       },
-      "text": "You arrive at the town square.  You see a {{occupation}} who is looking quite glum.  He explains, \"Thieves stole my precious {{valuable}}! I am pretty sure they fled to the Old Mill. Please help me recover it!\"",
+      "text": "You arrive at the town square.  You see a {{victim.occupation}} who is looking quite glum.  {{victim.He}} explains, \"Thieves stole my precious {{valuable}}! I am pretty sure they are hiding in the Old Mill. Please help me recover it!\"",
       "options": [
         "I'll help you::accept_merchant_quest",
         "Sorry, I'm busy"
@@ -29,23 +44,23 @@
     {
       "id": "accept_merchant_quest",
       "tags": [
-        "+merchant_quest",
+        "+q:merchant",
         "+quest"
       ],
-      "text": "The {{occupation}} looks hopeful. \"Thank you! Please hurry to the Old Mill to the east.\"",
-      "log": "Agreed to help the {{occupation}} recover their {{valuable}}"
+      "text": "The {{victim.occupation}} looks hopeful. \"Thank you! Please hurry to the Old Mill to the east.\"",
+      "log": "Agreed to help the {{victim.occupation}} recover {{victim.his}} {{valuable}}"
     },
     {
       "id": "Town Square",
       "tags": [
-        "merchant_quest"
+        "q:merchant"
       ],
-      "text": "The {{occupation}} is happy to see you've returned to the Town Square.  \"Have you recovered my {{valuable}} from the thieves?\", he asks, and is disappointed when you tell him you haven't.  I am pretty sure they fled to the Old Mill. If you hurry, they might still be there!"
+      "text": "The {{victim.occupation}} is happy to see you've returned to the Town Square.  \"Have you recovered my {{valuable}} from the thieves?\", {{victim.he}} asks, and is disappointed when you tell {{victim.him}} you haven't.  \"I am pretty sure they fled to the Old Mill. If you hurry, they might still be there!\""
     },
     {
       "id": "Old Mill",
       "tags": [
-        "@merchant_quest"
+        "@q:merchant"
       ],
       "text": "You arrive at the Old Mill. You hear voices inside.",
       "options": [
@@ -75,9 +90,8 @@
     {
       "id": "mill_sneak_success",
       "tags": [
-        "+recovered_valuable",
-        "-merchant_quest",
-        "+sneaky"
+        "+q:recovered_valuable",
+        "+trait:sneaky"
       ],
       "text": "You slip past the thieves unnoticed and find the {{valuable}} unprotected!  You are able to grab it and leave without being seen.",
       "log": "Sneaked into the mill and recovered the {{valuable}}"
@@ -105,9 +119,8 @@
     {
       "id": "mill_might_success",
       "tags": [
-        "+recovered_valuable",
-        "-merchant_quest",
-        "+warrior_reputation"
+        "+q:recovered_valuable",
+        "+trait:warrior"
       ],
       "text": "You intimidate the thieves into surrendering the {{valuable}}!",
       "log": "Intimidated the thieves and recovered the {{valuable}}"
@@ -115,8 +128,7 @@
     {
       "id": "mill_might_fail",
       "tags": [
-        "-merchant_quest",
-        "+injured"
+        "+status:injured"
       ],
       "text": "The thieves overpower you. You barely escape with your life.",
       "log": "Failed to recover the {{valuable}} and got injured"
@@ -129,9 +141,9 @@
         {
           "label": "Offer them 3 silver for the item",
           "tags": [
-            "silver",
-            "silver",
-            "silver"
+            "inv:silver",
+            "inv:silver",
+            "inv:silver"
           ],
           "pass": "mill_purchase"
         },
@@ -153,10 +165,10 @@
     {
       "id": "mill_purchase",
       "tags": [
-        "-silver",
-        "-silver",
-        "-silver",
-        "+recovered_valuable"
+        "-inv:silver",
+        "-inv:silver",
+        "-inv:silver",
+        "+q:recovered_valuable"
       ],
       "text": "The thieves accept your silver and hand over the {{valuable}}.",
       "log": "Bought the {{valuable}} from the thieves for 3 silver"
@@ -164,9 +176,8 @@
     {
       "id": "mill_fight_win",
       "tags": [
-        "+recovered_valuable",
-        "-merchant_quest",
-        "+warrior_reputation"
+        "+q:recovered_valuable",
+        "+trait:warrior"
       ],
       "text": "You defeat the thief and claim the {{valuable}}!",
       "log": "Fought the thieves and recovered the {{valuable}}"
@@ -174,9 +185,8 @@
     {
       "id": "mill_fight_lose",
       "tags": [
-        "-merchant_quest",
-        "+injured",
-        "+beaten_by_thieves"
+        "+status:injured",
+        "+trait:beaten_by_thieves"
       ],
       "text": "The thief beats you soundly. You limp away empty-handed.",
       "log": "Lost the fight and failed to recover the {{valuable}}"
@@ -184,8 +194,7 @@
     {
       "id": "mill_flee",
       "tags": [
-        "-merchant_quest",
-        "+coward"
+        "+trait:coward"
       ],
       "text": "You run from the mill. The thieves laugh at your cowardice.",
       "log": "Fled from the thieves in fear"
@@ -198,9 +207,9 @@
     {
       "id": "Town Square",
       "tags": [
-        "@recovered_valuable"
+        "@q:recovered_valuable"
       ],
-      "text": "The {{occupation}} is overjoyed to see their {{valuable}} returned!",
+      "text": "The {{victim.occupation}} is overjoyed to see {{victim.his}} {{valuable}} returned!",
       "options": [
         {
           "label": "Accept reward",
@@ -212,42 +221,40 @@
     {
       "id": "merchant_reward",
       "tags": [
-        "-recovered_valuable",
-        "+orange",
-        "+orange",
-        "+orange",
+        "+inv:orange",
+        "+inv:orange",
+        "+inv:orange",
         "-quest",
-        "+merchant_quest_complete"
+        "+done:merchant"
       ],
       "vars": {
         "valuable": null
       },
-      "text": "The {{occupation}} gives you a bag of ripe oranges and their eternal gratitude!",
-      "log": "Returned the item stolen from the {{occupation}} and earned a bag of oranges"
+      "text": "The {{victim.occupation}} gives you a bag of ripe oranges and {{victim.his}} eternal gratitude!",
+      "log": "Returned the item stolen from the {{victim.occupation}} and earned a bag of oranges"
     },
     {
       "id": "merchant_reward",
       "tags": [
-        "-recovered_valuable",
-        "+silver",
-        "+silver",
+        "+inv:silver",
+        "+inv:silver",
         "-quest",
-        "+merchant_quest_complete"
+        "+done:merchant"
       ],
       "vars": {
         "valuable": null
       },
-      "text": "The {{occupation}} gives you 2 silver and their eternal gratitude!",
-      "log": "Returned the {{occupation}}'s stolen item and earned 2 silver"
+      "text": "The {{victim.occupation}} gives you 2 silver and their eternal gratitude!",
+      "log": "Returned the {{victim.occupation}}'s stolen item and earned 2 silver"
     },
     {
       "id": "Town Square",
       "tags": [
-        "@injured",
-        "@merchant_quest",
-        "!recovered_valuable",
+        "@status:injured",
+        "@q:merchant",
+        "!q:recovered_valuable",
         "-quest",
-        "+merchant_quest_complete"
+        "+done:merchant"
       ],
       "text": "The merchant sees your injuries and sighs sadly. 'I appreciate you tried...'",
       "log": "Returned to the merchant empty-handed"
@@ -255,13 +262,13 @@
     {
       "id": "Town Square",
       "tags": [
-        "@coward",
-        "@merchant_quest",
-        "!recovered_valuable",
+        "@trait:coward",
+        "@q:merchant",
+        "!q:recovered_valuable",
         "-quest",
-        "+merchant_quest_complete"
+        "+done:merchant"
       ],
-      "text": "\"You ran away?\" The merchant shakes his head in disbelief. \"Well, I guess you tried.\"",
+      "text": "\"You ran away?\" The {{victim.occupation}} shakes {{victim.his}} head in disbelief. \"Well, I guess you tried.\"",
       "log": "Returned to the merchant empty-handed"
     }
   ]

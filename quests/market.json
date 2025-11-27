@@ -4,7 +4,7 @@
     {
       "id": "Market",
       "tags": [
-        "!banned_from_market"
+        "!status:banned_from_market"
       ],
       "vars": {
         "market_atmosphere": [
@@ -76,7 +76,7 @@
     {
       "id": "Market",
       "tags": [
-        "@banned_from_market"
+        "@status:banned_from_market"
       ],
       "text": "A guard blocks your path, hand on sword hilt. 'You've got nerve showing your face here, thief. The market is closed to you.'",
       "options": [
@@ -125,7 +125,7 @@
     {
       "id": "market_sneak_fail",
       "tags": [
-        "+injured"
+        "+status:injured"
       ],
       "text": "The guard catches you by the collar and throws you to the cobblestones. 'Try that again and it'll be the stocks for you.'",
       "log": "Roughed up by market guards"
@@ -145,40 +145,40 @@
         {
           "label": "Buy rope (1 silver)",
           "tags": [
-            "silver",
-            "!rope"
+            "inv:silver",
+            "!inv:rope"
           ],
           "pass": "buy_rope"
         },
         {
           "label": "Buy lantern (2 silver)",
           "tags": [
-            "silver",
-            "silver",
-            "!lantern"
+            "inv:silver",
+            "inv:silver",
+            "!inv:lantern"
           ],
           "pass": "buy_lantern"
         },
         {
           "label": "Buy rations (1 silver)",
           "tags": [
-            "silver"
+            "inv:silver"
           ],
           "pass": "buy_rations"
         },
         {
           "label": "Buy lockpicks (2 silver)",
           "tags": [
-            "silver",
-            "silver",
-            "!lockpicks"
+            "inv:silver",
+            "inv:silver",
+            "!inv:lockpicks"
           ],
           "pass": "buy_lockpicks"
         },
         {
           "label": "Browse other stalls",
           "tags": [
-            "!banned_from_market"
+            "!status:banned_from_market"
           ],
           "pass": "Market"
         },
@@ -192,8 +192,8 @@
     {
       "id": "buy_rope",
       "tags": [
-        "-silver",
-        "+rope"
+        "-inv:silver",
+        "+inv:rope"
       ],
       "text": "You tuck the coil of sturdy hemp rope into your pack.",
       "log": "Bought rope",
@@ -208,9 +208,9 @@
     {
       "id": "buy_lantern",
       "tags": [
-        "-silver",
-        "-silver",
-        "+lantern"
+        "-inv:silver",
+        "-inv:silver",
+        "+inv:lantern"
       ],
       "text": "The brass lantern is well-made, with a small reservoir of oil already inside.",
       "log": "Bought lantern",
@@ -225,8 +225,8 @@
     {
       "id": "buy_rations",
       "tags": [
-        "-silver",
-        "+rations"
+        "-inv:silver",
+        "+inv:rations"
       ],
       "text": "Dried meat, hard cheese, and twice-baked bread. It'll keep you going.",
       "log": "Bought rations",
@@ -241,9 +241,9 @@
     {
       "id": "buy_lockpicks",
       "tags": [
-        "-silver",
-        "-silver",
-        "+lockpicks"
+        "-inv:silver",
+        "-inv:silver",
+        "+inv:lockpicks"
       ],
       "text": "The merchant glances around before sliding a leather roll of picks across the counter.",
       "log": "Bought lockpicks",
@@ -270,32 +270,32 @@
         {
           "label": "Buy healer's kit (2 silver)",
           "tags": [
-            "silver",
-            "silver",
-            "!healers_kit"
+            "inv:silver",
+            "inv:silver",
+            "!inv:healers_kit"
           ],
           "pass": "buy_healers_kit"
         },
         {
           "label": "Buy antidote (2 silver)",
           "tags": [
-            "silver",
-            "silver",
-            "!antidote"
+            "inv:silver",
+            "inv:silver",
+            "!inv:antidote"
           ],
           "pass": "buy_antidote"
         },
         {
           "label": "Buy the cheap 'healing tonic' (1 silver)",
           "tags": [
-            "silver"
+            "inv:silver"
           ],
           "pass": "buy_dubious_tonic"
         },
         {
           "label": "Ask about removing a curse",
           "tags": [
-            "@cursed"
+            "@status:cursed"
           ],
           "pass": "apothecary_curse"
         },
@@ -303,7 +303,7 @@
         {
           "label": "Browse other stalls",
           "tags": [
-            "!banned_from_market"
+            "!status:banned_from_market"
           ],
           "pass": "Market"
         },
@@ -317,9 +317,9 @@
     {
       "id": "buy_healers_kit",
       "tags": [
-        "-silver",
-        "-silver",
-        "+healers_kit"
+        "-inv:silver",
+        "-inv:silver",
+        "+inv:healers_kit"
       ],
       "text": "Clean bandages, salves, and a needle with thread. Proper supplies for treating wounds.",
       "log": "Bought healer's kit",
@@ -334,9 +334,9 @@
     {
       "id": "buy_antidote",
       "tags": [
-        "-silver",
-        "-silver",
-        "+antidote"
+        "-inv:silver",
+        "-inv:silver",
+        "+inv:antidote"
       ],
       "text": "A small vial of murky liquid that the apothecary assures you will neutralize most common poisons.",
       "log": "Bought antidote",
@@ -351,8 +351,8 @@
     {
       "id": "buy_dubious_tonic",
       "tags": [
-        "-silver",
-        "+dubious_tonic"
+        "-inv:silver",
+        "+inv:dubious_tonic"
       ],
       "text": "The bottle is unlabeled. The apothecary winks. 'Healing. Probably.'",
       "log": "Bought dubious tonic",
@@ -382,11 +382,11 @@
         {
           "label": "Pay 5 silver",
           "tags": [
-            "silver",
-            "silver",
-            "silver",
-            "silver",
-            "silver"
+            "inv:silver",
+            "inv:silver",
+            "inv:silver",
+            "inv:silver",
+            "inv:silver"
           ],
           "pass": "curse_removed"
         },
@@ -400,12 +400,12 @@
     {
       "id": "curse_removed",
       "tags": [
-        "-silver",
-        "-silver",
-        "-silver",
-        "-silver",
-        "-silver",
-        "-cursed"
+        "-inv:silver",
+        "-inv:silver",
+        "-inv:silver",
+        "-inv:silver",
+        "-inv:silver",
+        "-status:cursed"
       ],
       "text": "The apothecary burns strange herbs and mutters words you don't recognize. A weight lifts from your shoulders.",
       "log": "Had curse removed by apothecary",
@@ -432,50 +432,50 @@
         {
           "label": "Buy lucky charm (2 silver)",
           "tags": [
-            "silver",
-            "silver",
-            "!lucky_charm"
+            "inv:silver",
+            "inv:silver",
+            "!inv:lucky_charm"
           ],
           "pass": "buy_lucky_charm"
         },
         {
           "label": "Buy smoke bomb (2 silver)",
           "tags": [
-            "silver",
-            "silver"
+            "inv:silver",
+            "inv:silver"
           ],
           "pass": "buy_smoke_bomb"
         },
         {
           "label": "Buy forged papers (3 silver)",
           "tags": [
-            "silver",
-            "silver",
-            "silver",
-            "!forged_papers"
+            "inv:silver",
+            "inv:silver",
+            "inv:silver",
+            "!inv:forged_papers"
           ],
           "pass": "buy_forged_papers"
         },
         {
           "label": "Examine the strange amulet",
           "tags": [
-            "!cursed_amulet"
+            "!inv:cursed_amulet"
           ],
           "pass": "examine_amulet"
         },
         {
           "label": "Buy the treasure map (2 silver)",
           "tags": [
-            "silver",
-            "silver",
-            "!treasure_map"
+            "inv:silver",
+            "inv:silver",
+            "!inv:treasure_map"
           ],
           "pass": "buy_treasure_map"
         },
         {
           "label": "Browse other stalls",
           "tags": [
-            "!banned_from_market"
+            "!status:banned_from_market"
           ],
           "pass": "Market"
         },
@@ -489,9 +489,9 @@
     {
       "id": "buy_lucky_charm",
       "tags": [
-        "-silver",
-        "-silver",
-        "+lucky_charm"
+        "-inv:silver",
+        "-inv:silver",
+        "+inv:lucky_charm"
       ],
       "text": "A rabbit's foot on a silver chain. The dealer swears it belonged to a very lucky rabbit.",
       "log": "Bought lucky charm",
@@ -506,9 +506,9 @@
     {
       "id": "buy_smoke_bomb",
       "tags": [
-        "-silver",
-        "-silver",
-        "+smoke_bomb"
+        "-inv:silver",
+        "-inv:silver",
+        "+inv:smoke_bomb"
       ],
       "text": "A small clay sphere, sealed with wax. 'Throw it hard,' the dealer advises. 'Then run.'",
       "log": "Bought smoke bomb",
@@ -523,10 +523,10 @@
     {
       "id": "buy_forged_papers",
       "tags": [
-        "-silver",
-        "-silver",
-        "-silver",
-        "+forged_papers"
+        "-inv:silver",
+        "-inv:silver",
+        "-inv:silver",
+        "+inv:forged_papers"
       ],
       "text": "The documents look official enough. A seal, a signature, space for you to fill in your 'authorized purpose.'",
       "log": "Bought forged papers",
@@ -558,8 +558,8 @@
     {
       "id": "take_cursed_amulet",
       "tags": [
-        "+cursed_amulet",
-        "+cursed"
+        "+inv:cursed_amulet",
+        "+status:cursed"
       ],
       "text": "The moment it touches your palm, you feel a chill. The dealer looks relieved. You feel... different.",
       "log": "Accepted the cursed amulet",
@@ -574,9 +574,9 @@
     {
       "id": "buy_treasure_map",
       "tags": [
-        "-silver",
-        "-silver",
-        "+treasure_map"
+        "-inv:silver",
+        "-inv:silver",
+        "+inv:treasure_map"
       ],
       "text": "'Genuine, I swear it,' the dealer says, which inspires no confidence whatsoever. The map shows a location in the hills.",
       "log": "Bought treasure map",
@@ -603,58 +603,58 @@
         {
           "label": "Buy flour (2 silver)",
           "tags": [
-            "silver",
-            "silver",
-            "!flour"
+            "inv:silver",
+            "inv:silver",
+            "!inv:flour"
           ],
           "pass": "buy_flour"
         },
         {
           "label": "Buy iron nails (1 silver)",
           "tags": [
-            "silver",
-            "!nails"
+            "inv:silver",
+            "!inv:nails"
           ],
           "pass": "buy_nails"
         },
         {
           "label": "Buy beast bait (1 silver)",
           "tags": [
-            "silver"
+            "inv:silver"
           ],
           "pass": "buy_beast_bait"
         },
         {
           "label": "Buy cheap wine (1 silver)",
           "tags": [
-            "silver"
+            "inv:silver"
           ],
           "pass": "buy_wine"
         },
         {
           "label": "Buy silver mirror (3 silver)",
           "tags": [
-            "silver",
-            "silver",
-            "silver",
-            "!mirror"
+            "inv:silver",
+            "inv:silver",
+            "inv:silver",
+            "!inv:mirror"
           ],
           "pass": "buy_mirror"
         },
         {
           "label": "Buy a caged songbird (3 silver)",
           "tags": [
-            "silver",
-            "silver",
-            "silver",
-            "!songbird"
+            "inv:silver",
+            "inv:silver",
+            "inv:silver",
+            "!inv:songbird"
           ],
           "pass": "buy_songbird"
         },
         {
           "label": "Browse other stalls",
           "tags": [
-            "!banned_from_market"
+            "!status:banned_from_market"
           ],
           "pass": "Market"
         },
@@ -668,9 +668,9 @@
     {
       "id": "buy_flour",
       "tags": [
-        "-silver",
-        "-silver",
-        "+flour"
+        "-inv:silver",
+        "-inv:silver",
+        "+inv:flour"
       ],
       "text": "A heavy sack of milled flour. Someone will be glad to have this.",
       "log": "Bought flour",
@@ -685,8 +685,8 @@
     {
       "id": "buy_nails",
       "tags": [
-        "-silver",
-        "+nails"
+        "-inv:silver",
+        "+inv:nails"
       ],
       "text": "A pouch of iron nails, useful for repairs—or improvised defenses.",
       "log": "Bought nails",
@@ -701,8 +701,8 @@
     {
       "id": "buy_beast_bait",
       "tags": [
-        "-silver",
-        "+beast_bait"
+        "-inv:silver",
+        "+inv:beast_bait"
       ],
       "text": "A pungent packet of dried meat and herbs. Animals find it irresistible.",
       "log": "Bought beast bait",
@@ -717,8 +717,8 @@
     {
       "id": "buy_wine",
       "tags": [
-        "-silver",
-        "+wine"
+        "-inv:silver",
+        "+inv:wine"
       ],
       "text": "A clay jug of wine. Not good wine, but wine nonetheless.",
       "log": "Bought wine",
@@ -733,10 +733,10 @@
     {
       "id": "buy_mirror",
       "tags": [
-        "-silver",
-        "-silver",
-        "-silver",
-        "+mirror"
+        "-inv:silver",
+        "-inv:silver",
+        "-inv:silver",
+        "+inv:mirror"
       ],
       "text": "A small silver-backed mirror, polished to a gleam. Your reflection stares back.",
       "log": "Bought silver mirror",
@@ -751,10 +751,10 @@
     {
       "id": "buy_songbird",
       "tags": [
-        "-silver",
-        "-silver",
-        "-silver",
-        "+songbird"
+        "-inv:silver",
+        "-inv:silver",
+        "-inv:silver",
+        "+inv:songbird"
       ],
       "text": "A tiny bird in a wicker cage trills sweetly. It seems happy enough, for now.",
       "log": "Bought caged songbird",

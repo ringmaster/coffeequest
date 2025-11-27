@@ -117,6 +117,74 @@ class GameStore {
 		return metadata;
 	});
 
+	/**
+	 * Get inventory items (inv: prefixed tags) grouped and counted
+	 */
+	inventoryItems = $derived.by(() => {
+		const counts = new Map<string, number>();
+		for (const tag of this.state.character.metadata) {
+			if (tag.startsWith('inv:')) {
+				const item = tag.substring(4);
+				counts.set(item, (counts.get(item) || 0) + 1);
+			}
+		}
+		return Array.from(counts.entries())
+			.map(([item, count]) => ({ item, count }))
+			.sort((a, b) => a.item.localeCompare(b.item));
+	});
+
+	/**
+	 * Get trait tags (trait: prefixed)
+	 */
+	traits = $derived.by(() => {
+		const traits = new Set<string>();
+		for (const tag of this.state.character.metadata) {
+			if (tag.startsWith('trait:')) {
+				traits.add(tag.substring(6));
+			}
+		}
+		return Array.from(traits).sort();
+	});
+
+	/**
+	 * Get status tags (status: prefixed)
+	 */
+	statuses = $derived.by(() => {
+		const statuses = new Set<string>();
+		for (const tag of this.state.character.metadata) {
+			if (tag.startsWith('status:')) {
+				statuses.add(tag.substring(7));
+			}
+		}
+		return Array.from(statuses).sort();
+	});
+
+	/**
+	 * Get ally tags (ally: prefixed)
+	 */
+	allies = $derived.by(() => {
+		const allies = new Set<string>();
+		for (const tag of this.state.character.metadata) {
+			if (tag.startsWith('ally:')) {
+				allies.add(tag.substring(5));
+			}
+		}
+		return Array.from(allies).sort();
+	});
+
+	/**
+	 * Get done tags (done: prefixed) - completed quests
+	 */
+	completedQuests = $derived.by(() => {
+		const done = new Set<string>();
+		for (const tag of this.state.character.metadata) {
+			if (tag.startsWith('done:')) {
+				done.add(tag.substring(5));
+			}
+		}
+		return Array.from(done).sort();
+	});
+
 	initialize(
 		config: GameConfig,
 		locations: Record<string, string>,
@@ -187,13 +255,24 @@ class GameStore {
 		this.state.character.metadata.push(tag);
 	}
 
+	/**
+	 * Remove a tag. Returns true if tag was found and removed.
+	 * When removing "quest" tag, also clears all q: prefixed tags and grants XP.
+	 * The leveledUp flag will be set if the XP gain caused a level up.
+	 */
+	leveledUp = $state(false);
+
 	removeTag(tag: string): boolean {
 		const index = this.state.character.metadata.indexOf(tag);
 		if (index > -1) {
 			this.state.character.metadata.splice(index, 1);
-			// Special handling for "quest" tag - grants XP when removed
+			// Special handling for "quest" tag - grants XP and clears all q: prefixed tags
 			if (tag === 'quest') {
-				this.state.character.xp++;
+				this.leveledUp = this.grantXP(1);
+				// Auto-clear all q: prefixed tags (quest-scoped state)
+				this.state.character.metadata = this.state.character.metadata.filter(
+					(t) => !t.startsWith('q:')
+				);
 			}
 			return true;
 		}
@@ -218,27 +297,90 @@ class GameStore {
 	}
 
 	renderText(template: string): string {
-		return template.replace(/\{\{(\w+)\}\}/g, (match, varName) => {
-			return this.state.questVars[varName] || match;
+		return template.replace(/\{\{([\w.]+)\}\}/g, (match, varName) => {
+			// Check for direct variable match first
+			if (this.state.questVars[varName]) {
+				return this.state.questVars[varName];
+			}
+
+			// Check for gendered pronoun derivation (e.g., {{npc.him}} derives from npc.gender)
+			const pronounValue = this.deriveGenderedPronoun(varName);
+			if (pronounValue) {
+				return pronounValue;
+			}
+
+			return match;
 		});
 	}
 
-	// Stat progression
-	checkStatIncrease(): StatName | null {
-		if (!this.config) return null;
-		const stepsCompleted = this.state.character.stepsCompleted;
-		const interval = this.config.statsIncreaseEvery;
+	/**
+	 * Derive a gendered pronoun from a namespace.pronoun pattern.
+	 * E.g., "npc.him" checks "npc.gender" and returns the appropriate pronoun.
+	 */
+	private deriveGenderedPronoun(varName: string): string | null {
+		const pronounMap: Record<string, Record<string, string>> = {
+			male: {
+				he: 'he', she: 'he', they: 'he',
+				him: 'him', her: 'him', them: 'him',
+				his: 'his', hers: 'his', theirs: 'his',
+				himself: 'himself', herself: 'himself', themself: 'himself',
+				He: 'He', She: 'He', They: 'He',
+				Him: 'Him', Her: 'Him', Them: 'Him',
+				His: 'His', Hers: 'His', Theirs: 'His',
+				Himself: 'Himself', Herself: 'Himself', Themself: 'Himself'
+			},
+			female: {
+				he: 'she', she: 'she', they: 'she',
+				him: 'her', her: 'her', them: 'her',
+				his: 'her', hers: 'her', theirs: 'her',
+				himself: 'herself', herself: 'herself', themself: 'herself',
+				He: 'She', She: 'She', They: 'She',
+				Him: 'Her', Her: 'Her', Them: 'Her',
+				His: 'Her', Hers: 'Her', Theirs: 'Her',
+				Himself: 'Herself', Herself: 'Herself', Themself: 'Herself'
+			},
+			neutral: {
+				he: 'they', she: 'they', they: 'they',
+				him: 'them', her: 'them', them: 'them',
+				his: 'their', hers: 'their', theirs: 'their',
+				himself: 'themself', herself: 'themself', themself: 'themself',
+				He: 'They', She: 'They', They: 'They',
+				Him: 'Them', Her: 'Them', Them: 'Them',
+				His: 'Their', Hers: 'Their', Theirs: 'Their',
+				Himself: 'Themself', Herself: 'Themself', Themself: 'Themself'
+			}
+		};
 
-		if (stepsCompleted > 0 && stepsCompleted % interval === 0) {
-			// Increase the lowest stat
-			const stats: StatName[] = ['might', 'guile', 'magic'];
-			const lowest = stats.reduce((min, stat) =>
-				this.state.character[stat] < this.state.character[min] ? stat : min
-			);
-			this.state.character[lowest] += this.config.statIncreaseAmount;
-			return lowest;
-		}
-		return null;
+		const dotIndex = varName.lastIndexOf('.');
+		if (dotIndex === -1) return null;
+
+		const namespace = varName.substring(0, dotIndex);
+		const pronounKey = varName.substring(dotIndex + 1);
+
+		// Look up the gender for this namespace
+		const gender = this.state.questVars[`${namespace}.gender`];
+		if (!gender || !pronounMap[gender]) return null;
+
+		// Look up the pronoun
+		return pronounMap[gender][pronounKey] || null;
+	}
+
+	// Stat progression - called by player choice during level_up phase
+	increaseStat(stat: StatName): void {
+		if (!this.config) return;
+		this.state.character[stat] += this.config.statIncreaseAmount;
+		this.save();
+	}
+
+	/**
+	 * Grant XP and check for level up.
+	 * Returns true if a level up occurred (caller should transition to level_up phase)
+	 */
+	grantXP(amount: number = 1): boolean {
+		const oldLevel = this.level;
+		this.state.character.xp += amount;
+		const newLevel = Math.floor(this.state.character.xp / 5) + 1;
+		return newLevel > oldLevel;
 	}
 
 	toggleQuestLog(): void {

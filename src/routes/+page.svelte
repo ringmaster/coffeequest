@@ -9,6 +9,7 @@
     import StepDisplay from "$lib/components/StepDisplay.svelte";
     import SkillCheck from "$lib/components/SkillCheck.svelte";
     import QuestLog from "$lib/components/QuestLog.svelte";
+    import LevelUp from "$lib/components/LevelUp.svelte";
 
     let loading = $state(true);
     let error = $state<string | null>(null);
@@ -76,6 +77,8 @@
         <main class="game-content">
             {#if isSkillCheckPhase}
                 <SkillCheck />
+            {:else if gameStore.phase === "level_up"}
+                <LevelUp />
             {:else if gameStore.phase === "display_step"}
                 <StepDisplay />
             {:else}
