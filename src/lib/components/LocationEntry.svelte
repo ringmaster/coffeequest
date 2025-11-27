@@ -9,6 +9,12 @@
 
     const debugEnabled = $derived(gameStore.hasTag("debug_mode"));
 
+    const mapLocations = $derived.by(() => {
+        return Object.entries(gameStore.locations)
+            .map(([coord, name]) => ({ coord, name }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+    });
+
     function handleSubmit() {
         if (coordinates.trim()) {
             navigateToStep(coordinates);
@@ -67,6 +73,19 @@
                         </button>
                     {/each}
                 </div>
+            {/each}
+        </div>
+
+        <div class="location-list">
+            <h3>Locations</h3>
+            {#each mapLocations as location}
+                <button
+                    class="location-button"
+                    onclick={() => goToCoord(location.coord, "")}
+                >
+                    <span class="coord">{location.coord}</span>
+                    <span class="name">{location.name}</span>
+                </button>
             {/each}
         </div>
     {/if}
@@ -158,5 +177,49 @@
     .coord-button:hover {
         background: var(--color-button);
         color: var(--color-button-text);
+    }
+
+    .location-list {
+        margin-top: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .location-list h3 {
+        font-size: 14px;
+        text-transform: uppercase;
+        color: var(--color-text-secondary);
+        margin: 0 0 8px 0;
+    }
+
+    .location-button {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 8px 12px;
+        font-size: 14px;
+        font-family: monospace;
+        text-align: left;
+        border: none;
+        border-radius: 6px;
+        background: var(--color-surface);
+        color: var(--color-text);
+        cursor: pointer;
+    }
+
+    .location-button:hover {
+        background: var(--color-button);
+        color: var(--color-button-text);
+    }
+
+    .location-button .coord {
+        font-weight: bold;
+        margin-right: 12px;
+        min-width: 24px;
+    }
+
+    .location-button .name {
+        opacity: 0.8;
     }
 </style>

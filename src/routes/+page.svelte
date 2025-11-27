@@ -174,5 +174,6 @@
         flex: 1;
         display: flex;
         flex-direction: column;
+        padding-top: 68px; /* Account for fixed header height */
     }
 </style>

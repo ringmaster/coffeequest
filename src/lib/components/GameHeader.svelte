@@ -77,6 +77,13 @@
 
 <style>
 	.game-header {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		max-width: 428px;
+		margin: 0 auto;
+		z-index: 50;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
