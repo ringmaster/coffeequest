@@ -174,7 +174,31 @@
       "tags": [
         "@q:bitter_medicine",
         "@inv:emberroot",
-        "!q:knows_brothers"
+        "@q:emberroot_salvaged"
+      ],
+      "text": "{{apothecary.name}} looks up expectantly as you approach, then frowns when {{apothecary.he}} sees what's in your hand. \"That's... emberroot, yes, but...\" {{apothecary.He}} picks through the wilted leaves, expression souring. \"This has been sitting in the mud for days. Half of it is useless.\" {{apothecary.He}} sighs heavily. \"I suppose I can work with what's here.\"",
+      "options": [
+        "It was all I could find::apothecary_salvaged_emberroot_end"
+      ]
+    },
+    {
+      "id": "apothecary_salvaged_emberroot_end",
+      "tags": [
+        "-quest",
+        "+done:bitter_medicine",
+        "-inv:emberroot",
+        "+inv:silver"
+      ],
+      "text": "{{apothecary.name}} reluctantly presses a single silver coin into your palm. \"This is... less than I'd hoped for, but you did bring something back.\" {{apothecary.He}} turns away, already sorting through the damaged leaves. \"I suppose beggars can't be choosers.\"",
+      "log": "Delivered salvaged emberroot to {{apothecary.name}}—earned 1 silver (reluctantly given)"
+    },
+    {
+      "id": "stall_apothecary",
+      "tags": [
+        "@q:bitter_medicine",
+        "@inv:emberroot",
+        "!q:knows_brothers",
+        "!q:emberroot_salvaged"
       ],
       "text": "{{apothecary.name}}'s eyes light up when {{apothecary.he}} sees the red-veined leaves in your hand. \"You found it! Excellent.\" {{apothecary.He}} takes the emberroot almost reverently, examining it closely. \"This is perfect. Fresh.\" {{apothecary.He}} presses a silver coin into your palm. \"You've done me a great service.\"",
       "options": [
@@ -197,7 +221,8 @@
       "tags": [
         "@q:bitter_medicine",
         "@inv:emberroot",
-        "@q:knows_brothers"
+        "@q:knows_brothers",
+        "!q:emberroot_salvaged"
       ],
       "text": "{{apothecary.name}}'s eyes light up when {{apothecary.he}} sees the emberroot. \"You found it!\" {{apothecary.He}} takes it almost reverently, then pauses. Something in your expression makes {{apothecary.him}} hesitate. \"What is it? Did something happen out there?\"",
       "options": [
@@ -360,6 +385,127 @@
       ]
     },
     {
+      "id": "Haunted Grove",
+      "tags": [
+        "@q:bitter_medicine",
+        "@q:found_hermit",
+        "!q:hermit_angered",
+        "!q:hermit_calmed",
+        "!q:hermit_betrayed",
+        "!inv:emberroot"
+      ],
+      "text": "You know the way back to the recluse's camp. The memory of his wild eyes and sharpened stick lingers, but perhaps he'll be calmer now.",
+      "options": [
+        {
+          "label": "Approach the hermit's camp",
+          "pass": "grove_return_to_hermit"
+        },
+        {
+          "label": "Search for emberroot instead",
+          "tags": [
+            "!q:found_stumps"
+          ],
+          "skill": "guile",
+          "dc": 4,
+          "pass": "grove_find_stumps",
+          "fail": "grove_search_fail_emberroot"
+        },
+        {
+          "label": "Return to the ravine and salvage what you can",
+          "tags": [
+            "q:found_stumps"
+          ],
+          "pass": "grove_salvage_emberroot"
+        },
+        "Leave the Grove"
+      ]
+    },
+    {
+      "id": "grove_return_to_hermit",
+      "text": "You push through the familiar thicket to find {{hermit.name}} exactly where you left him—tense, watchful, the sharpened stick still in his grip. He eyes you warily. \"You again. What do you want?\"",
+      "options": [
+        {
+          "label": "Stand your ground calmly",
+          "skill": "might",
+          "dc": 5,
+          "pass": "hermit_calmed_might",
+          "fail": "hermit_hostile"
+        },
+        {
+          "label": "Try to talk him down",
+          "skill": "guile",
+          "dc": 4,
+          "pass": "hermit_calmed_guile",
+          "fail": "hermit_hostile"
+        },
+        "Back away slowly"
+      ]
+    },
+    {
+      "id": "Haunted Grove",
+      "tags": [
+        "@q:bitter_medicine",
+        "@q:found_hermit",
+        "@q:hermit_angered",
+        "!q:hermit_rejected",
+        "!q:hermit_calmed",
+        "!q:hermit_betrayed",
+        "!inv:emberroot"
+      ],
+      "text": "You know where the recluse's camp lies. The question is whether he'll be any more welcoming on a second approach—or whether you should try to find emberroot some other way.",
+      "options": [
+        "Approach the hermit's camp again::hermit_second_chance",
+        {
+          "label": "Search for emberroot elsewhere",
+          "tags": [
+            "!q:found_stumps"
+          ],
+          "skill": "guile",
+          "dc": 4,
+          "pass": "grove_find_stumps",
+          "fail": "grove_search_fail_emberroot"
+        },
+        {
+          "label": "Return to the ravine and salvage what you can",
+          "tags": [
+            "q:found_stumps"
+          ],
+          "pass": "grove_salvage_emberroot"
+        },
+        "Leave the Grove"
+      ]
+    },
+    {
+      "id": "Haunted Grove",
+      "tags": [
+        "@q:bitter_medicine",
+        "@q:hermit_rejected",
+        "!q:hermit_betrayed",
+        "!inv:emberroot"
+      ],
+      "text": "The Grove feels emptier now. The recluse made it clear he wants nothing to do with you, and you've no desire to catch another rock to the head. But there may still be emberroot to salvage.",
+      "options": [
+        {
+          "label": "Search for emberroot",
+          "tags": [
+            "!q:found_stumps"
+          ],
+          "skill": "guile",
+          "dc": 4,
+          "pass": "grove_find_stumps",
+          "fail": "grove_search_fail_emberroot"
+        },
+        {
+          "label": "Return to the ravine and salvage what you can",
+          "tags": [
+            "q:found_stumps"
+          ],
+          "pass": "grove_salvage_emberroot"
+        },
+        "Leave the Grove"
+      ]
+    },
+    {
       "id": "grove_find_stumps",
       "tags": [
         "+q:found_stumps"
@@ -374,8 +520,18 @@
           "pass": "grove_find_hermit",
           "fail": "grove_search_fail_hermit"
         },
+        "Gather the discarded leaves—they might be enough::grove_salvage_emberroot",
         "Return to the Grove entrance"
       ]
+    },
+    {
+      "id": "grove_salvage_emberroot",
+      "tags": [
+        "+inv:emberroot",
+        "+q:emberroot_salvaged"
+      ],
+      "text": "You carefully gather the discarded leaves. They're wilted and muddied, not nearly as fresh as you'd like, but there's enough usable material here to be worth something. It's a poor harvest, but it should suffice.",
+      "log": "Salvaged emberroot from discarded cuttings"
     },
     {
       "id": "grove_search_fail_emberroot",
@@ -407,7 +563,11 @@
     },
     {
       "id": "grove_search_fail_hermit",
-      "text": "You search until your legs ache, but the Grove keeps its secrets. If anyone lives out here, they know how to stay hidden. Perhaps the apothecary could offer more specific directions."
+      "text": "You search until your legs ache, but the Grove keeps its secrets. If anyone lives out here, they know how to stay hidden. Perhaps the apothecary could offer more specific directions.",
+      "options": [
+        "Keep searching the Grove",
+        "Leave the Grove"
+      ]
     },
     {
       "_comment": "=== HAUNTED GROVE - HERMIT ENCOUNTER ==="
@@ -439,8 +599,41 @@
     },
     {
       "id": "hermit_hostile",
+      "tags": [
+        "+q:hermit_angered"
+      ],
       "text": "\"Liar!\" {{hermit.name}} jabs the stick toward you. \"He sent you. I know he did. Get out. GET OUT!\" He advances, and you have no choice but to retreat. The branches whip at your face as you flee back through the thicket.",
-      "log": "The recluse drove me off"
+      "log": "The recluse drove me off",
+      "options": [
+        "Flee the Grove",
+        "Circle back and try a different approach::hermit_second_chance"
+      ]
+    },
+    {
+      "id": "hermit_second_chance",
+      "text": "You wait in the shadows, watching the recluse pace his camp. Eventually he settles, though he remains wary. Perhaps if you approach more carefully this time...",
+      "options": [
+        {
+          "label": "Approach with hands raised, speaking softly",
+          "skill": "guile",
+          "dc": 6,
+          "pass": "hermit_calmed_guile",
+          "fail": "hermit_permanent_rejection"
+        },
+        "Leave him alone and search for emberroot elsewhere::grove_find_stumps"
+      ]
+    },
+    {
+      "id": "hermit_permanent_rejection",
+      "tags": [
+        "+q:hermit_rejected"
+      ],
+      "text": "{{hermit.name}} sees your movement and snatches up a rock. It whistles past your ear before you can even speak. \"I said GET OUT!\" There will be no reasoning with him now.",
+      "log": "The recluse refuses all contact",
+      "options": [
+        "Search for emberroot elsewhere::grove_find_stumps",
+        "Leave the Grove"
+      ]
     },
     {
       "id": "hermit_calmed_might",
@@ -611,7 +804,10 @@
         "@q:hermit_betrayed"
       ],
       "text": "You push through the thicket expecting to find {{hermit.name}}'s camp. Instead you find destruction. The lean-to torn down. The firepit scattered. Signs of a struggle in the mud. They came fast, and they came prepared. {{hermit.name}} is gone. Only the ransacked remains of his meager life remain.",
-      "log": "{{hermit.name}}'s camp is destroyed—the bookie's men took him"
+      "log": "{{hermit.name}}'s camp is destroyed—the bookie's men took him",
+      "options": [
+        "Leave the Grove"
+      ]
     },
     {
       "_comment": "=== MUD PIT - BOOKIE NEGOTIATION ==="
