@@ -1,4 +1,4 @@
-import type { Step, StepOption, StatName, SkillCheckResult, SkillBonus, SkillSource, RawStepOption, RawStep, OptionPresetsEntry } from '$lib/types/game';
+import type { Step, StepOption, StatName, SkillCheckResult, SkillBonus, SkillSource, RawStepOption, RawStep, OptionPresetsEntry, StepDebugInfo, TagAnalysis } from '$lib/types/game';
 import { gameStore } from '$lib/stores/gameState.svelte';
 
 /**
@@ -181,6 +181,70 @@ function hasRequiredTags(tags: string[], playerMetadata: string[]): boolean {
  */
 function passesHardFilters(step: Step, playerMetadata: string[]): boolean {
 	return hasRequiredTags(step.tags || [], playerMetadata);
+}
+
+/**
+ * Analyze step tags and return detailed info about which tags pass/fail
+ */
+function analyzeStepTags(step: Step, playerMetadata: string[]): TagAnalysis[] {
+	const analysis: TagAnalysis[] = [];
+	const playerCounts = new Map<string, number>();
+
+	for (const tag of playerMetadata) {
+		playerCounts.set(tag, (playerCounts.get(tag) || 0) + 1);
+	}
+
+	// Track required tag counts
+	const requiredCounts = new Map<string, number>();
+
+	for (const tag of step.tags || []) {
+		if (tag.startsWith('+') || tag.startsWith('-')) {
+			// Skip grant/consume tags
+			continue;
+		}
+
+		if (tag.startsWith('!')) {
+			// Blocked tag
+			const renderedTag = gameStore.renderText(tag.substring(1));
+			const hasTag = playerMetadata.includes(renderedTag);
+			analysis.push({
+				tag: tag,
+				type: 'blocked',
+				satisfied: !hasTag // Satisfied if player does NOT have it
+			});
+		} else {
+			// Required tag (plain or @)
+			const baseTag = tag.startsWith('@') ? tag.substring(1) : tag;
+			const renderedTag = gameStore.renderText(baseTag);
+			requiredCounts.set(renderedTag, (requiredCounts.get(renderedTag) || 0) + 1);
+
+			const playerCount = playerCounts.get(renderedTag) || 0;
+			const requiredCount = requiredCounts.get(renderedTag) || 1;
+
+			analysis.push({
+				tag: tag,
+				type: 'required',
+				satisfied: playerCount >= requiredCount
+			});
+		}
+	}
+
+	return analysis;
+}
+
+/**
+ * Get debug info for all steps matching a location ID
+ */
+export function getStepDebugInfo(locationId: string): StepDebugInfo[] {
+	const playerMetadata = gameStore.effectiveMetadata;
+	const normalizedId = locationId.toLowerCase();
+	const matchingSteps = gameStore.steps.filter((s) => s.id.toLowerCase() === normalizedId);
+
+	return matchingSteps.map((step) => ({
+		step,
+		eligible: passesHardFilters(step, playerMetadata),
+		tagAnalysis: analyzeStepTags(step, playerMetadata)
+	}));
 }
 
 /**
@@ -451,8 +515,18 @@ export function navigateToStep(id: string): void {
 		gameStore.errorMessage = "You don't see anything of interest here. Try another location.";
 		gameStore.currentDisplayStep = null;
 		gameStore.availableOptions = [];
+
+		// Populate debug info if debug mode is active
+		if (gameStore.hasTag('debug_mode')) {
+			gameStore.debugStepInfo = getStepDebugInfo(locationId);
+		} else {
+			gameStore.debugStepInfo = [];
+		}
 		return;
 	}
+
+	// Clear debug info on successful navigation
+	gameStore.debugStepInfo = [];
 
 	loadStep(step);
 }

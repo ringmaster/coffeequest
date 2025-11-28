@@ -175,10 +175,11 @@ async function mergeQuests() {
 
 			if (quest.steps && Array.isArray(quest.steps)) {
 				// Extract option_presets entries and merge them
+				// Skip entries without an id (comment-only objects)
 				for (const step of quest.steps) {
 					if (step.option_presets && typeof step.option_presets === 'object') {
 						Object.assign(mergedPresets, step.option_presets);
-					} else {
+					} else if (step.id) {
 						allSteps.push(step);
 					}
 				}

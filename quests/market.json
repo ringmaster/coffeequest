@@ -257,7 +257,7 @@
     },
     {
       "id": "stall_apothecary",
-      "tags": [],
+      "tags": ["@done:bitter_medicine"],
       "vars": {
         "apothecary_desc": [
           "A hooded figure",

@@ -111,3 +111,16 @@ export type GamePhase =
 	| 'skill_check_roll'
 	| 'skill_check_result'
 	| 'level_up';
+
+// Debug info for tag analysis
+export interface TagAnalysis {
+	tag: string;
+	type: 'required' | 'blocked';
+	satisfied: boolean;
+}
+
+export interface StepDebugInfo {
+	step: Step;
+	eligible: boolean;
+	tagAnalysis: TagAnalysis[];
+}

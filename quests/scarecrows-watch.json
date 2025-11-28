@@ -592,6 +592,16 @@
     },
     {
       "id": "farmhouse_spirit_report",
+      "tags": ["!q:spirit_released"],
+      "text": "{{farmer.name}}'s eyes go wide. \"A spirit? A real one?\" {{farmer.He}} sits heavily on a stool. \"Protecting us. After all these years.\" A long silence. \"The Church will want it gone, won't they? They always do.\" {{farmer.He}} looks at you. \"But if it's keeping my crops safe... can't we just leave it be?\"",
+      "options": [
+        "I'll tell the Church it's harmless\u2014they don't need to know::protect_spirit_end",
+        "The Church should decide::church_spirit_defer"
+      ]
+    },
+    {
+      "id": "farmhouse_spirit_report",
+      "tags": ["@q:spirit_released"],
       "text": "{{farmer.name}}'s eyes go wide. \"A spirit? A real one?\" {{farmer.He}} sits heavily on a stool. \"Protecting us. After all these years.\" A long silence. \"The Church will want it gone, won't they? They always do.\" {{farmer.He}} looks at you. \"But if it's keeping my crops safe... can't we just leave it be?\"",
       "options": [
         "I'll tell the Church it's harmless\u2014they don't need to know::protect_spirit_end",
@@ -671,14 +681,10 @@
     {
       "id": "destroy_dark_farmer_wish",
       "tags": [
-        "-quest",
-        "+done:scarecrows_watch",
-        "+ally:farmer",
-        "+know:dark_destroyed",
-        "-status:blessed"
+        "+q:farmer_wants_destruction"
       ],
-      "text": "You return to the field at dawn, when shadows are weakest. It takes everything you have\u2014will, steel, and the farmer's desperate prayers at your back\u2014but you drive the darkness out. The scarecrow collapses, just straw and cloth now. {{farmer.name}} weeps with relief. \"Thank you. Whatever comes, at least it won't come from inside my fields.\" The Church won't be pleased when they hear. But the farmer is at peace.",
-      "log": "Destroyed the dark entity as the farmer wished\u2014lost Church's blessing"
+      "text": "{{farmer.name}} grips your arm tighter. \"You mean it? You'll destroy it?\" {{farmer.His}} eyes are desperate, hopeful. \"Dawn. That's when shadows are weakest. Go at first light, and I'll be praying for you from here.\"",
+      "log": "Agreed to destroy the dark entity for {{farmer.name}}"
     },
     {
       "id": "church_dark_defer",
@@ -820,6 +826,97 @@
         },
         "Leave"
       ]
+    },
+    {
+      "id": "Field",
+      "tags": [
+        "@q:scarecrows_watch",
+        "@q:entity_dark",
+        "@q:farmer_wants_destruction",
+        "!done:scarecrows_watch"
+      ],
+      "text": "Dawn light filters through the mist as you approach the scarecrow. The shadows around it seem thinner now, weaker—but still present. The darkness within stirs, sensing your intent. It knows why you've come.",
+      "options": [
+        {
+          "label": "Steel yourself and attack",
+          "skill": "might",
+          "dc": 6,
+          "pass": "dark_fight_success",
+          "fail": "dark_fight_fail"
+        },
+        {
+          "label": "Draw on your blessing to strike",
+          "skill": [
+            "might",
+            "status:blessed"
+          ],
+          "dc": 6,
+          "tags": [
+            "status:blessed"
+          ],
+          "pass": "dark_fight_success_blessed",
+          "fail": "dark_fight_fail",
+          "hidden": true
+        },
+        "This was a mistake—retreat"
+      ]
+    },
+    {
+      "id": "dark_fight_success",
+      "tags": [
+        "-quest",
+        "+done:scarecrows_watch",
+        "+ally:farmer",
+        "+know:dark_destroyed",
+        "-status:blessed"
+      ],
+      "text": "You pour everything into the assault—will, steel, fury. The darkness writhes, screams without sound, claws at your mind. But dawn is on your side, and your determination is absolute. With a final, wrenching effort, you drive the shadow out. It dissipates like smoke in sunlight. The scarecrow collapses, just straw and cloth now. You stand over it, trembling, victorious.",
+      "options": [
+        "Return to {{farmer.name}}::dark_destroyed_return_farmer"
+      ],
+      "log": "Destroyed the dark entity through sheer might"
+    },
+    {
+      "id": "dark_fight_success_blessed",
+      "tags": [
+        "-quest",
+        "+done:scarecrows_watch",
+        "+ally:farmer",
+        "+know:dark_destroyed",
+        "-status:blessed"
+      ],
+      "text": "Your blessing flares as you strike, holy light searing the darkness. It shrieks—a sound felt more than heard—and recoils. You press the advantage, faith and strength combined, until the shadow tears apart like rotted cloth. The scarecrow crumples. The blessing fades with its purpose fulfilled, leaving you drained but triumphant.",
+      "options": [
+        "Return to {{farmer.name}}::dark_destroyed_return_farmer"
+      ],
+      "log": "Destroyed the dark entity with blessing and might"
+    },
+    {
+      "id": "dark_fight_fail",
+      "tags": [
+        "+status:injured",
+        "-q:farmer_wants_destruction"
+      ],
+      "text": "The darkness is stronger than you expected. Even at dawn, even with everything you have—it's not enough. Cold tendrils wrap around your mind, your limbs. You feel your strength draining, your vision darkening. At the last moment, survival instinct takes over and you wrench yourself free, stumbling back through the field. The shadow doesn't pursue. It doesn't need to. You've been shown your place.",
+      "log": "Failed to destroy the dark entity—barely escaped"
+    },
+    {
+      "id": "dark_destroyed_return_farmer",
+      "text": "{{farmer.name}} is waiting at the edge of the field, hands clasped, lips moving in silent prayer. When {{farmer.he}} sees you walking back—whole, upright—{{farmer.he}} lets out a sob of relief. \"It's done? Truly done?\" You nod, and the farmer's face crumples with gratitude. \"Thank you. Whatever comes next... at least it won't come from inside my fields.\" {{farmer.He}} presses silver into your hand. The Church won't be pleased when they hear. But {{farmer.name}} is at peace.",
+      "tags": [
+        "+inv:silver"
+      ],
+      "log": "{{farmer.name}} rewarded me for destroying the dark entity"
+    },
+    {
+      "id": "Farmhouse",
+      "tags": [
+        "@q:scarecrows_watch",
+        "@q:entity_dark",
+        "@q:farmer_wants_destruction",
+        "!done:scarecrows_watch"
+      ],
+      "text": "{{farmer.name}} looks up sharply when you enter. \"You haven't gone yet? Dawn's the time—that's what the old stories say. Shadows are weakest at first light.\" {{farmer.He}} wrings {{farmer.his}} hands. \"Please. I won't sleep until that thing is gone.\""
     },
     {
       "id": "Farmhouse",

@@ -9,7 +9,8 @@ import type {
 	SkillCheckResult,
 	RawStep,
 	OptionPresetsEntry,
-	RawStepOption
+	RawStepOption,
+	StepDebugInfo
 } from '$lib/types/game';
 import { processStepData } from '$lib/game/engine';
 
@@ -75,6 +76,7 @@ class GameStore {
 	skillCheckResult = $state<SkillCheckResult | null>(null);
 	showQuestLog = $state<boolean>(false);
 	errorMessage = $state<string | null>(null);
+	debugStepInfo = $state<StepDebugInfo[]>([]);
 
 	// Derived state
 	hasExistingSave = $derived(
@@ -314,8 +316,9 @@ class GameStore {
 	}
 
 	/**
-	 * Derive a gendered pronoun from a namespace.pronoun pattern.
+	 * Derive a gendered term from a namespace.term pattern.
 	 * E.g., "npc.him" checks "npc.gender" and returns the appropriate pronoun.
+	 * Also supports family terms: "victim.brother" returns "sister" for female gender.
 	 */
 	private deriveGenderedPronoun(varName: string): string | null {
 		const pronounMap: Record<string, Record<string, string>> = {
@@ -327,7 +330,13 @@ class GameStore {
 				He: 'He', She: 'He', They: 'He',
 				Him: 'Him', Her: 'Him', Them: 'Him',
 				His: 'His', Hers: 'His', Theirs: 'His',
-				Himself: 'Himself', Herself: 'Himself', Themself: 'Himself'
+				Himself: 'Himself', Herself: 'Himself', Themself: 'Himself',
+				brother: 'brother', sister: 'brother', sibling: 'brother',
+				son: 'son', daughter: 'son', child: 'son',
+				father: 'father', mother: 'father', parent: 'father',
+				Brother: 'Brother', Sister: 'Brother', Sibling: 'Brother',
+				Son: 'Son', Daughter: 'Son', Child: 'Son',
+				Father: 'Father', Mother: 'Father', Parent: 'Father'
 			},
 			female: {
 				he: 'she', she: 'she', they: 'she',
@@ -337,7 +346,13 @@ class GameStore {
 				He: 'She', She: 'She', They: 'She',
 				Him: 'Her', Her: 'Her', Them: 'Her',
 				His: 'Her', Hers: 'Her', Theirs: 'Her',
-				Himself: 'Herself', Herself: 'Herself', Themself: 'Herself'
+				Himself: 'Herself', Herself: 'Herself', Themself: 'Herself',
+				brother: 'sister', sister: 'sister', sibling: 'sister',
+				son: 'daughter', daughter: 'daughter', child: 'daughter',
+				father: 'mother', mother: 'mother', parent: 'mother',
+				Brother: 'Sister', Sister: 'Sister', Sibling: 'Sister',
+				Son: 'Daughter', Daughter: 'Daughter', Child: 'Daughter',
+				Father: 'Mother', Mother: 'Mother', Parent: 'Mother'
 			},
 			neutral: {
 				he: 'they', she: 'they', they: 'they',
@@ -347,7 +362,13 @@ class GameStore {
 				He: 'They', She: 'They', They: 'They',
 				Him: 'Them', Her: 'Them', Them: 'Them',
 				His: 'Their', Hers: 'Their', Theirs: 'Their',
-				Himself: 'Themself', Herself: 'Themself', Themself: 'Themself'
+				Himself: 'Themself', Herself: 'Themself', Themself: 'Themself',
+				brother: 'sibling', sister: 'sibling', sibling: 'sibling',
+				son: 'child', daughter: 'child', child: 'child',
+				father: 'parent', mother: 'parent', parent: 'parent',
+				Brother: 'Sibling', Sister: 'Sibling', Sibling: 'Sibling',
+				Son: 'Child', Daughter: 'Child', Child: 'Child',
+				Father: 'Parent', Mother: 'Parent', Parent: 'Parent'
 			}
 		};
 

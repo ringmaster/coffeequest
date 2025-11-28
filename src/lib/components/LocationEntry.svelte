@@ -7,8 +7,6 @@
     const columns = ["A", "B", "C", "D", "E", "F", "G"];
     const rows = ["N", "C", "S"];
 
-    const debugEnabled = $derived(gameStore.hasTag("debug_mode"));
-
     const mapLocations = $derived.by(() => {
         return Object.entries(gameStore.locations)
             .map(([coord, name]) => ({ coord, name }))
@@ -58,37 +56,69 @@
     </div>
     {#if gameStore.errorMessage}
         <p class="error">{gameStore.errorMessage}</p>
+
+        {#if gameStore.debugStepInfo.length > 0}
+            <div class="debug-steps">
+                <h4>Debug: Steps at this location ({gameStore.debugStepInfo.length})</h4>
+                {#each gameStore.debugStepInfo as debugInfo, i}
+                    <div class="debug-step" class:eligible={debugInfo.eligible}>
+                        <div class="debug-step-header">
+                            <span class="step-num">#{i + 1}</span>
+                            <span class="step-status">{debugInfo.eligible ? '✓ ELIGIBLE' : '✗ BLOCKED'}</span>
+                        </div>
+                        {#if debugInfo.tagAnalysis.length > 0}
+                            <div class="debug-tags">
+                                {#each debugInfo.tagAnalysis as tagInfo}
+                                    <span
+                                        class="debug-tag"
+                                        class:satisfied={tagInfo.satisfied}
+                                        class:missing={!tagInfo.satisfied}
+                                        title={tagInfo.type === 'required'
+                                            ? (tagInfo.satisfied ? 'Player has this tag' : 'Player missing this tag')
+                                            : (tagInfo.satisfied ? 'Player does not have blocked tag' : 'Player has blocked tag')}
+                                    >
+                                        {tagInfo.tag}
+                                    </span>
+                                {/each}
+                            </div>
+                        {:else}
+                            <div class="debug-tags">
+                                <span class="debug-tag no-tags">No filter tags</span>
+                            </div>
+                        {/if}
+                    </div>
+                {/each}
+            </div>
+        {/if}
     {/if}
 
-    {#if debugEnabled}
-        <div class="coord-grid">
-            {#each rows as row}
-                <div class="coord-row">
-                    {#each columns as col}
-                        <button
-                            class="coord-button"
-                            onclick={() => goToCoord(col, row)}
-                        >
-                            {col}{row}
-                        </button>
-                    {/each}
-                </div>
-            {/each}
-        </div>
+    <div class="coord-grid">
+        {#each rows as row}
+            <div class="coord-row">
+                {#each columns as col}
+                    <button
+                        class="coord-button"
+                        onclick={() => goToCoord(col, row)}
+                    >
+                        {col}{row}
+                    </button>
+                {/each}
+            </div>
+        {/each}
+    </div>
 
-        <div class="location-list">
-            <h3>Locations</h3>
-            {#each mapLocations as location}
-                <button
-                    class="location-button"
-                    onclick={() => goToCoord(location.coord, "")}
-                >
-                    <span class="coord">{location.coord}</span>
-                    <span class="name">{location.name}</span>
-                </button>
-            {/each}
-        </div>
-    {/if}
+    <div class="location-list">
+        <h3>Locations</h3>
+        {#each mapLocations as location}
+            <button
+                class="location-button"
+                onclick={() => goToCoord(location.coord, "")}
+            >
+                <span class="coord">{location.coord}</span>
+                <span class="name">{location.name}</span>
+            </button>
+        {/each}
+    </div>
 </div>
 
 <style>
@@ -221,5 +251,84 @@
 
     .location-button .name {
         opacity: 0.8;
+    }
+
+    /* Debug styles */
+    .debug-steps {
+        margin-top: 16px;
+        padding: 12px;
+        background: var(--color-surface);
+        border-radius: 8px;
+        font-size: 12px;
+    }
+
+    .debug-steps h4 {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        color: var(--color-text-secondary);
+    }
+
+    .debug-step {
+        margin-bottom: 12px;
+        padding: 8px;
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.2);
+        border-left: 3px solid var(--color-failure);
+    }
+
+    .debug-step.eligible {
+        border-left-color: var(--color-success);
+    }
+
+    .debug-step-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 6px;
+        font-weight: 600;
+    }
+
+    .step-num {
+        color: var(--color-text-secondary);
+    }
+
+    .step-status {
+        font-size: 11px;
+    }
+
+    .debug-step.eligible .step-status {
+        color: var(--color-success);
+    }
+
+    .debug-step:not(.eligible) .step-status {
+        color: var(--color-failure);
+    }
+
+    .debug-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .debug-tag {
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 11px;
+    }
+
+    .debug-tag.satisfied {
+        background: rgba(76, 175, 80, 0.3);
+        color: var(--color-success);
+    }
+
+    .debug-tag.missing {
+        background: rgba(244, 67, 54, 0.3);
+        color: var(--color-failure);
+    }
+
+    .debug-tag.no-tags {
+        background: rgba(128, 128, 128, 0.2);
+        color: var(--color-text-secondary);
+        font-style: italic;
     }
 </style>
