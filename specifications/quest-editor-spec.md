@@ -60,32 +60,44 @@ The editor operates on individual quest YAML files. It does not manage the build
 
 ### Layout
 
+Three-panel layout: step list (left), step editor (center), simulator (right, collapsible).
+
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│  [Open File] [Save] [Download]          Coffee Quest Editor    [⚙]  │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  Location: [▼ Town Square                              ]            │
-│                                                                     │
-│  Active Tags: [quest] [q:mystery] [inv:clue]  [+ Add Tag]          │
-│                                                                     │
-│  [▼ Show Coverage Matrix]                                           │
-│                                                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌─ Matching Step ─────────────────────────────────────────────┐   │
-│  │                                                              │   │
-│  │  (step editor form — see Step Editor section)                │   │
-│  │                                                              │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-│  [+ Add Step for This Location]                                     │
-│                                                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│  Lint: ✓ No issues  /  ⚠ 3 warnings  [Run Lint]                    │
-│  (expandable lint results panel)                                    │
-└─────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│  [Open File] [Save] [Download]              Coffee Quest Editor           [▶ Sim] [⚙] │
+├─────────────────────────┬────────────────────────────────────────┬───────────────────┤
+│  Step List              │  Step Editor                           │  Simulator        │
+│  [Search: _______]      │                                        │  (collapsible)    │
+│                         │  ┌─ baker_buy ─────────────────────┐   │                   │
+│  ▼ Market (12 steps)    │  │                                 │   │  Location: [▼]    │
+│    📍 Market            │  │  ID: [baker_buy]                │   │                   │
+│      ➔ stall_general    │  │                                 │   │  Tags:            │
+│        ➔ stall_rope     │  │  Tags: [quest] [+]              │   │  [quest]          │
+│          ➔ buy_rope     │  │                                 │   │  [q:flour]        │
+│          ➔ haggle_rope  │  │  Text:                          │   │                   │
+│        ➔ stall_fruit    │  │  ┌─────────────────────────┐    │   │  Step: baker_buy  │
+│          ➔ buy_orange   │  │  │ She wipes her hands...  │    │   │  "She wipes..."   │
+│                         │  │  └─────────────────────────┘    │   │                   │
+│  ▼ Bakery (4 steps)     │  │                                 │   │  Options:         │
+│    📍 Bakery            │  │  Options:                       │   │  ○ Buy bread      │
+│      ➔ baker_buy  ←     │  │  1. "Buy bread" → buy_bread    │   │  ○ Buy pastry     │
+│        ➔ buy_bread      │  │  2. "Buy pastry" → buy_pastry  │   │  ○ Leave          │
+│        ➔ buy_pastry     │  │  3. "Leave" → (end)            │   │                   │
+│                         │  │                                 │   │  History:         │
+│  ▼ Orphaned (0)         │  │  Log: [________________]        │   │  1. Market →      │
+│                         │  │                                 │   │  2. Bakery →      │
+│  ▼ Patches (1)          │  │                    [Delete]     │   │                   │
+│    🩹 @patch:baker_buy  │  └─────────────────────────────────┘   │  [Reset] [Back]   │
+├─────────────────────────┴────────────────────────────────────────┴───────────────────┤
+│  Lint: ✓ No issues  /  ⚠ 3 warnings  [Run Lint]                                      │
+└──────────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+**Panel behavior:**
+- Step List is always visible (left panel)
+- Step Editor shows the currently selected step (center panel)
+- Simulator is collapsible via [▶ Sim] toggle (right panel)
+- Lint panel is collapsible at bottom
 
 ### Header Bar
 
@@ -95,51 +107,150 @@ The editor operates on individual quest YAML files. It does not manage the build
 - **Settings (⚙):** Load project context files, configure lint rules
 - **Simulate (▶):** Open/close simulator panel
 
-### Location Selector
+### Step List (Left Panel)
 
-Dropdown populated from:
-1. `_locations.json` (if loaded as project context)
-2. All unique location-type `id` values found in the current file
-3. Manual entry for new locations
+The step list displays all steps organized as a graph derived from option targets. This reveals quest flow structure rather than just listing steps sequentially.
 
-Location-type IDs are those matching known location names (from `_locations.json`) or appearing as the `id` of steps that lack internal-transition patterns.
+#### Layout
 
-### Tag State Selector
+```
+┌─ Step List ─────────────────────────────────────────────────┐
+│ [Search: ________] [Filter by tag ▼]                        │
+│                                                             │
+│ ▼ Market → stall_general (12 steps)                         │
+│   ├─ 📍 Market "The market square hums..."                  │
+│   │   └─➔ stall_general "Vendors hawk their wares..."       │
+│   │       ├─➔ stall_rope "The rope merchant..."             │
+│   │       │   ├─➔ buy_rope "You purchase the rope."         │
+│   │       │   └─➔ haggle_rope "You try to negotiate..."     │
+│   │       │       ├─➔ haggle_rope_success                   │
+│   │       │       └─➔ haggle_rope_fail                      │
+│   │       ├─➔ stall_fruit "Oranges and apples..."           │
+│   │       │   └─➔ buy_orange                                │
+│   │       └─➔ stall_tools "Farming implements..."           │
+│   │           └─➔ buy_lockpick [ally:thieves] hidden        │
+│                                                             │
+│ ▼ Market [quest] → investigate_merchant (6 steps)           │
+│   ├─ 📍 Market [quest] "You scan the crowd..."              │
+│   │   └─➔ investigate_merchant                              │
+│   │       ├─➔ confront_merchant                             │
+│   │       │   ├─➔ merchant_confess                          │
+│   │       │   └─➔ merchant_deny                             │
+│   │       └─➔ search_stall                                  │
+│                                                             │
+│ ▼ Orphaned (1 step)                                         │
+│   └─ ➔ unused_step ⚠️                                       │
+│                                                             │
+│ ▼ Patches                                                   │
+│   └─ 🩹 @patch:stall_general [q:flour_mystery]              │
+└─────────────────────────────────────────────────────────────┘
+```
 
-**Active Tags panel:**
-- Displays currently selected hypothetical tags as removable chips/badges
-- Add Tag input with autocomplete:
-  - Suggests tags used in the current file
-  - Suggests tags from other loaded quest files (project context)
-  - Suggests known prefixes (`inv:`, `q:`, `done:`, `status:`, `trait:`, `ally:`, `know:`)
-- Clicking a tag chip removes it from the active set
+#### Graph Construction Algorithm
 
-**Interaction:**
-- Changing the active tags immediately updates the matching step display
-- The tag state represents "a player with exactly these tags" for filtering purposes
+```typescript
+interface StepNode {
+  step: StepDef;
+  children: StepNode[];  // steps this one can reach via options
+  parents: StepNode[];   // steps that can reach this one
+}
 
-### Coverage Matrix (Collapsible)
+function buildStepGraph(steps: StepDef[]): Map<string, StepNode> {
+  const nodes = new Map<string, StepNode>();
+  
+  // Create nodes for non-patch steps
+  for (const step of steps) {
+    if (!step.id.startsWith('@patch:')) {
+      nodes.set(step.id, { step, children: [], parents: [] });
+    }
+  }
+  
+  // Build edges from options
+  for (const step of steps) {
+    if (step.id.startsWith('@patch:')) continue;
+    
+    const node = nodes.get(step.id)!;
+    for (const option of expandOptions(step.options)) {
+      if (option.pass && nodes.has(option.pass)) {
+        const child = nodes.get(option.pass)!;
+        node.children.push(child);
+        child.parents.push(node);
+      }
+      if (option.fail && nodes.has(option.fail)) {
+        const child = nodes.get(option.fail)!;
+        node.children.push(child);
+        child.parents.push(node);
+      }
+    }
+  }
+  
+  return nodes;
+}
 
-Shows all tag combinations relevant to the selected location and which step (if any) matches each.
+function findRoots(nodes: Map<string, StepNode>, locations: Set<string>): StepNode[] {
+  const roots: StepNode[] = [];
+  
+  for (const node of nodes.values()) {
+    const isLocation = locations.has(node.step.id);
+    const noParents = node.parents.length === 0;
+    
+    if (isLocation || noParents) {
+      roots.push(node);
+    }
+  }
+  
+  return roots;
+}
+```
 
-**Columns:**
-- One column per tag that appears in any step's requirements for this location
-- "Matches" column showing result
+#### Grouping Rules
 
-**Rows:**
-- Cartesian product of tag presence/absence, pruned to plausible combinations
-- Each row shows: tag values (✓/✗/−), matching step ID or status
+1. **Patches** — All `@patch:` steps go in a separate "Patches" group at the bottom
+2. **Root identification** — A step is a root if:
+   - It's a location step (ID matches a known location), OR
+   - It has no incoming edges (no options target it)
+3. **Tree construction** — From each root, traverse children via option targets to build subtrees
+4. **Orphaned steps** — Steps with no parents AND no children go in "Orphaned" group with warning
 
-**Match statuses:**
-- Step ID (clickable to load that step)
-- `(default)` — Falls through to default-locations.json
-- `(none)` — No step matches; coverage gap
-- `(ambiguous: N)` — Multiple steps match; random selection would occur
+#### Edge Case Display
 
-**Interaction:**
-- Clicking a row sets the Active Tags to that combination
-- Coverage gaps highlighted in warning color
-- Ambiguous matches highlighted in info color
+**Cycles (back-edges):**
+When a step links back to an ancestor, show as a reference rather than nesting:
+```
+├─➔ haggle_rope_fail
+│   └─↩ stall_rope (back)
+```
+
+**Multiple parents:**
+When a step is reachable from multiple paths, show under primary parent (first encountered) with reference elsewhere:
+```
+├─➔ buy_rope
+│   └─➔ purchase_complete
+├─➔ buy_orange  
+│   └─↗ purchase_complete (see above)
+```
+
+**Cross-location references:**
+When an option targets a step in a different location group:
+```
+└─➔ recommend_baker → baker_buy (external)
+```
+
+#### Step Display Format
+
+Each step in the tree shows:
+- **Icon:** 📍 for location steps, ➔ for internal steps, 🩹 for patches, ⚠️ for orphaned
+- **ID:** Step ID (or location name for location steps)
+- **Tags preview:** Key tags in brackets, e.g., `[quest]`, `[!done:baker]`
+- **Text preview:** First ~40 characters of step text, truncated with ellipsis
+
+#### Interactions
+
+- **Click step:** Select for editing in main panel
+- **Expand/collapse:** Toggle subtree visibility (▼/▶)
+- **Search:** Filter tree to steps matching ID or text content
+- **Filter by tag:** Show only steps with specific tag conditions
+- **Click back-reference:** Jump to the referenced step
 
 ### Step Editor
 

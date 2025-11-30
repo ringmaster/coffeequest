@@ -7,6 +7,38 @@ export interface QuestFile {
 	steps: RawStep[];
 }
 
+// Step graph node for tree visualization
+export interface StepNode {
+	step: RawStep;
+	stepIndex: number;
+	children: StepNode[];
+	parents: StepNode[];
+}
+
+// Tree node for display (handles cycles and multiple parents)
+export interface TreeNode {
+	stepId: string;
+	stepIndex: number;
+	step: RawStep;
+	children: TreeNode[];
+	// Display metadata
+	isLocation: boolean;
+	isPatch: boolean;
+	isOrphaned: boolean;
+	// Reference types (for non-primary occurrences)
+	refType: 'primary' | 'back' | 'see-above' | 'external' | null;
+	refTarget?: string; // For back/see-above refs, the step ID being referenced
+}
+
+// Root group for display
+export interface StepTreeGroup {
+	rootId: string;
+	rootLabel: string;
+	keyTags: string[]; // Key differentiating tags
+	children: TreeNode[];
+	stepCount: number;
+}
+
 // Parsed tag with operator
 export interface ParsedTag {
 	operator: '@' | '!' | '+' | '-' | '';

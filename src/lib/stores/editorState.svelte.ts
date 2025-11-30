@@ -1,5 +1,5 @@
-import type { GameConfig, RawStep } from '$lib/types/game';
-import type { QuestFile, LintResult, CoverageRow, ParsedTag } from '$lib/types/editor';
+import type { GameConfig, RawStep, RawStepOption } from '$lib/types/game';
+import type { QuestFile, LintResult, CoverageRow, ParsedTag, StepNode, TreeNode, StepTreeGroup } from '$lib/types/editor';
 
 const PATCH_PREFIX = '@patch:';
 
@@ -122,6 +122,247 @@ function generateCoverageMatrix(steps: RawStep[], location: string): CoverageRow
 	return combinations;
 }
 
+/**
+ * Expand options to handle presets and shorthand
+ */
+function expandOptions(
+	options: RawStepOption[] | string | undefined,
+	presets?: Record<string, RawStepOption[]>
+): RawStepOption[] {
+	if (!options) return [];
+	if (typeof options === 'string') {
+		return presets?.[options] ?? [];
+	}
+	return options;
+}
+
+/**
+ * Parse shorthand option string to extract pass/fail targets
+ */
+function parseOptionTargets(option: RawStepOption): { pass: string | null; fail: string | null } {
+	if (typeof option === 'string') {
+		// "Label::step_id" format
+		const match = option.match(/^.+?::(.+)$/);
+		return { pass: match ? match[1] : null, fail: null };
+	}
+	return {
+		pass: option.pass ?? null,
+		fail: option.fail ?? null
+	};
+}
+
+/**
+ * Build a step graph from quest file steps
+ * Creates nodes for ALL steps (keyed by index), handles multiple steps with same ID
+ */
+function buildStepGraph(
+	steps: RawStep[],
+	presets?: Record<string, RawStepOption[]>
+): { nodesByIndex: Map<number, StepNode>; stepsByIdMap: Map<string, number[]> } {
+	const nodesByIndex = new Map<number, StepNode>();
+	const stepsByIdMap = new Map<string, number[]>(); // ID -> [indices]
+
+	// Create nodes for ALL non-patch steps (keyed by index for uniqueness)
+	steps.forEach((step, index) => {
+		if (!isPatchStep(step)) {
+			nodesByIndex.set(index, { step, stepIndex: index, children: [], parents: [] });
+
+			// Track all indices for each ID
+			const indices = stepsByIdMap.get(step.id) ?? [];
+			indices.push(index);
+			stepsByIdMap.set(step.id, indices);
+		}
+	});
+
+	// Build edges from options
+	// When an option targets an ID, link to ALL steps with that ID
+	for (const [index, node] of nodesByIndex) {
+		const options = expandOptions(node.step.options, presets);
+		const addedEdges = new Set<number>(); // Track by index to avoid duplicates
+
+		for (const option of options) {
+			const { pass, fail } = parseOptionTargets(option);
+
+			// Link to all steps with the target ID
+			if (pass) {
+				const targetIndices = stepsByIdMap.get(pass) ?? [];
+				for (const targetIndex of targetIndices) {
+					if (!addedEdges.has(targetIndex)) {
+						const child = nodesByIndex.get(targetIndex)!;
+						node.children.push(child);
+						child.parents.push(node);
+						addedEdges.add(targetIndex);
+					}
+				}
+			}
+			if (fail) {
+				const targetIndices = stepsByIdMap.get(fail) ?? [];
+				for (const targetIndex of targetIndices) {
+					if (!addedEdges.has(targetIndex)) {
+						const child = nodesByIndex.get(targetIndex)!;
+						node.children.push(child);
+						child.parents.push(node);
+						addedEdges.add(targetIndex);
+					}
+				}
+			}
+		}
+	}
+
+	return { nodesByIndex, stepsByIdMap };
+}
+
+/**
+ * Find root nodes in the step graph
+ * Roots are: location steps, or steps with no incoming edges
+ */
+function findRoots(nodesByIndex: Map<number, StepNode>, locationIds: Set<string>): StepNode[] {
+	const roots: StepNode[] = [];
+
+	for (const node of nodesByIndex.values()) {
+		const isLocation = locationIds.has(node.step.id);
+		const noParents = node.parents.length === 0;
+
+		if (isLocation || noParents) {
+			roots.push(node);
+		}
+	}
+
+	return roots;
+}
+
+/**
+ * Get key tags for a step (@ and ! tags, for display)
+ */
+function getKeyTags(step: RawStep): string[] {
+	const keyTags: string[] = [];
+	for (const rawTag of step.tags ?? []) {
+		const { operator, tag } = parseTag(rawTag);
+		if (operator === '@' || operator === '!') {
+			keyTags.push(rawTag);
+		}
+	}
+	return keyTags.slice(0, 3); // Limit to 3 for display
+}
+
+/**
+ * Build tree structure from step graph, handling cycles and multiple parents
+ * Uses step index for uniqueness (not ID) to handle multiple steps with same ID
+ */
+function buildTreeFromGraph(
+	roots: StepNode[],
+	nodesByIndex: Map<number, StepNode>,
+	locationIds: Set<string>
+): { groups: StepTreeGroup[]; orphans: TreeNode[]; patches: TreeNode[] } {
+	const groups: StepTreeGroup[] = [];
+	const visited = new Set<number>(); // Track which steps appear in any tree (for orphan detection)
+
+	// Build tree recursively with cycle detection
+	// ancestors tracked by index to properly detect cycles
+	// Note: We always fully expand subtrees - no "see above" references
+	// This ensures every step is visible and editable somewhere in the tree
+	function buildSubtree(node: StepNode, ancestors: Set<number>): TreeNode {
+		const isLocation = locationIds.has(node.step.id);
+
+		// Check for back-reference (cycle) - by index
+		if (ancestors.has(node.stepIndex)) {
+			return {
+				stepId: node.step.id,
+				stepIndex: node.stepIndex,
+				step: node.step,
+				children: [],
+				isLocation,
+				isPatch: false,
+				isOrphaned: false,
+				refType: 'back',
+				refTarget: node.step.id
+			};
+		}
+
+		// Track that this step appears in the tree (for orphan detection)
+		visited.add(node.stepIndex);
+
+		const newAncestors = new Set(ancestors);
+		newAncestors.add(node.stepIndex);
+
+		// Build children recursively - always fully expand
+		const children: TreeNode[] = [];
+		for (const child of node.children) {
+			children.push(buildSubtree(child, newAncestors));
+		}
+
+		return {
+			stepId: node.step.id,
+			stepIndex: node.stepIndex,
+			step: node.step,
+			children,
+			isLocation,
+			isPatch: false,
+			isOrphaned: false,
+			refType: 'primary'
+		};
+	}
+
+	// Count total steps in a tree
+	function countSteps(node: TreeNode): number {
+		if (node.refType === 'back') {
+			return 0; // Don't double count back-references (cycles)
+		}
+		return 1 + node.children.reduce((sum, child) => sum + countSteps(child), 0);
+	}
+
+	// Build groups from roots
+	for (const root of roots) {
+		const keyTags = getKeyTags(root.step);
+
+		const rootTree = buildSubtree(root, new Set());
+		const stepCount = countSteps(rootTree);
+
+		// Create group label - include tags to differentiate same-ID roots
+		let rootLabel = root.step.id;
+		if (keyTags.length > 0) {
+			rootLabel += ` [${keyTags.join(', ')}]`;
+		}
+		if (rootTree.children.length > 0 && keyTags.length === 0) {
+			// Find first child for the "→ child" part of label (only if no tags shown)
+			const firstLeafId = rootTree.children[0]?.stepId;
+			if (firstLeafId) {
+				rootLabel += ` → ${firstLeafId}`;
+			}
+		}
+
+		groups.push({
+			rootId: root.step.id,
+			rootLabel,
+			keyTags,
+			children: [rootTree],
+			stepCount
+		});
+	}
+
+	// Find orphans (no parents AND no children)
+	const orphans: TreeNode[] = [];
+	for (const node of nodesByIndex.values()) {
+		if (node.parents.length === 0 && node.children.length === 0 && !locationIds.has(node.step.id)) {
+			// Check if it was already included as a root
+			if (!visited.has(node.stepIndex)) {
+				orphans.push({
+					stepId: node.step.id,
+					stepIndex: node.stepIndex,
+					step: node.step,
+					children: [],
+					isLocation: false,
+					isPatch: false,
+					isOrphaned: true,
+					refType: 'primary'
+				});
+			}
+		}
+	}
+
+	return { groups, orphans, patches: [] };
+}
+
 class EditorStore {
 	// File State
 	questFile = $state<QuestFile | null>(null);
@@ -147,24 +388,34 @@ class EditorStore {
 
 	// Derived: All locations from current file + _locations.json
 	allLocations = $derived.by(() => {
-		const locs = new Map<string, string>();
+		const locs = new Map<string, string>(); // id -> name
+		const knownNames = new Set<string>(); // Track names to avoid duplicates
 
 		// Add from _locations.json (coordinate -> name)
 		for (const [coord, name] of Object.entries(this.locations)) {
 			locs.set(coord.toUpperCase(), name);
+			knownNames.add(name.toUpperCase());
 		}
 
 		// Add unique step IDs from current file (excluding patches)
+		// Only add if the step ID isn't already a known location name
 		if (this.questFile) {
 			for (const step of this.questFile.steps) {
 				// Skip patch steps
 				if (isPatchStep(step)) continue;
 
 				const id = step.id;
-				// Only add if it looks like a location (not an internal step)
-				// Internal steps typically have underscores or lowercase
-				if (!locs.has(id.toUpperCase()) && !id.includes('_')) {
+				// Only add if:
+				// - Not already in locations map by ID
+				// - Not already in locations map by name (avoids "Market" duplicate when B2->Market exists)
+				// - Doesn't contain underscore (internal steps)
+				if (
+					!locs.has(id.toUpperCase()) &&
+					!knownNames.has(id.toUpperCase()) &&
+					!id.includes('_')
+				) {
 					locs.set(id, id);
+					knownNames.add(id.toUpperCase());
 				}
 			}
 		}
@@ -247,6 +498,54 @@ class EditorStore {
 	coverageMatrix = $derived.by(() => {
 		if (!this.questFile || !this.selectedLocation) return [];
 		return generateCoverageMatrix(this.questFile.steps, this.selectedLocation);
+	});
+
+	// Derived: Location IDs set for quick lookup
+	// Includes both coordinate IDs (e.g., "B2") and location names (e.g., "Market")
+	// so step ID matching works when steps use location names
+	locationIdSet = $derived.by(() => {
+		const ids = new Set<string>();
+		for (const loc of this.allLocations) {
+			ids.add(loc.id);
+			ids.add(loc.name);
+		}
+		return ids;
+	});
+
+	// Derived: Step graph and tree structure
+	stepTree = $derived.by((): { groups: StepTreeGroup[]; orphans: TreeNode[]; patches: TreeNode[] } => {
+		if (!this.questFile) return { groups: [], orphans: [], patches: [] };
+
+		const steps = this.questFile.steps;
+		const presets = this.questFile.option_presets;
+
+		// Build graph (now returns nodesByIndex and stepsByIdMap)
+		const { nodesByIndex } = buildStepGraph(steps, presets);
+
+		// Find roots
+		const roots = findRoots(nodesByIndex, this.locationIdSet);
+
+		// Build tree from graph
+		const { groups, orphans } = buildTreeFromGraph(roots, nodesByIndex, this.locationIdSet);
+
+		// Collect patches separately
+		const patches: TreeNode[] = [];
+		steps.forEach((step, index) => {
+			if (isPatchStep(step)) {
+				patches.push({
+					stepId: step.id,
+					stepIndex: index,
+					step,
+					children: [],
+					isLocation: false,
+					isPatch: true,
+					isOrphaned: false,
+					refType: 'primary'
+				});
+			}
+		});
+
+		return { groups, orphans, patches };
 	});
 
 	// Actions
