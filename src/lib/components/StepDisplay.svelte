@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { gameStore } from '$lib/stores/gameState.svelte';
-	import { selectOption, isOptionAvailable, calculateSkillBonus, isStatName } from '$lib/game/engine';
+	import { selectOption, isOptionAvailable, calculateSkillBonus, isStatName, calculateOptionPriority } from '$lib/game/engine';
 	import type { StepOption, StatName, SkillSource } from '$lib/types/game';
 
 	function handleOption(option: StepOption) {
@@ -86,15 +86,8 @@
 			result.push(available ?? visible[0]);
 		}
 
-		// Maintain original order based on first occurrence of each label
-		const labelOrder = new Map<string, number>();
-		options.forEach((opt, i) => {
-			if (!labelOrder.has(opt.label)) {
-				labelOrder.set(opt.label, i);
-			}
-		});
-
-		return result.sort((a, b) => (labelOrder.get(a.label) ?? 0) - (labelOrder.get(b.label) ?? 0));
+		// Sort by priority (descending) - options with more required tags first
+		return result.sort((a, b) => calculateOptionPriority(b) - calculateOptionPriority(a));
 	}
 
 	// Filter and deduplicate options

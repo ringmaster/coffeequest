@@ -7,7 +7,9 @@
       "Bash(npm run build:*)",
       "Bash(npm run check:*)",
       "Bash(cat:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run test:unit:*)"
     ],
     "deny": [],
     "ask": []

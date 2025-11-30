@@ -188,6 +188,35 @@ async function writeErrorOutput(errorMessage) {
 	console.log(`\x1b[31m✗\x1b[0m ${errorMessage}`);
 }
 
+const PATCH_PREFIX = '@patch:';
+
+/**
+ * Check if a step is a patch (id starts with @patch:)
+ * @param {any} step
+ * @returns {boolean}
+ */
+function isPatchStep(step) {
+	return typeof step.id === 'string' && step.id.startsWith(PATCH_PREFIX);
+}
+
+/**
+ * Convert a patch step to a StepPatch object
+ * @param {any} step
+ * @returns {{ target: string, tags?: string[], text?: any, options?: any[], vars?: any }}
+ */
+function stepToPatch(step) {
+	const target = step.id.substring(PATCH_PREFIX.length);
+	/** @type {{ target: string, tags?: string[], text?: any, options?: any[], vars?: any }} */
+	const patch = { target };
+
+	if (step.tags) patch.tags = step.tags;
+	if (step.text) patch.text = step.text;
+	if (step.options) patch.options = step.options;
+	if (step.vars) patch.vars = step.vars;
+
+	return patch;
+}
+
 async function mergeQuests() {
 	try {
 		const files = await readdir(QUESTS_DIR);
@@ -240,6 +269,7 @@ async function mergeQuests() {
 		const questFiles = files.filter(isQuestFile);
 
 		const allSteps = [];
+		const allPatches = [];
 		const questMeta = [];
 		/** @type {Record<string, any[]>} */
 		const mergedPresets = {};
@@ -256,13 +286,17 @@ async function mergeQuests() {
 			const quest = questResult.data;
 
 			if (quest.steps && Array.isArray(quest.steps)) {
-				// Extract option_presets entries and merge them
+				// Extract option_presets entries, patches, and regular steps
 				// Skip entries without an id (comment-only objects)
 				for (const step of quest.steps) {
 					if (step.option_presets && typeof step.option_presets === 'object') {
 						Object.assign(mergedPresets, step.option_presets);
 					} else if (step.id) {
-						allSteps.push(step);
+						if (isPatchStep(step)) {
+							allPatches.push({ ...stepToPatch(step), _sourceFile: file });
+						} else {
+							allSteps.push(step);
+						}
 					}
 				}
 				questMeta.push({
@@ -272,6 +306,41 @@ async function mergeQuests() {
 				});
 			}
 		}
+
+		// Collect all regular step IDs for validation
+		const regularStepIds = new Set(allSteps.map((s) => s.id));
+
+		// Validate patches
+		const patchErrors = [];
+		const patchWarnings = [];
+		for (const patch of allPatches) {
+			// Error if patch targets another patch (i.e., target starts with @patch:)
+			if (patch.target.startsWith(PATCH_PREFIX)) {
+				patchErrors.push(
+					`Patch in ${patch._sourceFile} targets another patch: @patch:${patch.target}`
+				);
+			}
+			// Warn if patch targets a step ID that doesn't exist
+			else if (!regularStepIds.has(patch.target)) {
+				patchWarnings.push(
+					`Patch in ${patch._sourceFile} targets non-existent step: ${patch.target}`
+				);
+			}
+		}
+
+		// Report patch errors (fatal)
+		if (patchErrors.length > 0) {
+			await writeErrorOutput(`Patch validation errors:\n${patchErrors.join('\n')}`);
+			return false;
+		}
+
+		// Report patch warnings
+		for (const warning of patchWarnings) {
+			console.log(`\x1b[33m!\x1b[0m ${warning}`);
+		}
+
+		// Clean up internal _sourceFile from patches before output
+		const cleanPatches = allPatches.map(({ _sourceFile, ...patch }) => patch);
 
 		// Count steps by ID (duplicates are allowed for coordinate-based steps)
 		/** @type {Record<string, number>} */
@@ -291,12 +360,18 @@ async function mergeQuests() {
 			config,
 			locations,
 			...(Object.keys(mergedPresets).length > 0 && { option_presets: mergedPresets }),
-			steps: allSteps
+			steps: allSteps,
+			...(cleanPatches.length > 0 && { patches: cleanPatches })
 		};
 
 		await writeFile(OUTPUT_FILE, JSON.stringify(output, null, '\t'));
 
-		console.log(`\x1b[32m✓\x1b[0m Merged ${allSteps.length} steps from ${questMeta.length} quest files`);
+		let message = `\x1b[32m✓\x1b[0m Merged ${allSteps.length} steps`;
+		if (cleanPatches.length > 0) {
+			message += ` and ${cleanPatches.length} patches`;
+		}
+		message += ` from ${questMeta.length} quest files`;
+		console.log(message);
 		return true;
 	} catch (e) {
 		const errorMessage = `Unexpected error: ${e instanceof Error ? e.message : String(e)}`;

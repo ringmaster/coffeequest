@@ -1,4 +1,4 @@
-import type { Step, StepOption, StatName, SkillCheckResult, SkillBonus, SkillSource, RawStepOption, RawStep, OptionPresetsEntry, StepDebugInfo, TagAnalysis } from '$lib/types/game';
+import type { Step, StepOption, StatName, SkillCheckResult, SkillBonus, SkillSource, RawStepOption, RawStep, OptionPresetsEntry, StepDebugInfo, TagAnalysis, RawStepPatch, StepPatch, TextModification, VarOptions } from '$lib/types/game';
 import { gameStore } from '$lib/stores/gameState.svelte';
 
 /**
@@ -123,6 +123,142 @@ export function processStepData(
 	}
 
 	return { steps, presets };
+}
+
+/**
+ * Process raw patch data: expand shorthand options in patches
+ */
+export function processPatchData(
+	rawPatches: RawStepPatch[],
+	presets: Record<string, RawStepOption[]>
+): StepPatch[] {
+	return rawPatches.map((rawPatch) => {
+		const patch: StepPatch = {
+			target: rawPatch.target
+		};
+
+		if (rawPatch.tags) patch.tags = rawPatch.tags;
+		if (rawPatch.text) patch.text = rawPatch.text;
+		if (rawPatch.vars) patch.vars = rawPatch.vars;
+
+		// Expand options if present
+		if (rawPatch.options) {
+			patch.options = rawPatch.options.map(expandOption);
+		}
+
+		return patch;
+	});
+}
+
+/**
+ * Evaluate patch tag conditions against player tags.
+ * Patches use @tag (or bare tag) to require and !tag to forbid.
+ * +tag and -tag are not valid on patches (ignored with warning).
+ */
+function evaluatePatchConditions(patchTags: string[], playerTags: string[]): boolean {
+	const playerTagSet = new Set(playerTags);
+
+	for (const rawTag of patchTags) {
+		// Skip mutation operators (not valid on patches)
+		if (rawTag.startsWith('+') || rawTag.startsWith('-')) {
+			console.warn(`Patch has invalid mutation tag: ${rawTag} (patches cannot mutate tags)`);
+			continue;
+		}
+
+		if (rawTag.startsWith('!')) {
+			// Forbid tag
+			const tag = gameStore.renderText(rawTag.substring(1));
+			if (playerTagSet.has(tag)) return false;
+		} else {
+			// Require tag (@ or bare)
+			const tag = gameStore.renderText(rawTag.startsWith('@') ? rawTag.substring(1) : rawTag);
+			if (!playerTagSet.has(tag)) return false;
+		}
+	}
+	return true;
+}
+
+/**
+ * Apply text modifications from patches to base text.
+ * Order: prepends (in patch order) + base + appends (in patch order)
+ * If any replace exists, it overrides everything (last one wins).
+ */
+function applyTextModifications(baseText: string, patches: StepPatch[]): string {
+	const prepends: string[] = [];
+	const appends: string[] = [];
+	let replacement: string | null = null;
+
+	for (const patch of patches) {
+		if (patch.text?.prepend) prepends.push(patch.text.prepend);
+		if (patch.text?.append) appends.push(patch.text.append);
+		if (patch.text?.replace) replacement = patch.text.replace;
+	}
+
+	if (replacement !== null) {
+		return replacement;
+	}
+
+	return prepends.join('') + baseText + appends.join('');
+}
+
+/**
+ * Apply applicable patches to a base step.
+ * Returns a new step object with patches applied.
+ */
+export function applyPatches(
+	baseStep: Step,
+	patches: StepPatch[],
+	playerTags: string[]
+): Step {
+	// Filter to applicable patches
+	const applicable = patches.filter((p) =>
+		evaluatePatchConditions(p.tags ?? [], playerTags)
+	);
+
+	if (applicable.length === 0) return baseStep;
+
+	// Clone base step
+	const result: Step = {
+		id: baseStep.id,
+		tags: baseStep.tags ? [...baseStep.tags] : [],
+		text: baseStep.text
+	};
+
+	if (baseStep.vars) result.vars = { ...baseStep.vars };
+	if (baseStep.log) result.log = baseStep.log;
+	if (baseStep.options) result.options = [...baseStep.options];
+
+	// Apply patches in order
+	for (const patch of applicable) {
+		// Options: append
+		if (patch.options && patch.options.length > 0) {
+			result.options = [...(result.options ?? []), ...patch.options];
+		}
+
+		// Vars: merge (patch overrides on conflict)
+		if (patch.vars) {
+			result.vars = { ...result.vars, ...patch.vars };
+		}
+	}
+
+	// Apply text modifications
+	result.text = applyTextModifications(result.text, applicable);
+
+	return result;
+}
+
+/**
+ * Get the display step with patches applied.
+ * Looks up patches for the step and applies any that match current player state.
+ */
+export function getDisplayStep(baseStep: Step): Step {
+	const patches = gameStore.patchIndex.get(baseStep.id);
+	if (!patches || patches.length === 0) {
+		return baseStep;
+	}
+
+	const playerTags = gameStore.effectiveMetadata;
+	return applyPatches(baseStep, patches, playerTags);
 }
 
 /**
@@ -319,6 +455,28 @@ export function isOptionAvailable(option: StepOption): boolean {
 }
 
 /**
+ * Calculate priority score for an option based on filter tags
+ * Options with more filter tags have higher priority
+ * Options with no tags have lowest priority (0)
+ */
+export function calculateOptionPriority(option: StepOption): number {
+	const tags = option.tags || [];
+	if (tags.length === 0) return 0;
+
+	let priority = 0;
+	for (const tag of tags) {
+		// Count tags that act as filters (determine availability)
+		// @ tags = required, ! tags = blocked, plain tags = required
+		// Skip + (grant) and - (consume) as they're not filters
+		if (tag.startsWith('+') || tag.startsWith('-')) {
+			continue;
+		}
+		priority++;
+	}
+	return priority;
+}
+
+/**
  * Get all options for a step (regardless of availability)
  */
 export function getAllOptions(step: Step): StepOption[] {
@@ -329,11 +487,12 @@ export function getAllOptions(step: Step): StepOption[] {
 }
 
 /**
- * Filter options based on player's current tags
+ * Filter options based on player's current tags and sort by priority
  * - Plain tags and @tags are both required (player must have)
  * - !tags are blocked (player must NOT have)
  * - +tags and -tags are grants/consumes (not filters)
  * - Duplicate tags require multiple copies (e.g., ["silver", "silver"] needs 2 silver)
+ * - Options are sorted by priority (more required tags = higher priority)
  */
 export function getAvailableOptions(step: Step): StepOption[] {
 	if (!step.options || step.options.length === 0) {
@@ -342,9 +501,12 @@ export function getAvailableOptions(step: Step): StepOption[] {
 
 	const playerMetadata = gameStore.effectiveMetadata;
 
-	return step.options.filter((option) => {
+	const available = step.options.filter((option) => {
 		return hasRequiredTags(option.tags || [], playerMetadata);
 	});
+
+	// Sort by priority (descending) - options with more required tags first
+	return available.sort((a, b) => calculateOptionPriority(b) - calculateOptionPriority(a));
 }
 
 /**
@@ -540,17 +702,20 @@ export function loadStep(step: Step): void {
 	// Execute the step (process vars, tags, log)
 	executeStep(step);
 
+	// Apply patches to the step for display
+	const patchedStep = getDisplayStep(step);
+
 	// Store current step id
 	gameStore.state.currentStepId = step.id;
 
 	// Set display step with rendered text
 	gameStore.currentDisplayStep = {
-		...step,
-		text: gameStore.renderText(step.text)
+		...patchedStep,
+		text: gameStore.renderText(patchedStep.text)
 	};
 
 	// Get all options (availability will be checked in the UI)
-	gameStore.availableOptions = getAllOptions(step).map((opt) => ({
+	gameStore.availableOptions = getAllOptions(patchedStep).map((opt) => ({
 		...opt,
 		label: gameStore.renderText(opt.label)
 	}));

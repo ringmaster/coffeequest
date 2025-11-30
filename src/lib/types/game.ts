@@ -77,6 +77,7 @@ export interface StepData {
 	locations?: Record<string, string>;
 	option_presets?: Record<string, RawStepOption[]>;
 	steps: (RawStep | OptionPresetsEntry)[];
+	patches?: RawStepPatch[];
 }
 
 export interface StepDataError {
@@ -123,4 +124,28 @@ export interface StepDebugInfo {
 	step: Step;
 	eligible: boolean;
 	tagAnalysis: TagAnalysis[];
+}
+
+// Step patches for cross-quest integration
+export interface TextModification {
+	prepend?: string;
+	append?: string;
+	replace?: string;
+}
+
+export interface StepPatch {
+	target: string; // step ID being patched (extracted from "@patch:xxx")
+	tags?: string[]; // conditions for this patch to apply
+	text?: TextModification;
+	options?: StepOption[];
+	vars?: Record<string, VarOptions>;
+}
+
+// Raw patch as stored in quest files (before option expansion)
+export interface RawStepPatch {
+	target: string;
+	tags?: string[];
+	text?: TextModification;
+	options?: RawStepOption[];
+	vars?: Record<string, VarOptions>;
 }

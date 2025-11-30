@@ -257,15 +257,29 @@
     },
     {
       "id": "stall_apothecary",
-      "tags": ["@done:bitter_medicine"],
+      "tags": [
+        "!q:bitter_medicine"
+      ],
       "vars": {
-        "apothecary_desc": [
-          "A hooded figure",
-          "An elderly woman with knowing eyes",
-          "A pale man who rarely blinks"
+        "apothecary": [
+          {
+            "name": "Earnest",
+            "desc": "A hooded figure",
+            "gender": "male"
+          },
+          {
+            "name": "Mira",
+            "desc": "An elderly woman with knowing eyes",
+            "gender": "female"
+          },
+          {
+            "name": "Silas",
+            "desc": "A pale man who rarely blinks",
+            "gender": "male"
+          }
         ]
       },
-      "text": "{{apothecary_desc}} presides over a cluttered tent that smells of herbs and something faintly sulfurous. Bottles and pouches crowd every surface.",
+      "text": "{{apothecary.desc}} presides over a cluttered tent that smells of herbs and something faintly sulfurous. Bottles and pouches crowd every surface.",
       "options": [
         {
           "label": "Buy healer's kit (2 silver)",
@@ -293,13 +307,13 @@
           "pass": "buy_dubious_tonic"
         },
         {
-          "label": "Ask about removing a curse",
+          "label": "Ask {{apothecary.him}} about removing a curse",
           "tags": [
             "@status:cursed"
           ],
           "pass": "apothecary_curse"
         },
-        "Ask about removing a curse::apothecary_not_cursed",
+        "Ask {{apothecary.him}} about removing a curse::apothecary_not_cursed",
         {
           "label": "Browse other stalls",
           "tags": [

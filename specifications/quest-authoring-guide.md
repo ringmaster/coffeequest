@@ -892,6 +892,49 @@ Document potential connections in comments:
 // NOTE: ally:thieves_guild would let them bypass the lock entirely
 ```
 
+### Step Patches
+
+For more complex cross-quest integration, you can use **step patches** to conditionally augment steps defined in other quest files. This lets you add options or modify text without editing the original file.
+
+A patch is a step with an `id` prefixed by `@patch:`:
+
+```json
+{
+  "id": "@patch:baker_buy",
+  "tags": ["@q:flour_mystery"],
+  "text": {
+    "append": " She keeps glancing at the empty shelves behind her."
+  },
+  "options": [
+    {
+      "label": "Ask about the flour shortage",
+      "pass": "baker_flour_hint",
+      "hidden": true
+    }
+  ]
+}
+```
+
+**Key concepts:**
+
+- **Runtime evaluation:** Patches are conditional — the `tags` array specifies when the patch applies (using `@tag` to require and `!tag` to forbid)
+- **Text modification:** Use `{"append": "..."}`, `{"prepend": "..."}`, or `{"replace": "..."}` instead of a plain string
+- **Options:** Appended to the target step's options array
+- **Variables:** Merged with the target step's vars (patch values override on conflict)
+
+**Multiple patches can target the same step.** If a player has both `q:flour_mystery` and `q:herb_errand`, and there are patches for each, both apply — text modifications accumulate, options from both are appended.
+
+**Use patches when:**
+- You want to add quest-specific dialogue to a shared step (like a shop)
+- You need to modify text conditionally without duplicating the entire step
+- Cross-quest integration requires more than just hidden options
+
+**Use hidden options (not patches) when:**
+- You just need to add a conditional option to a step you control
+- The integration is simple enough that a hidden option suffices
+
+See `specifications/quest-editor-spec.md` for full technical details on patch syntax and behavior.
+
 ### Avoiding Key Item Problems
 
 Be cautious about quest items that might strand players:
@@ -1084,6 +1127,8 @@ Before finalizing a quest, verify:
 - [ ] All cross-quest paths are optional, never required
 - [ ] Quest is completable using only visible options
 - [ ] Documented integration points in comments
+- [ ] Step patches target existing step IDs (not other patches)
+- [ ] Patch conditions use `@tag`/`!tag` syntax (not `+`/`-`)
 
 ### Logging
 - [ ] Actions are logged, not arrivals

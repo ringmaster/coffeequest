@@ -10,9 +10,11 @@ import type {
 	RawStep,
 	OptionPresetsEntry,
 	RawStepOption,
-	StepDebugInfo
+	StepDebugInfo,
+	RawStepPatch,
+	StepPatch
 } from '$lib/types/game';
-import { processStepData } from '$lib/game/engine';
+import { processStepData, processPatchData } from '$lib/game/engine';
 
 const STORAGE_KEY = 'coffeequest_save';
 const MAX_LOG_ENTRIES = 100;
@@ -66,6 +68,18 @@ class GameStore {
 	config = $state<GameConfig | null>(null);
 	locations = $state<Record<string, string>>({});
 	steps = $state<Step[]>([]);
+	patches = $state<StepPatch[]>([]);
+
+	// Patch index: maps target step IDs to their applicable patches
+	patchIndex = $derived.by(() => {
+		const index = new Map<string, StepPatch[]>();
+		for (const patch of this.patches) {
+			const existing = index.get(patch.target) ?? [];
+			existing.push(patch);
+			index.set(patch.target, existing);
+		}
+		return index;
+	});
 
 	// UI state
 	currentDisplayStep = $state<Step | null>(null);
@@ -191,14 +205,22 @@ class GameStore {
 		config: GameConfig,
 		locations: Record<string, string>,
 		rawSteps: (RawStep | OptionPresetsEntry)[],
-		topLevelPresets?: Record<string, RawStepOption[]>
+		topLevelPresets?: Record<string, RawStepOption[]>,
+		rawPatches?: RawStepPatch[]
 	): void {
 		this.config = config;
 		this.locations = locations;
 
 		// Process raw steps: expand presets and shorthand options
-		const { steps } = processStepData(rawSteps, topLevelPresets);
+		const { steps, presets } = processStepData(rawSteps, topLevelPresets);
 		this.steps = steps;
+
+		// Process patches: expand shorthand options in patches
+		if (rawPatches && rawPatches.length > 0) {
+			this.patches = processPatchData(rawPatches, presets);
+		} else {
+			this.patches = [];
+		}
 
 		const saved = loadFromStorage();
 		if (saved) {

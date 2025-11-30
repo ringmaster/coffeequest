@@ -2,7 +2,7 @@
 
 ## Overview
 
-A browser-based visual editor for authoring and editing quest step files. The editor provides tag-state-driven navigation, step editing forms, coverage analysis, and validation — tools that address pain points in raw YAML editing that syntax highlighting alone cannot solve.
+A browser-based visual editor for authoring and editing quest step files. The editor provides tag-state-driven navigation, step editing forms, coverage analysis, state simulation, and validation — tools that address pain points in raw YAML editing that syntax highlighting alone cannot solve.
 
 **Target users:** Solo developer and any ambitious contributors.
 
@@ -17,6 +17,10 @@ The editor's primary navigation model is "what would a player with these tags se
 ### Coverage Analysis
 
 The editor can reveal gaps in step coverage — combinations of location + tags that have no matching step, or that match multiple steps ambiguously.
+
+### State Simulation
+
+A side panel lets you "play through" quest paths, tracking tag mutations and showing which steps become reachable. This changes authoring from write-then-test to interactive exploration of quest logic.
 
 ### Validation
 
@@ -89,6 +93,7 @@ The editor operates on individual quest YAML files. It does not manage the build
 - **Save:** Write to source file (if available) or prompt download
 - **Download:** Always available; downloads current state as YAML
 - **Settings (⚙):** Load project context files, configure lint rules
+- **Simulate (▶):** Open/close simulator panel
 
 ### Location Selector
 
@@ -315,6 +320,266 @@ Collapsed by default; shows summary count. Expandable to show full results.
 - Each result clickable to navigate to the relevant step
 - Suppress/acknowledge option for intentional patterns
 
+## State Simulator
+
+A side panel that lets you "play through" quest paths, tracking tag mutations and showing which steps become reachable. This changes authoring from write-then-test to interactive exploration of quest logic.
+
+### Layout
+
+The simulator appears as a collapsible right panel alongside the main editor:
+
+```
+┌─────────────────────────────────────────────┬──────────────────────────────┐
+│  (main editor layout)                       │  ▶ Simulator           [✕]  │
+│                                             │                              │
+│  Location: [Town Square]                    │  Location: Tavern    [▼]    │
+│  Active Tags: [quest] [q:mystery]           │                              │
+│                                             │  Tag State:                  │
+│  ┌─ Matching Step ──────────────────────┐   │  ┌────────────────────────┐  │
+│  │                                      │   │  │ quest                  │  │
+│  │  (step editor form)                  │   │  │ q:mystery              │  │
+│  │                                      │   │  │ q:talked_to_barkeep    │  │
+│  │                                      │   │  │ inv:silver ×2          │  │
+│  └──────────────────────────────────────┘   │  └────────────────────────┘  │
+│                                             │                              │
+│                                             │  Step: barkeep_hint          │
+│                                             │  ┌────────────────────────┐  │
+│                                             │  │ "The barkeep leans     │  │
+│                                             │  │ in close..."           │  │
+│                                             │  └────────────────────────┘  │
+│                                             │                              │
+│                                             │  Options:                    │
+│                                             │  ┌────────────────────────┐  │
+│                                             │  │ ○ "Ask about noise"    │  │
+│                                             │  │   → ask_noise          │  │
+│                                             │  │   +q:asked_noise       │  │
+│                                             │  │                        │  │
+│                                             │  │ ○ "Bribe him"          │  │
+│                                             │  │   requires: inv:silver │  │
+│                                             │  │   → bribe_barkeep      │  │
+│                                             │  │   -inv:silver          │  │
+│                                             │  │   +q:bribed            │  │
+│                                             │  │                        │  │
+│                                             │  │ ○ "Leave"              │  │
+│                                             │  │   → (end) [Location ▼] │  │
+│                                             │  └────────────────────────┘  │
+│                                             │                              │
+│                                             │  History:                    │
+│                                             │  ┌────────────────────────┐  │
+│                                             │  │ 1. Tavern: initiation  │  │
+│                                             │  │    +quest, +q:mystery  │  │
+│                                             │  │ 2. Market: buy_rope    │  │
+│                                             │  │    -inv:silver, +inv:… │  │
+│                                             │  │ 3. Tavern: barkeep_hin…│  │
+│                                             │  │    (current)           │  │
+│                                             │  └────────────────────────┘  │
+│                                             │                              │
+│                                             │  [Reset] [← Back] [Export]   │
+└─────────────────────────────────────────────┴──────────────────────────────┘
+```
+
+### Starting a Simulation
+
+**Entry points:**
+- Click [▶ Simulate] button in header to open panel
+- Panel initializes with current Active Tags from the editor
+- Or start fresh with empty/minimal tag state
+
+**Initial state:**
+- Location defaults to first location-step in file, or selectable via dropdown
+- Tag state copied from editor's Active Tags selector
+- History is empty
+
+### Option Display
+
+Each option shows:
+- Label text
+- Target step (or "end interaction")
+- Tag requirements (with ✓/✗ indicating if currently satisfied)
+- Tag mutations that will occur (+/- tags)
+- Skill check details if applicable
+
+**Option states:**
+- **Available:** Requirements met, clickable
+- **Unavailable:** Requirements not met, dimmed, shows what's missing
+- **Hidden:** Has `hidden: true` and requirements not met — not shown at all
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│ ○ "Bribe him" (1 silver)                                            │
+│   requires: [inv:silver] ✓                                          │
+│   → bribe_barkeep                                                   │
+│   mutations: [-inv:silver] [+q:bribed_barkeep]                      │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ ○ "Use your guild contacts"                              [Hidden]   │
+│   requires: [ally:thieves_guild] ✗                                  │
+│   (option would not appear in game)                                 │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Skill Check Handling
+
+Skill checks show both outcomes with a toggle to choose which path to follow:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│ ○ "Pick the lock"                                        [Guile: 6] │
+│                                                                     │
+│   Pass → lock_opened                                                │
+│     mutations: [+q:lock_picked]                                     │
+│                                                                     │
+│   Fail → lock_jammed                                                │
+│     mutations: [+q:lock_broken] [+status:wanted]                    │
+│                                                                     │
+│   Choose outcome:  (● Pass)  (○ Fail)                               │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+Clicking the option follows the selected outcome path.
+
+### End Interaction Handling
+
+When an option has `pass: null` (ends interaction):
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│ ○ "Leave"                                                           │
+│   → (end interaction)                                               │
+│   Next location: [▼ Select location]                                │
+│                  ├─ Town Square                                     │
+│                  ├─ Market                                          │
+│                  ├─ Guardhouse                                      │
+│                  └─ ...                                             │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+Selecting a location continues the simulation there, finding the matching step for the current tag state.
+
+### Taking an Action
+
+When the user clicks an available option:
+
+1. **Record history entry** for current step + chosen option
+2. **Apply tag mutations** from the target step's `tags` array:
+   - `+tag` → add to state
+   - `-tag` → remove from state
+   - `-quest` → also clear all `q:` prefixed tags
+3. **Resolve variables** if the target step has `vars` (pick random values, store for session)
+4. **Navigate to target step** or prompt for location if ending interaction
+5. **Find matching step** at new location given updated tag state
+6. **Display new step** with its options
+
+### No Matching Step
+
+If the tag state + location has no matching step:
+
+```
+┌────────────────────────────────────────────┐
+│ ⚠ No step matches at Guardhouse            │
+│                                            │
+│ Tag state:                                 │
+│   quest, q:mystery, q:bribed_barkeep       │
+│                                            │
+│ This is a coverage gap.                    │
+│ [Create step for this state]               │
+│ [Choose different location]                │
+└────────────────────────────────────────────┘
+```
+
+This surfaces coverage gaps during authoring rather than playtesting.
+
+### History Panel
+
+Scrollable list of steps taken:
+
+```
+┌────────────────────────────────────────────┐
+│ History:                                   │
+├────────────────────────────────────────────┤
+│ 1. Tavern: initiation              [Jump]  │
+│    → "Accept the quest"                    │
+│    +quest, +q:mystery                      │
+│                                            │
+│ 2. Market: market_main             [Jump]  │
+│    → "Buy rope (1 silver)"                 │
+│    -inv:silver, +inv:rope                  │
+│                                            │
+│ 3. Tavern: barkeep_hint            [Jump]  │
+│    (current)                               │
+└────────────────────────────────────────────┘
+```
+
+**Interactions:**
+- Click [Jump] to rewind simulation to that point (restores tag state as it was after that step)
+- History entries after the jump point are preserved but grayed out (can re-advance or take different path)
+
+### Controls
+
+| Control | Action |
+|---------|--------|
+| [Reset] | Clear history, restore initial tag state |
+| [← Back] | Undo last action, restore previous state |
+| [Export] | Copy simulation path as YAML (for documentation or test cases) |
+| [Edit Step] | Jump editor to currently displayed step |
+| Location [▼] | Change location without taking an option (for testing arrival at different locations) |
+
+### Editor Integration
+
+**Bidirectional sync:**
+- Clicking a step ID in simulator scrolls/focuses the editor to that step
+- [Edit Step] button opens current simulator step in the editor
+- Edits in the editor immediately reflect in simulator (if viewing that step)
+
+**Tag state sync (optional):**
+- Button to copy simulator's current tag state to editor's Active Tags
+- Useful for: "I've simulated to this point, now let me see coverage matrix for this state"
+
+### Export Format
+
+Exporting produces a YAML document describing the path taken:
+
+```yaml
+# Quest path export
+# Generated: 2025-01-15T10:30:00Z
+# File: scarecrows-watch.yaml
+
+initial_tags: []
+
+path:
+  - location: Farmhouse
+    step: initiation
+    option: "I'll look into it"
+    tags_added: [quest, q:scarecrows_watch, q:entity_spirit]
+    tags_removed: []
+    tags_after: [quest, q:scarecrows_watch, q:entity_spirit]
+
+  - location: Field
+    step: field_investigation
+    option: "Examine the scarecrow"
+    tags_added: [q:investigated]
+    tags_removed: []
+    tags_after: [quest, q:scarecrows_watch, q:entity_spirit, q:investigated]
+
+  - location: Farmhouse
+    step: farmer_debrief
+    option: "Tell them everything"
+    skill_check: null
+    tags_added: [q:talked_farmer_after]
+    tags_removed: []
+    tags_after: [quest, q:scarecrows_watch, q:entity_spirit, q:investigated, q:talked_farmer_after]
+
+final_tags:
+  - quest
+  - q:scarecrows_watch
+  - q:entity_spirit
+  - q:investigated
+  - q:talked_farmer_after
+```
+
+This serves as documentation for quest paths and could feed into automated testing.
+
 ## Data Model
 
 ### Internal Representation
@@ -455,6 +720,54 @@ function generateCoverageMatrix(
 }
 ```
 
+### Simulator State
+
+```typescript
+interface SimulatorState {
+  active: boolean;
+  location: string;
+  tags: Set<string>;
+  variables: Record<string, any>;  // resolved variable values
+  history: HistoryEntry[];
+  historyIndex: number;  // for rewind/forward
+}
+
+interface HistoryEntry {
+  location: string;
+  stepId: string;
+  optionLabel: string;
+  optionTarget: string | null;
+  skillCheck?: { skill: string; dc: number; outcome: 'pass' | 'fail' };
+  tagsBefore: string[];
+  tagsAfter: string[];
+  tagsAdded: string[];
+  tagsRemoved: string[];
+}
+```
+
+### Simulator Tag Mutation Logic
+
+```typescript
+function applyStepTags(state: SimulatorState, step: StepDef): void {
+  for (const rawTag of step.tags ?? []) {
+    const { operator, tag } = parseTag(rawTag);
+    
+    if (operator === '+') {
+      state.tags.add(tag);
+    } else if (operator === '-') {
+      state.tags.delete(tag);
+      // Special case: -quest clears all q: tags
+      if (tag === 'quest') {
+        for (const t of [...state.tags]) {
+          if (t.startsWith('q:')) state.tags.delete(t);
+        }
+      }
+    }
+    // @ and ! are conditions, not mutations — ignore here
+  }
+}
+```
+
 ## File Format
 
 ### YAML Structure
@@ -509,6 +822,284 @@ When serializing:
 - Use block sequences for complex arrays (options with objects)
 - Preserve comments if possible (js-yaml doesn't; consider alternatives)
 - 2-space indentation
+
+## Step Patches
+
+Step patches allow one quest file to conditionally augment steps defined in another file. This enables cross-quest integration without modifying the original quest file.
+
+### Syntax
+
+A patch is a step entry with an `id` prefixed by `@patch:`:
+
+```yaml
+steps:
+  # Regular step (in baker-quest.yaml)
+  - id: baker_buy
+    tags: ["quest"]
+    text: "The baker gestures to her wares. \"What'll it be?\""
+    options:
+      - "Buy bread (1 silver)::buy_bread"
+      - "Buy pastry (2 silver)::buy_pastry"
+      - "Leave"
+
+  # Patch (in flour-mystery.yaml)
+  - id: "@patch:baker_buy"
+    tags: ["@q:flour_mystery"]
+    text:
+      append: " She keeps glancing nervously at the empty shelves behind her."
+    options:
+      - label: "Ask about the flour shortage"
+        pass: baker_flour_hint
+        hidden: true
+```
+
+### Patch Behavior
+
+Patches are **evaluated at runtime**, not merged at build time. This allows patches to be conditional based on the player's current tag state.
+
+**Evaluation order:**
+1. Engine selects the base step for the current location + tag state
+2. Engine finds all patches targeting that step's ID
+3. For each patch, evaluate its tag conditions against player state
+4. Apply matching patches in file-processing order
+
+**Tag conditions on patches:**
+- `@tag` — Patch only applies if player has this tag
+- `!tag` — Patch only applies if player lacks this tag
+- `+tag` / `-tag` — Not valid on patches (patches don't mutate tags directly)
+
+### Field Merge Semantics
+
+| Field | Merge Behavior |
+|-------|----------------|
+| `tags` | Conditions for patch application (not merged into base step) |
+| `text` | See Text Modifications below |
+| `options` | Appended to base step's options array |
+| `vars` | Merged with base step's vars (patch vars override on conflict) |
+| `log` | Ignored (patches cannot modify log entries) |
+
+### Text Modifications
+
+The `text` field on a patch uses an object syntax to specify how to modify the base step's text:
+
+```yaml
+# Append text to the end
+- id: "@patch:baker_buy"
+  tags: ["@q:flour_mystery"]
+  text:
+    append: " She keeps glancing at the empty shelves."
+
+# Prepend text to the beginning
+- id: "@patch:market_main"
+  tags: ["@q:festival_day"]
+  text:
+    prepend: "Colorful banners flutter overhead. "
+
+# Replace text entirely (use sparingly)
+- id: "@patch:baker_buy"
+  tags: ["@status:baker_angry"]
+  text:
+    replace: "The baker glares at you. \"You've got nerve showing your face here.\""
+```
+
+**Multiple patches with text modifications:**
+- All `prepend` modifications are applied first (in file order), then the base text, then all `append` modifications (in file order)
+- If any patch uses `replace`, it takes precedence and other text modifications are ignored
+- If multiple patches use `replace`, the last one wins (file processing order)
+
+### Multiple Patches
+
+Multiple patches can target the same step. They accumulate:
+
+```yaml
+# flour-mystery.yaml
+- id: "@patch:baker_buy"
+  tags: ["@q:flour_mystery"]
+  text:
+    append: " She looks worried."
+  options:
+    - label: "Ask about the flour"
+      pass: flour_hint
+      hidden: true
+
+# herb-errand.yaml  
+- id: "@patch:baker_buy"
+  tags: ["@q:herb_errand", "@inv:herbs"]
+  options:
+    - label: "Deliver the herbs"
+      pass: deliver_herbs
+      hidden: true
+```
+
+If a player has both `q:flour_mystery` and `q:herb_errand` + `inv:herbs`, they see:
+- Base text + " She looks worried."
+- Base options + "Ask about the flour" + "Deliver the herbs"
+
+### Build vs. Runtime
+
+**Build time:**
+- Patches are included in the compiled `steps.json` as separate entries
+- Build warns if a patch targets a step ID that doesn't exist
+- Patches are not merged into their targets
+
+**Runtime:**
+- Engine maintains a patch index: `Map<targetStepId, Patch[]>`
+- After selecting a base step, engine looks up applicable patches
+- Patches with satisfied tag conditions are applied in order
+- Final composed step is displayed to player
+
+### Data Model Additions
+
+```typescript
+interface StepPatch {
+  target: string;  // step ID being patched (extracted from "@patch:xxx")
+  tags?: string[];  // conditions for this patch to apply
+  text?: TextModification;
+  options?: OptionDef[];
+  vars?: Record<string, VarValue>;
+}
+
+interface TextModification {
+  prepend?: string;
+  append?: string;
+  replace?: string;
+}
+
+// Parsing
+function isPatch(step: StepDef): boolean {
+  return step.id.startsWith('@patch:');
+}
+
+function getPatchTarget(step: StepDef): string {
+  return step.id.slice('@patch:'.length);
+}
+```
+
+### Runtime Application
+
+```typescript
+function applyPatches(
+  baseStep: StepDef,
+  patches: StepPatch[],
+  playerTags: Set<string>
+): StepDef {
+  // Filter to applicable patches
+  const applicable = patches.filter(p => 
+    evaluateTagConditions(p.tags ?? [], playerTags)
+  );
+  
+  if (applicable.length === 0) return baseStep;
+  
+  // Clone base step
+  const result = { ...baseStep };
+  
+  // Collect text modifications
+  const prepends: string[] = [];
+  const appends: string[] = [];
+  let replacement: string | null = null;
+  
+  for (const patch of applicable) {
+    // Text modifications
+    if (patch.text?.prepend) prepends.push(patch.text.prepend);
+    if (patch.text?.append) appends.push(patch.text.append);
+    if (patch.text?.replace) replacement = patch.text.replace;
+    
+    // Options: append
+    if (patch.options) {
+      result.options = [...(result.options ?? []), ...patch.options];
+    }
+    
+    // Vars: merge (patch overrides)
+    if (patch.vars) {
+      result.vars = { ...result.vars, ...patch.vars };
+    }
+  }
+  
+  // Apply text modifications
+  if (replacement !== null) {
+    result.text = replacement;
+  } else {
+    result.text = prepends.join('') + result.text + appends.join('');
+  }
+  
+  return result;
+}
+```
+
+### Editor Support
+
+**Displaying patches:**
+- Patch steps shown with distinct icon (🩹 or similar)
+- Target step ID displayed prominently
+- Editor shows "Patches step: baker_buy" header
+
+**Editing patches:**
+- Same form as regular steps, but:
+  - ID field shows target selector instead of location dropdown
+  - Text field shows prepend/append/replace mode selector
+  - Tags are labeled as "Conditions" not "Requirements"
+
+**Viewing patched steps:**
+- When viewing a base step, show indicator if patches exist
+- "This step has 2 patches" with links to view them
+- In simulator, show composed result with patch contributions highlighted
+
+**Lint additions:**
+
+| Check | Severity | Description |
+|-------|----------|-------------|
+| Patch target not found | Warning | `@patch:xxx` references step ID that doesn't exist in project |
+| Patch targets patch | Error | Patches cannot target other patches |
+| Unconditional patch | Info | Patch has no tag conditions (always applies) |
+
+### Example: Cross-Quest Integration
+
+**baker-quest.yaml** (base quest):
+```yaml
+steps:
+  - id: Bakery
+    tags: ["!quest", "!done:baker_fetch"]
+    text: "The baker kneads dough, flour dusting her apron."
+    options:
+      - "Buy something::baker_buy"
+      - "Leave"
+
+  - id: baker_buy
+    tags: []
+    text: "She wipes her hands. \"Fresh bread, pastries, or perhaps some fruit?\""
+    options:
+      - "Buy bread (1 silver)::buy_bread"
+      - "Buy pastry (2 silver)::buy_pastry" 
+      - "Buy orange (1 silver)::buy_orange"
+      - "Never mind"
+```
+
+**flour-mystery.yaml** (separate quest that patches the baker):
+```yaml
+steps:
+  - id: Bakery
+    tags: ["!quest", "!done:flour_mystery", "@done:baker_fetch"]
+    text: "The baker waves you over urgently. \"You helped me before—I need your help again.\""
+    options:
+      - "What's wrong?::flour_quest_intro"
+      - "Not now"
+
+  - id: "@patch:baker_buy"
+    tags: ["@q:flour_mystery"]
+    text:
+      append: " The shelves behind her are half-empty."
+    options:
+      - label: "Ask about the flour shortage"
+        pass: flour_shortage_info
+        hidden: true
+
+  - id: flour_quest_intro
+    tags: ["+quest", "+q:flour_mystery"]
+    text: "\"The flour shipments have stopped coming. The mill says they're sending them, but...\""
+    log: "The baker asked you to investigate missing flour shipments"
+```
+
+Now a player who has `q:flour_mystery` active sees the modified baker_buy step with the extra text and hidden option, without the original baker-quest.yaml being modified.
 
 ## Project Context
 
@@ -579,7 +1170,7 @@ For variable placeholders in text:
 const LINT_DEBOUNCE_MS = 3000;
 let lintTimeout: number | null = null;
 
-function scheduleLib() {
+function scheduleLint() {
   if (lintTimeout) clearTimeout(lintTimeout);
   lintTimeout = setTimeout(runLint, LINT_DEBOUNCE_MS);
 }
@@ -587,11 +1178,18 @@ function scheduleLib() {
 // Call scheduleLint() on every edit
 ```
 
+### Simulator Variable Resolution
+
+When entering a step with `vars`:
+- Pick random values from each variable's array
+- Store resolved values in simulator state
+- Same variable values persist for the simulation session (matching game behavior)
+- Reset clears variable state
+
 ## Future Considerations
 
 Features explicitly deferred from initial implementation:
 
-- **State simulator / playthrough mode:** Set tags, click options, see resulting state changes
 - **Graph visualization:** Node-edge view of step relationships
 - **Diff view:** Compare current state to saved file
 - **Multi-file editing:** Tabs or split view for multiple quest files
@@ -608,8 +1206,9 @@ The editor is successful if it:
 1. Reduces time to author a new quest compared to raw YAML editing
 2. Catches coverage gaps and broken references before playtesting
 3. Makes tag state reasoning explicit rather than mental simulation
-4. Doesn't corrupt quest files or lose work
-5. Feels faster than switching between text editor and game for testing
+4. Surfaces coverage gaps during authoring via the simulator
+5. Doesn't corrupt quest files or lose work
+6. Feels faster than switching between text editor and game for testing
 
 ## Appendix: Tag Prefix Reference
 
