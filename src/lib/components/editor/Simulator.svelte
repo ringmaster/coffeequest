@@ -37,6 +37,15 @@
 			simulatorStore.goToLocation(select.value);
 		}
 	}
+
+	// Check if current step can be edited (is in the loaded quest file)
+	function canEditCurrentStep(): boolean {
+		if (!simulatorStore.currentStep || !editorStore.questFile) return false;
+		const step = simulatorStore.currentStep.step;
+		return editorStore.questFile.steps.some(
+			(s) => s.id === step.id && JSON.stringify(s.tags) === JSON.stringify(step.tags)
+		);
+	}
 </script>
 
 <div class="simulator">
@@ -123,7 +132,7 @@
 			<div class="sim-section">
 				<label class="section-label">
 					Current Step
-					{#if simulatorStore.currentStep}
+					{#if canEditCurrentStep()}
 						<button
 							class="edit-step-btn"
 							onclick={() => simulatorStore.editCurrentStep()}

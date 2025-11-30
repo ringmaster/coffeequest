@@ -375,6 +375,10 @@ class EditorStore {
 	allQuestFiles = $state<string[]>([]);
 	externalTags = $state<Set<string>>(new Set());
 
+	// Merged steps from ALL quest files (for simulator)
+	allSteps = $state<RawStep[]>([]);
+	allPresets = $state<Record<string, RawStepOption[]>>({});
+
 	// Navigation State
 	selectedLocation = $state<string | null>(null);
 	activeTags = $state<Set<string>>(new Set());
@@ -559,9 +563,16 @@ class EditorStore {
 		this.lintResults = [];
 	}
 
-	loadContext(locations: Record<string, string>, config: GameConfig | null): void {
+	loadContext(
+		locations: Record<string, string>,
+		config: GameConfig | null,
+		allSteps?: RawStep[],
+		allPresets?: Record<string, RawStepOption[]>
+	): void {
 		this.locations = locations;
 		this.config = config;
+		if (allSteps) this.allSteps = allSteps;
+		if (allPresets) this.allPresets = allPresets;
 	}
 
 	setFileList(files: string[]): void {

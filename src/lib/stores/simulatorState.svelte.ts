@@ -255,30 +255,30 @@ class SimulatorStore {
 	historyIndex = $state(-1);
 	selectedOutcome = $state<'pass' | 'fail'>('pass');
 
-	// Derived: Current step matching location + tags
+	// Derived: Current step matching location + tags (uses ALL steps from ALL quest files)
 	currentStep = $derived.by((): { step: RawStep; index: number } | null => {
-		if (!this.active || !this.location || !editorStore.questFile) return null;
-		return findMatchingStep(editorStore.questFile.steps, this.location, this.tags);
+		if (!this.active || !this.location || editorStore.allSteps.length === 0) return null;
+		return findMatchingStep(editorStore.allSteps, this.location, this.tags);
 	});
 
 	// Derived: Current step with patches applied
 	patchedStep = $derived.by((): RawStep | null => {
-		if (!this.currentStep || !editorStore.questFile) return null;
+		if (!this.currentStep || editorStore.allSteps.length === 0) return null;
 		return applyPatches(
 			this.currentStep.step,
-			editorStore.questFile.steps,
+			editorStore.allSteps,
 			this.tags,
-			editorStore.questFile.option_presets
+			editorStore.allPresets
 		);
 	});
 
 	// Derived: Available options for current step
 	availableOptions = $derived.by((): ResolvedOption[] => {
-		if (!this.patchedStep || !editorStore.questFile) return [];
+		if (!this.patchedStep || editorStore.allSteps.length === 0) return [];
 
 		const rawOptions = expandStepOptions(
 			this.patchedStep.options,
-			editorStore.questFile.option_presets
+			editorStore.allPresets
 		);
 
 		return rawOptions.map((opt) => {
@@ -289,7 +289,7 @@ class SimulatorStore {
 			// Also include mutations from target step's tags
 			if (expanded.pass && !expanded.skill) {
 				const targetMatch = findMatchingStep(
-					editorStore.questFile!.steps,
+					editorStore.allSteps,
 					expanded.pass,
 					this.tags
 				);
@@ -393,8 +393,8 @@ class SimulatorStore {
 		}
 
 		// Apply target step tag mutations
-		if (target && editorStore.questFile) {
-			const targetMatch = findMatchingStep(editorStore.questFile.steps, target, this.tags);
+		if (target && editorStore.allSteps.length > 0) {
+			const targetMatch = findMatchingStep(editorStore.allSteps, target, this.tags);
 			if (targetMatch) {
 				for (const rawTag of targetMatch.step.tags ?? []) {
 					const { operator, tag } = parseTag(rawTag);
@@ -519,11 +519,21 @@ class SimulatorStore {
 
 	/**
 	 * Edit current step in editor
+	 * Finds the matching step in the currently loaded quest file
 	 */
 	editCurrentStep(): void {
-		if (this.currentStep) {
-			editorStore.selectStep(this.currentStep.index);
+		if (!this.currentStep || !editorStore.questFile) return;
+
+		const step = this.currentStep.step;
+		// Find this step in the currently loaded file by matching id and tags
+		const index = editorStore.questFile.steps.findIndex(
+			(s) => s.id === step.id && JSON.stringify(s.tags) === JSON.stringify(step.tags)
+		);
+
+		if (index >= 0) {
+			editorStore.selectStep(index);
 		}
+		// If not found, the step is from a different quest file - can't edit
 	}
 }
 

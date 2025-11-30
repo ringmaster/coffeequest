@@ -12,7 +12,7 @@
 	// Initialize store with server data
 	$effect(() => {
 		editorStore.setFileList(data.files);
-		editorStore.loadContext(data.locations, data.config);
+		editorStore.loadContext(data.locations, data.config, data.allSteps, data.allPresets);
 	});
 
 	let selectedFile = $state<string>('');
