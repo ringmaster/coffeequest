@@ -11,5 +11,8 @@
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "svelte"
+  ]
 }

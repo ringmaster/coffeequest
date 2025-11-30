@@ -1,8 +1,28 @@
 import { readdir, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
+import yaml from 'js-yaml';
 
 const QUESTS_DIR = 'quests';
 const OUTPUT_FILE = 'static/steps.json';
+
+/**
+ * Check if a filename is a quest file (json or yaml, not starting with _)
+ * @param {string} filename
+ * @returns {boolean}
+ */
+function isQuestFile(filename) {
+	if (filename.startsWith('_')) return false;
+	return /\.(json|ya?ml)$/i.test(filename);
+}
+
+/**
+ * Check if a path is a quest-related file (json or yaml)
+ * @param {string} path
+ * @returns {boolean}
+ */
+function isQuestRelatedFile(path) {
+	return /\.(json|ya?ml)$/i.test(path);
+}
 
 /**
  * Find the line and column number for a character position in a string
@@ -109,6 +129,56 @@ function parseJSON(content, filename) {
 }
 
 /**
+ * Parse YAML with error messages including line numbers
+ * @param {string} content
+ * @param {string} filename
+ * @returns {{ data: any } | { error: string }}
+ */
+function parseYAML(content, filename) {
+	try {
+		const data = yaml.load(content);
+		return { data };
+	} catch (e) {
+		if (e instanceof yaml.YAMLException) {
+			const mark = e.mark;
+			if (mark) {
+				// Get context around the error
+				const lines = content.split('\n');
+				const line = mark.line + 1; // js-yaml uses 0-based line numbers
+				const column = mark.column + 1;
+				const startLine = Math.max(0, line - 3);
+				const contextLines = [];
+				for (let i = startLine; i < line && i < lines.length; i++) {
+					const lineNum = i + 1;
+					const marker = lineNum === line ? '>>>' : '   ';
+					contextLines.push(`${marker} ${lineNum}: ${lines[i]}`);
+				}
+				const context = contextLines.join('\n');
+
+				return {
+					error: `YAML syntax error in ${filename} at line ${line}, column ${column}\n\n${context}\n\nDetails: ${e.reason || e.message}`
+				};
+			}
+			return { error: `YAML syntax error in ${filename}: ${e.reason || e.message}` };
+		}
+		return { error: `Error parsing ${filename}: ${e instanceof Error ? e.message : String(e)}` };
+	}
+}
+
+/**
+ * Parse a file based on its extension (JSON or YAML)
+ * @param {string} content
+ * @param {string} filename
+ * @returns {{ data: any } | { error: string }}
+ */
+function parseFile(content, filename) {
+	if (/\.ya?ml$/i.test(filename)) {
+		return parseYAML(content, filename);
+	}
+	return parseJSON(content, filename);
+}
+
+/**
  * Write an error output file
  * @param {string} errorMessage
  */
@@ -122,40 +192,52 @@ async function mergeQuests() {
 	try {
 		const files = await readdir(QUESTS_DIR);
 
-		// Load config (must exist)
-		const configPath = join(QUESTS_DIR, '_config.json');
-		let configContent;
-		try {
-			configContent = await readFile(configPath, 'utf-8');
-		} catch {
-			await writeErrorOutput('Missing required file: _config.json');
-			return false;
-		}
-
-		const configResult = parseJSON(configContent, '_config.json');
-		if ('error' in configResult) {
-			await writeErrorOutput(configResult.error);
-			return false;
-		}
-		const config = configResult.data;
-
-		// Load locations mapping (optional)
-		let locations = {};
-		const locationsPath = join(QUESTS_DIR, '_locations.json');
-		try {
-			const locationsContent = await readFile(locationsPath, 'utf-8');
-			const locationsResult = parseJSON(locationsContent, '_locations.json');
-			if ('error' in locationsResult) {
-				await writeErrorOutput(locationsResult.error);
-				return false;
+		// Load config (must exist - try json, yaml, yml in order)
+		let config = null;
+		let configFilename = null;
+		for (const ext of ['.json', '.yaml', '.yml']) {
+			const filename = `_config${ext}`;
+			const configPath = join(QUESTS_DIR, filename);
+			try {
+				const configContent = await readFile(configPath, 'utf-8');
+				const configResult = parseFile(configContent, filename);
+				if ('error' in configResult) {
+					await writeErrorOutput(configResult.error);
+					return false;
+				}
+				config = configResult.data;
+				configFilename = filename;
+				break;
+			} catch {
+				// Try next extension
 			}
-			locations = locationsResult.data;
-		} catch {
-			// No locations file, that's fine
+		}
+		if (config === null) {
+			await writeErrorOutput('Missing required file: _config.json (or _config.yaml/_config.yml)');
+			return false;
 		}
 
-		// Load all quest files (excluding _config.json and _locations.json)
-		const questFiles = files.filter((f) => f.endsWith('.json') && !f.startsWith('_'));
+		// Load locations mapping (optional - try json, yaml, yml in order)
+		let locations = {};
+		for (const ext of ['.json', '.yaml', '.yml']) {
+			const filename = `_locations${ext}`;
+			const locationsPath = join(QUESTS_DIR, filename);
+			try {
+				const locationsContent = await readFile(locationsPath, 'utf-8');
+				const locationsResult = parseFile(locationsContent, filename);
+				if ('error' in locationsResult) {
+					await writeErrorOutput(locationsResult.error);
+					return false;
+				}
+				locations = locationsResult.data;
+				break;
+			} catch {
+				// Try next extension
+			}
+		}
+
+		// Load all quest files (excluding files starting with _)
+		const questFiles = files.filter(isQuestFile);
 
 		const allSteps = [];
 		const questMeta = [];
@@ -166,7 +248,7 @@ async function mergeQuests() {
 			const filePath = join(QUESTS_DIR, file);
 			const content = await readFile(filePath, 'utf-8');
 
-			const questResult = parseJSON(content, file);
+			const questResult = parseFile(content, file);
 			if ('error' in questResult) {
 				await writeErrorOutput(questResult.error);
 				return false;
@@ -237,21 +319,21 @@ export default function mergeQuestsPlugin() {
 			server.watcher.add(QUESTS_DIR);
 
 			server.watcher.on('change', async (/** @type {string} */ path) => {
-				if (path.includes(QUESTS_DIR) && path.endsWith('.json')) {
+				if (path.includes(QUESTS_DIR) && isQuestRelatedFile(path)) {
 					console.log(`\x1b[36m[quests]\x1b[0m ${path} changed, regenerating...`);
 					await mergeQuests();
 				}
 			});
 
 			server.watcher.on('add', async (/** @type {string} */ path) => {
-				if (path.includes(QUESTS_DIR) && path.endsWith('.json')) {
+				if (path.includes(QUESTS_DIR) && isQuestRelatedFile(path)) {
 					console.log(`\x1b[36m[quests]\x1b[0m ${path} added, regenerating...`);
 					await mergeQuests();
 				}
 			});
 
 			server.watcher.on('unlink', async (/** @type {string} */ path) => {
-				if (path.includes(QUESTS_DIR) && path.endsWith('.json')) {
+				if (path.includes(QUESTS_DIR) && isQuestRelatedFile(path)) {
 					console.log(`\x1b[36m[quests]\x1b[0m ${path} removed, regenerating...`);
 					await mergeQuests();
 				}
