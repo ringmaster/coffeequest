@@ -330,7 +330,37 @@ class SimulatorStore {
 	}
 
 	setLocation(location: string): void {
+		const previousLocation = this.location;
 		this.location = location;
+
+		// Record history for arriving at a new location (after setting location so currentStep updates)
+		if (location && location !== previousLocation) {
+			// Need to wait for derived state to update
+			// Use queueMicrotask to let Svelte reactivity settle
+			queueMicrotask(() => {
+				if (this.currentStep) {
+					const entry: HistoryEntry = {
+						location: location,
+						stepId: this.currentStep.step.id,
+						stepIndex: this.currentStep.index,
+						optionLabel: previousLocation ? '(traveled)' : '(started)',
+						optionTarget: null,
+						tagsBefore: Array.from(this.tags),
+						tagsAfter: Array.from(this.tags),
+						tagsAdded: [],
+						tagsRemoved: []
+					};
+
+					// Truncate future history if we're not at the end
+					if (this.historyIndex < this.history.length - 1) {
+						this.history = this.history.slice(0, this.historyIndex + 1);
+					}
+
+					this.history = [...this.history, entry];
+					this.historyIndex = this.history.length - 1;
+				}
+			});
+		}
 	}
 
 	addTag(tag: string): void {
