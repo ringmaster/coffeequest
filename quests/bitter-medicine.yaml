@@ -1,11 +1,21 @@
 steps:
   - id: "@patch:stall_apothecary"
+    vars:
+      hermit:
+        - name: Floyd
+          gender: male
+        - name: Miren
+          gender: male
+        - name: Ogden
+          gender: male
     options:
       - label: Ask if {{apothecary.he}} needs help obtaining supplies
-        pass: apothecary_job_offer
         tags:
           - "!quest"
           - "!done:bitter_medicine"
+        pass: apothecary_job_offer
+        hidden: true
+    tags: []
   - id: apothecary_job_offer
     tags: []
     text: >-
@@ -32,7 +42,7 @@ steps:
       - "!inv:emberroot"
       - "!q:apothecary_hint"
       - "!q:hermit_betrayed"
-    text: '{{apothecary.name}} looks up expectantly, then sees your empty hands. "No luck with the emberroot?"'
+    text: "{{apothecary.name}} looks up expectantly, then sees your empty hands. \"No luck with the emberroot?\""
     options:
       - The Grove is difficult to navigate::apothecary_give_hint
       - I'm still working on it
@@ -59,7 +69,7 @@ steps:
       - "@q:bitter_medicine"
       - "@q:hermit_betrayed"
       - "!inv:emberroot"
-    text: '{{apothecary.name}} looks up. "Any luck with the emberroot?"'
+    text: "{{apothecary.name}} looks up. \"Any luck with the emberroot?\""
     options:
       - I couldn't find it::apothecary_betrayal_end
   - id: apothecary_betrayal_end
@@ -111,6 +121,7 @@ steps:
       - +done:bitter_medicine
       - "-inv:emberroot"
       - +ally:apothecary
+      - +inv:silver
     text: >-
       {{apothecary.name}} is already sorting the leaves, but {{apothecary.he}} pauses to nod at you. "If you need
       anything from my stall in the future, I won't forget this."

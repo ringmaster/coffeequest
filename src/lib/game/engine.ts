@@ -699,11 +699,11 @@ export function navigateToStep(id: string): void {
 export function loadStep(step: Step): void {
 	gameStore.errorMessage = null;
 
-	// Execute the step (process vars, tags, log)
-	executeStep(step);
-
-	// Apply patches to the step for display
+	// Apply patches to the step (for vars, tags, options, and display)
 	const patchedStep = getDisplayStep(step);
+
+	// Execute the patched step (process vars, tags, log)
+	executeStep(patchedStep);
 
 	// Store current step id
 	gameStore.state.currentStepId = step.id;

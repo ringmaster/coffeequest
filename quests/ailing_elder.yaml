@@ -1,0 +1,164 @@
+name: Ailing Elder
+steps:
+  - id: Church
+    tags:
+      - quest
+    text: >-
+      You enter the church and take a seat among it's many pews. The silence is meditative, and you take a moment to
+      reflect on your journey so far.
+
+  - id: Church
+    tags:
+      - "!q:ailing_elder"
+      - "!done:cleric"
+      - "!quest"
+    vars:
+      ailment:
+        - plague
+        - curse
+        - fever
+    text: >-
+      You enter the church and find a worried cleric pacing near the altar. "Thank the heavens you've come! A terrible
+      {{ailment}} has struck the village elder. I need a rare ingredient to cure them - Moon Blossom, which only grows
+      in the Haunted Grove. Will you help?"
+    options:
+      - I will find the Moon Blossom::cleric_accept_quest
+      - I cannot help right now
+
+  - id: cleric_accept_quest
+    tags:
+      - +q:ailing_elder
+      - +quest
+    text: The cleric smiles gratefully. "Thank you! Please hurry, the elder's condition worsens by the hour."
+    log: Agreed to find the Moon Blossom for the cleric
+
+  - id: Church
+    tags:
+      - "@q:ailing_elder"
+      - "!inv:moon_blossom"
+    text: >-
+      The cleric looks up hopefully as you enter. "Have you found the Moon Blossom? The elder grows weaker by the
+      hour. Please, search the Haunted Grove to the north!"
+
+  - id: Church
+    tags:
+      - "@q:ailing_elder"
+      - "!inv:moon_blossom"
+      - "@q:grove_searched"
+    text: >-
+      The cleric looks up hopefully as you enter, but his face drops when you tell him you couldn't find the Moon
+      Blossom. "Please, keep searching the Haunted Grove. The elder's life depends on it."
+    options:
+      - label: Continue exploring
+        tags:
+          - "-q:grove_searched"
+        pass: null
+
+  - id: Church
+    tags:
+      - "@q:ailing_elder"
+      - "@inv:moon_blossom"
+    text: >-
+      The cleric's eyes light up when she sees the glowing flower in your hands. "You found it! Quickly, let me
+      prepare the remedy!"
+    options:
+      - label: Hand over the Moon Blossom
+        tags: []
+        pass: cleric_cure_elder
+
+  - id: Church
+    tags:
+      - done:cleric
+    text: >-
+      The church is peaceful. The cleric tends to the altar, occasionally glancing at you with a grateful smile. The
+      elder rests comfortably in a nearby pew, recovering well.
+
+  - id: Haunted Grove
+    tags:
+      - "@q:ailing_elder"
+      - "!inv:moon_blossom"
+      - "!q:grove_searched"
+    text: >-
+      You arrive at the Haunted Grove. Twisted trees block out the moonlight, and an eerie mist clings to the ground.
+      You spot a faint glow deeper in the grove - could that be the Moon Blossom?
+    options:
+      - label: Navigate carefully through the mist
+        tags: []
+        skill: guile
+        dc: 5
+        pass: grove_find_blossom
+        fail: grove_get_lost
+      - label: Push through the undergrowth by force
+        tags: []
+        skill: might
+        dc: 6
+        pass: grove_find_blossom
+        fail: grove_thorns
+
+  - id: Haunted Grove
+    tags:
+      - "@q:ailing_elder"
+      - "!inv:moon_blossom"
+      - q:grove_searched
+    text: >-
+      You return to the Haunted Grove. The mist seems thinner now that you know the way. You can see the faint glow of
+      the Moon Blossom ahead.
+    options:
+      - label: Navigate carefully through the mist
+        tags: []
+        skill: guile
+        dc: 4
+        pass: grove_find_blossom
+        fail: grove_get_lost
+      - label: Push through the undergrowth by force
+        tags: []
+        skill: might
+        dc: 5
+        pass: grove_find_blossom
+        fail: grove_thorns
+
+  - id: grove_find_blossom
+    tags:
+      - +inv:moon_blossom
+      - "-q:grove_searched"
+    text: >-
+      You reach a small clearing where a single Moon Blossom glows with ethereal light. You carefully pluck it,
+      feeling its warmth pulse gently in your hands.
+    log: Found the Moon Blossom in the Haunted Grove
+
+  - id: grove_get_lost
+    tags:
+      - +q:grove_searched
+    text: >-
+      The mist confuses your senses. You wander in circles for what feels like hours before finding your way back to
+      the grove's edge. The flower still eludes you.
+
+  - id: grove_thorns
+    tags:
+      - +q:grove_searched
+      - +status:scratched
+    text: >-
+      The undergrowth fights back! Thorny vines scratch at your arms and face, forcing you to retreat. You'll need to
+      try a different approach.
+
+  - id: cleric_cure_elder
+    tags:
+      - "-inv:moon_blossom"
+      - "-quest"
+      - +done:cleric
+      - +status:blessed
+    vars:
+      ailment: null
+    text: >-
+      The cleric crushes the Moon Blossom into a glowing paste and applies it to the elder's forehead. Color returns
+      to the old man's cheeks almost immediately. "You have saved a life today," the cleric says, placing a hand on
+      your shoulder. "May the light always guide your path." You feel a warm blessing settle over you.
+    log: Delivered the Moon Blossom and saved the village elder
+
+  - id: Church
+    tags:
+      - status:blessed
+      - "!q:ailing_elder"
+    text: >-
+      The church feels warm and welcoming. Your blessing from the cleric gives you a sense of peace whenever you
+      visit.

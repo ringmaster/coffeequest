@@ -92,6 +92,14 @@ class GameStore {
 	errorMessage = $state<string | null>(null);
 	debugStepInfo = $state<StepDebugInfo[]>([]);
 
+	// Track the quest log length when it was last read
+	lastReadQuestLogLength = $state(0);
+
+	// Count of unread quest log entries
+	unreadQuestLogCount = $derived(
+		Math.max(0, this.state.questLog.length - this.lastReadQuestLogLength)
+	);
+
 	// Derived state
 	hasExistingSave = $derived(
 		typeof window !== 'undefined' && localStorage.getItem(STORAGE_KEY) !== null
@@ -428,6 +436,10 @@ class GameStore {
 
 	toggleQuestLog(): void {
 		this.showQuestLog = !this.showQuestLog;
+	}
+
+	markQuestLogRead(): void {
+		this.lastReadQuestLogLength = this.state.questLog.length;
 	}
 
 	// Resolve a coordinate to a location name (case insensitive)

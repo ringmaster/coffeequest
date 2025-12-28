@@ -97,12 +97,22 @@
 	const hasAvailableOptions = $derived(
 		visibleOptions.some((opt) => isOptionAvailable(opt))
 	);
+
+	// Check if debug mode is enabled
+	const debugEnabled = $derived(gameStore.hasTag('debug_mode'));
+
+	/**
+	 * Convert newlines to <br/> for HTML rendering
+	 */
+	function formatText(text: string): string {
+		return text.replace(/\n/g, '<br/>');
+	}
 </script>
 
 <div class="step-display">
 	{#if gameStore.currentDisplayStep}
 		<div class="step-text">
-			<p>{gameStore.currentDisplayStep.text}</p>
+			<p>{@html formatText(gameStore.currentDisplayStep.text)}</p>
 		</div>
 
 		<div class="options">
@@ -115,6 +125,9 @@
 					disabled={!available}
 				>
 					{option.label}
+					{#if debugEnabled && option.pass}
+						<span class="debug-target">({option.pass})</span>
+					{/if}
 					{#if option.skill && option.dc !== undefined}
 						<span class="skill-indicator"
 							>[{formatSkillIndicator(option.skill)} - {getDifficulty(option.skill, option.dc)}]</span
@@ -185,5 +198,12 @@
 		margin-top: 4px;
 		font-size: 14px;
 		opacity: 0.9;
+	}
+
+	.debug-target {
+		font-size: 12px;
+		font-family: monospace;
+		opacity: 0.7;
+		margin-left: 4px;
 	}
 </style>

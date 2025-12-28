@@ -171,7 +171,12 @@
 										disabled={!opt.available}
 										onclick={() => handleOptionClick(opt)}
 									>
-										<span class="option-label">{opt.label}</span>
+										<span class="option-label">
+											{opt.label}
+											{#if opt.pass && !opt.skill}
+												<span class="target-hint">({opt.pass})</span>
+											{/if}
+										</span>
 
 										{#if opt.skill && opt.dc}
 											<span class="skill-badge">
@@ -580,6 +585,13 @@
 
 	.option-label {
 		font-size: 0.85rem;
+	}
+
+	.target-hint {
+		font-size: 0.7rem;
+		color: var(--color-text-secondary);
+		font-family: monospace;
+		margin-left: 0.25rem;
 	}
 
 	.skill-badge {

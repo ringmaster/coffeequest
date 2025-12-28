@@ -22,18 +22,17 @@
 
 	function openQuestLog() {
 		gameStore.showQuestLog = true;
+		gameStore.markQuestLogRead();
 	}
 
-	// Count total inventory items for badge
-	const inventoryCount = $derived(
-		gameStore.inventoryItems.reduce((sum, item) => sum + item.count, 0)
-	);
+	// Count unique inventory items for badge (ignores duplicates like "×2")
+	const inventoryCount = $derived(gameStore.inventoryItems.length);
 
 	// Check if there are any status effects (for badge indicator)
 	const hasStatusEffects = $derived(gameStore.statuses.length > 0);
 
-	// Count quest log entries for badge
-	const questLogCount = $derived(gameStore.state.questLog.length);
+	// Count unread quest log entries for badge
+	const questLogCount = $derived(gameStore.unreadQuestLogCount);
 </script>
 
 <header class="game-header">

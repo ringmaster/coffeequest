@@ -1,0 +1,842 @@
+option_presets:
+  bc_hear_route:
+    - label: "Consider what you've heard"
+      tags:
+        - "@q:stage_1"
+      pass: "bc_stage_1_return"
+
+    - label: "Consider what you've heard"
+      tags:
+        - "@q:stage_2"
+      pass: "bc_stage_2_return"
+
+steps:
+  # ============================================================
+  # INITIATION (two variants for variety)
+  # ============================================================
+  - id: Inn
+    tags:
+      - "!quest"
+      - "!done:broken_contract"
+    vars:
+      runaway:
+        - name: Cora
+          gender: female
+          trade: blacksmith's apprentice
+          tools: a hammer and tongs
+        - name: Wren
+          gender: female
+          trade: farrier's apprentice
+          tools: a hoof knife and rasp
+        - name: Tam
+          gender: male
+          trade: founder's apprentice
+          tools: a crucible and molds
+        - name: Edric
+          gender: male
+          trade: locksmith's apprentice
+          tools: picks and files
+      master:
+        - name: Varn
+          gender: male
+        - name: Holt
+          gender: male
+        - name: Bessa
+          gender: female
+    text: >-
+      The inn's door bangs open. A broad figure in a travel-stained coat
+      surveys the room, then fixes on a young worker scrubbing tables near
+      the kitchen. "There you are." The worker—you've seen {{runaway.him}}
+      around, quiet, keeps {{runaway.his}} head down—goes pale. The innkeeper
+      freezes mid-pour. Other patrons suddenly find their drinks fascinating.
+    options:
+      - "Watch what happens::bc_stage_1"
+      - "This isn't your business::bc_walk_away"
+
+  - id: Inn
+    tags:
+      - "!quest"
+      - "!done:broken_contract"
+    vars:
+      runaway:
+        - name: Cora
+          gender: female
+          trade: blacksmith's apprentice
+          tools: a hammer and tongs
+        - name: Wren
+          gender: female
+          trade: farrier's apprentice
+          tools: a hoof knife and rasp
+        - name: Tam
+          gender: male
+          trade: founder's apprentice
+          tools: a crucible and molds
+        - name: Edric
+          gender: male
+          trade: locksmith's apprentice
+          tools: picks and files
+      master:
+        - name: Varn
+          gender: male
+        - name: Holt
+          gender: male
+        - name: Bessa
+          gender: female
+    text: >-
+      Raised voices cut through the inn's usual murmur. Near the kitchen, a
+      young worker backs against the wall while a heavyset stranger in
+      traveling clothes advances. "Thought you could run to the coast and
+      I'd forget?" The worker—{{runaway.name}}, you think {{runaway.his}}
+      name is—looks ready to bolt. The innkeeper wrings a dishrag, helpless.
+    options:
+      - "Watch what happens::bc_stage_1"
+      - "This isn't your business::bc_walk_away"
+
+  # ============================================================
+  # WALK AWAY (only available at initiation)
+  # ============================================================
+  - id: bc_walk_away
+    tags:
+      - "+done:broken_contract"
+      - "+trait:detached"
+    text: >-
+      You turn back to your drink. Behind you, the scuffle continues—raised
+      voices, a crash, the innkeeper's pleading. Then the door slams and
+      it's over. You don't look up to see who left and who stayed.
+
+
+      Whatever happened, it wasn't your problem. That's a choice too.
+    log: Chose not to involve yourself in a dispute at the inn
+
+  # ============================================================
+  # STAGE 1: VERBAL CONFRONTATION
+  # ============================================================
+  - id: bc_stage_1
+    tags:
+      - "+quest"
+      - "+q:broken_contract"
+      - "+q:stage_1"
+    text: >-
+      The stranger seizes {{runaway.name}}'s arm. "You broke your contract.
+      You stole my tools. You owe me three years of labor and the cost of
+      tracking you here."
+
+
+      {{runaway.name}} tries to pull free. "I don't owe you anything! You
+      never paid me what you promised—"
+
+
+      "I fed you, housed you, taught you a trade!"
+
+
+      The innkeeper looks at you with desperate eyes. Someone needs to do
+      something—or this is going to get worse.
+    options:
+      - "Ask the stranger to explain::bc_hear_master"
+      - "Ask {{runaway.name}} to explain::bc_hear_runaway"
+      - "Step in now—help the stranger::bc_side_master"
+      - "Step in now—help {{runaway.name}}::bc_side_runaway"
+      - "Wait and see how this plays out::bc_stage_2"
+    log: Witnessed a confrontation at the inn between a guild master and a runaway apprentice
+
+  # --- Stage 1 returns (after hearing one side) ---
+  - id: bc_stage_1_return
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_1"
+      - "@q:heard_master"
+      - "!q:heard_runaway"
+    text: >-
+      {{runaway.name}} is still struggling against {{master.name}}'s grip,
+      face flushed with anger or fear—hard to tell which. The innkeeper
+      wrings {{master.his}} hands. You've heard the guild master's case.
+      The apprentice hasn't had {{runaway.his}} say.
+    options:
+      - "Ask {{runaway.name}} for {{runaway.his}} side::bc_hear_runaway"
+      - "You've heard enough—help {{master.name}}::bc_side_master"
+      - "You've heard enough—help {{runaway.name}} escape::bc_side_runaway"
+      - "Wait and see how this plays out::bc_stage_2"
+
+  - id: bc_stage_1_return
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_1"
+      - "!q:heard_master"
+      - "@q:heard_runaway"
+    text: >-
+      {{master.name}} still has {{runaway.name}} by the arm, jaw set with
+      the certainty of someone who knows the law is on {{master.his}} side.
+      You've heard the apprentice's grievances. The guild master hasn't
+      made {{master.his}} full case.
+    options:
+      - "Ask {{master.name}} for {{master.his}} side::bc_hear_master"
+      - "You've heard enough—help {{runaway.name}} escape::bc_side_runaway"
+      - "You've heard enough—help {{master.name}}::bc_side_master"
+      - "Wait and see how this plays out::bc_stage_2"
+
+  - id: bc_stage_1_return
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_1"
+      - "@q:heard_master"
+      - "@q:heard_runaway"
+    text: >-
+      Both have made their case. {{master.name}}'s grip on {{runaway.name}}'s
+      arm hasn't loosened. The innkeeper looks between them, then at you,
+      clearly hoping you'll resolve this before it gets worse.
+    options:
+      - "Help {{master.name}} take {{runaway.name}} back to Ironford::bc_side_master"
+      - "Help {{runaway.name}} escape::bc_side_runaway"
+      - "Propose a settlement::bc_mediate"
+      - "Wait and see how this plays out::bc_stage_2"
+
+  # ============================================================
+  # STAGE 2: PHYSICAL SCUFFLE
+  # ============================================================
+  - id: bc_stage_2
+    tags:
+      - "@q:broken_contract"
+      - "-q:stage_1"
+      - "+q:stage_2"
+    text: >-
+      {{runaway.name}} twists suddenly, trying to break free. {{master.name}}
+      yanks {{runaway.him}} back, hard. A table overturns. Mugs shatter.
+      The innkeeper yelps and backs away.
+
+
+      "You're coming back to Ironford," {{master.name}} growls, "one way
+      or another."
+
+
+      {{runaway.name}}'s hand closes around a bottle neck. This is about
+      to turn violent.
+    options:
+      - label: "Demand to hear the stranger's side first"
+        tags: ["!q:heard_master"]
+        pass: bc_hear_master
+        hidden: true
+      - label: "Demand to hear {{runaway.name}}'s side first"
+        tags: ["!q:heard_runaway"]
+        pass: bc_hear_runaway
+        hidden: true
+      - "Step between them—help the stranger::bc_side_master"
+      - "Step between them—help {{runaway.name}}::bc_side_runaway"
+      - label: "Step between them—negotiate"
+        tags: ["q:heard_master", "q:heard_runaway"]
+        pass: bc_mediate
+        hidden: true
+      - "Let it play out::bc_stage_3"
+    log: The confrontation turned physical
+
+  # --- Stage 2 returns (after hearing one side) ---
+  - id: bc_stage_2_return
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_2"
+      - "@q:heard_master"
+      - "!q:heard_runaway"
+    text: >-
+      They're circling now, {{master.name}} blocking the door,
+      {{runaway.name}} clutching that bottle like a lifeline. Your
+      intervention bought a moment's pause, but it won't last.
+    options:
+      - "Demand to hear {{runaway.name}}'s side::bc_hear_runaway"
+      - "Help {{master.name}}::bc_side_master"
+      - "Help {{runaway.name}} escape::bc_side_runaway"
+      - "Let it play out::bc_stage_3"
+
+  - id: bc_stage_2_return
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_2"
+      - "!q:heard_master"
+      - "@q:heard_runaway"
+    text: >-
+      They're circling now, {{master.name}} blocking the door,
+      {{runaway.name}} clutching that bottle like a lifeline. Your
+      intervention bought a moment's pause, but it won't last.
+    options:
+      - "Demand to hear {{master.name}}'s side::bc_hear_master"
+      - "Help {{runaway.name}} escape::bc_side_runaway"
+      - "Help {{master.name}}::bc_side_master"
+      - "Let it play out::bc_stage_3"
+
+  - id: bc_stage_2_return
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_2"
+      - "@q:heard_master"
+      - "@q:heard_runaway"
+    text: >-
+      They're circling now, {{master.name}} blocking the door,
+      {{runaway.name}} clutching that bottle like a lifeline. You've
+      heard both sides. Time to decide—or watch it explode.
+    options:
+      - "Help {{master.name}}::bc_side_master"
+      - "Help {{runaway.name}} escape::bc_side_runaway"
+      - "Propose a settlement::bc_mediate"
+      - "Let it play out::bc_stage_3"
+
+  # ============================================================
+  # STAGE 3: VIOLENCE ERUPTS
+  # ============================================================
+  - id: bc_stage_3
+    tags:
+      - "@q:broken_contract"
+      - "-q:stage_2"
+      - "+q:stage_3"
+    text: >-
+      The bottle swings. {{master.name}} throws up an arm—glass shatters,
+      blood wells. {{master.He}} roars and lunges. {{runaway.name}} goes
+      down hard, skull cracking against the floor.
+
+
+      For a terrible moment, neither moves. Then {{runaway.name}} stirs,
+      groaning. {{master.name}} cradles {{master.his}} slashed arm, face
+      white with shock and fury. Blood pools between them.
+
+
+      The innkeeper stares at you. "You just... watched."
+    options:
+      - "Help {{master.name}} restrain {{runaway.name}}::bc_side_master"
+      - "Help {{runaway.name}} escape while {{master.name}} is injured::bc_side_runaway"
+      - "Get the healer—for both of them::bc_healer"
+    log: Violence erupted. Both were injured.
+
+  # ============================================================
+  # HEAR ARGUMENTS (stage-agnostic, route back by stage)
+  # ============================================================
+  - id: bc_hear_master
+    tags:
+      - "@q:broken_contract"
+      - "+q:heard_master"
+    text: >-
+      {{master.name}} doesn't release {{master.his}} grip, but {{master.he}}
+      turns to address you. "I'm Guildmaster {{master.name}} of the Ironford
+      Founders' Guild. This one—" a shake of {{runaway.name}}'s arm "—signed
+      a seven-year contract. Room, board, training in a skilled trade. In
+      exchange, {{runaway.he}} works. Simple."
+
+
+      {{master.He}} pulls a folded document from {{master.his}} coat. "Three
+      years in, {{runaway.he}} disappears in the night. Takes {{runaway.tools}}—my
+      property—and runs. I've spent two months and considerable silver tracking
+      {{runaway.him}} here." {{master.His}} voice hardens. "A contract is a
+      contract. {{runaway.He}} owes me four more years now, plus the cost of
+      recovery."
+    options: bc_hear_route
+
+  - id: bc_hear_runaway
+    tags:
+      - "@q:broken_contract"
+      - "+q:heard_runaway"
+    text: >-
+      {{runaway.name}}'s voice shakes, but {{runaway.he}} meets your eyes.
+      "The contract said I'd be paid a half-silver each month. {{master.He}}
+      never paid. Not once in three years. Said it was 'held against my
+      training costs.' Said I'd see it when I finished."
+
+
+      {{runaway.He}} pulls at {{master.name}}'s grip. "The contract said
+      seven years. Then {{master.he}} added two more for 'damages' when I
+      dropped a mold. Then another year when I got sick and couldn't work
+      for a week." {{runaway.His}} jaw tightens. "I took the tools because
+      I *made* them. My hands, my labor. I'm not a thief—I took what I was
+      owed."
+    options: "bc_hear_route"
+
+  # ============================================================
+  # SIDE WITH MASTER (stage-conditional outcomes)
+  # ============================================================
+
+  # --- Stage 1: Clean intervention, full reward ---
+  - id: bc_side_master
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_1"
+      - "!q:heard_master"
+      - "!q:heard_runaway"
+    text: >-
+      You step forward. "The law's the law. If there's a contract, it
+      should be honored."
+
+
+      {{master.name}}'s eyes light up. {{runaway.name}}'s face crumples.
+      "You don't even know what {{master.he}}—"
+
+
+      "I know enough." You don't, really. But you've made your choice.
+
+
+      {{master.name}} claps you on the shoulder. "Finally. Help me get
+      {{runaway.him}} to the port. I'll make it worth your while."
+    options:
+      - "Escort them to the port::bc_side_master_resolve"
+    log: Sided with Guildmaster {{master.name}} without hearing {{runaway.name}}'s case
+
+  - id: bc_side_master
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_1"
+      - "@q:heard_master"
+    text: >-
+      You move to {{master.name}}'s side. "A contract's a contract. I'll
+      help you get {{runaway.him}} to your ship."
+
+
+      {{runaway.name}}'s face falls—{{runaway.he}} looks at you with
+      something between betrayal and desperation, then goes limp in
+      {{master.name}}'s grip. The fight drains out of {{runaway.him}}.
+
+
+      {{master.name}} nods with grim satisfaction. "I'll make it worth
+      your while."
+    options:
+      - "Escort them to the port::bc_side_master_resolve"
+    log: Agreed to help Guildmaster {{master.name}} return {{runaway.name}} to Ironford
+
+  - id: bc_side_master
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_1"
+      - "!q:heard_master"
+      - "@q:heard_runaway"
+    text: >-
+      You step toward {{master.name}}. {{runaway.name}}'s eyes widen.
+      "But you heard me—you know what {{master.he}} did—"
+
+
+      "I heard your side. Doesn't mean I believe it." Maybe you do.
+      Maybe you don't. But order is order, and this stranger has
+      documentation.
+
+
+      {{master.name}} nods curtly. "Help me get {{runaway.him}} to the
+      port. I'll make it worth your while."
+    options:
+      - "Escort them to the port::bc_side_master_resolve"
+    log: Sided with Guildmaster {{master.name}} despite hearing {{runaway.name}}'s grievances
+
+  # --- Stage 2: Tense intervention, things almost got ugly ---
+  - id: bc_side_master
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_2"
+    text: >-
+      You grab {{runaway.name}}'s wrist before the bottle can swing.
+      "Enough." The word cuts through the tension. {{runaway.name}}
+      freezes. {{master.name}} exhales, flexing {{master.his}} hands.
+
+
+      "Wise choice," {{master.name}} says, voice still tight with
+      adrenaline. "Another moment and this would have gotten ugly."
+      {{master.He}} produces a length of cord from {{master.his}} pack.
+      "Help me secure {{runaway.him}}. I'll make it worth your while."
+
+
+      {{runaway.name}} doesn't resist as {{runaway.his}} hands are bound.
+      The fight's gone—replaced by something hollow.
+    options:
+      - "Escort them to the port::bc_side_master_resolve"
+    log: Intervened at the last moment to help Guildmaster {{master.name}}
+
+  # --- Stage 3: After violence, helping pick up the pieces ---
+  - id: bc_side_master
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_3"
+    text: >-
+      You help {{master.name}} bind {{runaway.name}}'s hands with a belt.
+      The apprentice doesn't resist—the fight's gone out of {{runaway.him}},
+      along with something else. {{runaway.He}} stares at nothing while
+      {{master.name}} wraps {{master.his}} wounded arm.
+
+
+      "You waited too long," {{master.name}} says flatly. Blood seeps
+      through the makeshift bandage. "But you chose right, in the end."
+    options:
+      - "Help them to the port::bc_side_master_resolve_bloody"
+    log: Helped {{master.name}} after violence had already erupted
+
+  # --- Master resolution variants ---
+  - id: bc_side_master_resolve
+    tags:
+      - "@q:broken_contract"
+      - "-quest"
+      - "+done:broken_contract"
+      - "+trait:lawful"
+      - "+inv:silver"
+      - "+inv:silver"
+    text: >-
+      The walk to the port is quiet. {{runaway.name}} doesn't resist,
+      doesn't speak. {{master.name}} keeps up a steady patter about the
+      importance of contracts, the breakdown of society when obligations
+      aren't honored, how {{master.he}}'s really doing {{runaway.name}} a
+      favor in the long run.
+
+
+      At the gangplank, {{master.name}} presses two silver into your palm.
+      "Contracts matter. Remember that." {{runaway.name}} looks back once
+      as {{runaway.he}}'s led aboard. Then the crowd swallows them both.
+
+
+      You stood for order. Whether it was justice... that's a harder question.
+    log: Helped return {{runaway.name}} to Ironford. Received 2 silver.
+
+  - id: bc_side_master_resolve_bloody
+    tags:
+      - "@q:broken_contract"
+      - "-quest"
+      - "+done:broken_contract"
+      - "+trait:lawful"
+      - "+inv:silver"
+    text: >-
+      The walk to the port is grim. {{runaway.name}} stumbles, head wound
+      still seeping. {{master.name}} grips {{runaway.him}} with one hand,
+      the other arm bound tight against {{master.his}} chest. Neither
+      speaks.
+
+
+      At the gangplank, {{master.name}} fumbles a single silver from
+      {{master.his}} purse. "This could have been cleaner." {{master.He}}
+      doesn't say whose fault that is. {{master.He}} doesn't need to.
+
+
+      {{runaway.name}} doesn't look back. The ship takes them both.
+    log: Helped return {{runaway.name}} to Ironford after violence. Received 1 silver.
+
+  # ============================================================
+  # SIDE WITH RUNAWAY (stage-conditional outcomes)
+  # ============================================================
+
+  # --- Stage 1: Clean escape, grateful runaway ---
+  - id: bc_side_runaway
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_1"
+      - "!q:heard_master"
+      - "!q:heard_runaway"
+    text: >-
+      You step between them, breaking {{master.name}}'s grip.
+      "{{runaway.He}}'s scared. You're twice {{runaway.his}} size. Back off."
+
+
+      "You don't know what {{runaway.he}}'s done—"
+
+
+      "I know a bully when I see one."
+
+
+      {{master.name}}'s face goes red, but {{master.he}} doesn't advance.
+      {{runaway.name}} grabs your sleeve, voice shaking. "Please—there's
+      a place in the forest. Help me get clear of town."
+    options:
+      - "Get {{runaway.name}} to the forest::bc_side_runaway_resolve"
+    log: Sided with {{runaway.name}} without hearing {{master.name}}'s case
+
+  - id: bc_side_runaway
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_1"
+      - "@q:heard_runaway"
+    text: >-
+      You step between them, breaking {{master.name}}'s grip.
+      {{runaway.name}} scrambles back, eyes wide with sudden hope.
+
+
+      {{master.name}}'s face goes red. "You're interfering with lawful
+      reclamation—"
+
+
+      "The law in Ironford isn't the law here."
+
+
+      Someone in the crowd mutters agreement. {{master.name}} looks around,
+      realizes {{master.he}}'s outnumbered, and takes a step back.
+      {{runaway.name}} grabs your sleeve. "The forest. Please. {{master.He}}
+      won't find me there."
+    options:
+      - "Get {{runaway.name}} to the forest::bc_side_runaway_resolve"
+    log: Intervened to help {{runaway.name}} escape from Guildmaster {{master.name}}
+
+  - id: bc_side_runaway
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_1"
+      - "@q:heard_master"
+      - "!q:heard_runaway"
+    text: >-
+      You step between them. {{master.name}} blinks in surprise—{{master.he}}
+      thought {{master.he}} had you convinced.
+
+
+      "I heard your side. A contract's a contract, you said." You meet
+      {{master.his}} eyes. "But tracking someone for two months? That's
+      not about tools. That's about making an example."
+
+
+      {{master.name}} sputters, but {{master.he}} doesn't advance.
+      {{runaway.name}} stares at you, stunned, then grabs your sleeve.
+      "The forest—please—"
+    options:
+      - "Get {{runaway.name}} to the forest::bc_side_runaway_resolve"
+    log: Sided with {{runaway.name}} despite hearing {{master.name}}'s case
+
+  # --- Stage 2: Desperate escape, close call ---
+  - id: bc_side_runaway
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_2"
+    text: >-
+      You grab {{master.name}}'s arm before {{master.he}} can lunge.
+      {{runaway.name}} doesn't hesitate—{{runaway.he}} bolts for the
+      back door, bottle clattering to the floor.
+
+
+      {{master.name}} tries to shake you off. "Let go—!"
+
+
+      "It's over." You hold firm until {{runaway.name}} disappears into
+      the alley. By the time {{master.name}} breaks free, there's no one
+      to chase.
+
+
+      "I'll remember your face," {{master.name}} snarls. "This isn't
+      finished."
+    options:
+      - "Slip out the back and make sure {{runaway.name}} got clear::bc_side_runaway_resolve"
+    log: Helped {{runaway.name}} escape at the last moment
+
+  # --- Stage 3: After violence, desperate extraction ---
+  - id: bc_side_runaway
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_3"
+    text: >-
+      You haul {{runaway.name}} up while {{master.name}} is still reeling.
+      "Go. Forest. Now." {{runaway.name}} stumbles toward the back door,
+      blood matting {{runaway.his}} hair. {{runaway.He}} can barely walk.
+
+
+      {{master.name}} tries to follow, but {{master.his}} arm won't
+      cooperate. "This isn't over," {{master.he}} snarls at you. "I know
+      your face."
+
+
+      You watch {{runaway.name}} disappear into the alley, weaving.
+      Whether {{runaway.he}}'ll make it to the forest—whether {{runaway.he}}'ll
+      survive the head wound—is another question entirely.
+    options:
+      - "::bc_side_runaway_resolve_bloody"
+    log: Helped {{runaway.name}} escape after violence had already erupted
+
+  # --- Runaway resolution variants ---
+  - id: bc_side_runaway_resolve
+    tags:
+      - "@q:broken_contract"
+      - "-quest"
+      - "+done:broken_contract"
+      - "+trait:defiant"
+      - "+inv:silver"
+    text: >-
+      You take back alleys toward the forest edge, {{runaway.name}}
+      following close. {{master.name}}'s shouts fade behind you. When you
+      reach the treeline, {{runaway.name}} stops.
+
+
+      "I can make it from here. There's a charcoal-burner's camp deeper
+      in—they don't ask questions." {{runaway.He}} presses something into
+      your hand—a silver coin, worn smooth. "It's all I have. But I won't
+      forget this."
+
+
+      {{runaway.He}} disappears into the shadows between the trees. You
+      stood against the law for someone who might have been a thief—or
+      might have been a slave in all but name. The distinction feels
+      blurrier than it should.
+    log: Helped {{runaway.name}} escape into the forest. Received 1 silver.
+
+  - id: bc_side_runaway_resolve_bloody
+    tags:
+      - "@q:broken_contract"
+      - "-quest"
+      - "+done:broken_contract"
+      - "+trait:defiant"
+    text: >-
+      You catch up to {{runaway.name}} in the alley. {{runaway.He}}'s
+      leaning against a wall, pressing a hand to {{runaway.his}} head.
+      Blood wells between {{runaway.his}} fingers.
+
+
+      "The forest," {{runaway.he}} manages. "I can make it."
+
+
+      You half-carry {{runaway.him}} to the treeline. {{runaway.He}}
+      doesn't have the strength to offer you anything—not even thanks.
+      Just a look, and then {{runaway.he}}'s stumbling into the shadows.
+
+
+      You helped someone escape. Whether {{runaway.he}}'ll live to
+      appreciate it is beyond your power now.
+    log: Helped {{runaway.name}} escape after violence. Received nothing.
+
+  # ============================================================
+  # MEDIATE (only available with full information, not in stage 3)
+  # ============================================================
+
+  # --- Stage 1: Clean negotiation ---
+  - id: bc_mediate
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_1"
+      - "@q:heard_master"
+      - "@q:heard_runaway"
+    text: >-
+      "Wait." Both of them look at you. "{{master.name}}—you've spent two
+      months and good silver chasing {{runaway.him}}. You want your tools
+      back and your pride satisfied. {{runaway.name}}—you want out of a
+      contract you say was broken first. Neither of you is getting what
+      you want right now."
+
+
+      You let that sit for a moment. "There might be a way. {{runaway.name}}
+      pays for the tools. {{master.name}} releases the contract. Everyone
+      walks away."
+
+
+      They glance at each other. Neither likes it. But neither says no.
+    options:
+      - "Press your case::bc_mediate_resolve"
+
+  # --- Stage 2: Tense negotiation ---
+  - id: bc_mediate
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_2"
+      - "@q:heard_master"
+      - "@q:heard_runaway"
+    text: >-
+      "STOP." The word cuts through the tension. {{runaway.name}}'s
+      knuckles are white on the bottle neck. {{master.name}}'s hands are
+      raised, ready to grapple. Both freeze.
+
+
+      "You're about to get blood on this floor. Is that what either of
+      you wants?" You step between them, heart hammering. "There's a way
+      out of this that doesn't end with the guard involved."
+
+
+      {{master.name}}'s jaw works. {{runaway.name}}'s breath comes ragged.
+      But the bottle lowers an inch. The fists unclench.
+    options:
+      - "Press your case::bc_mediate_resolve"
+    log: Defused the situation before violence erupted
+
+  # --- Mediation resolution ---
+  - id: bc_mediate_resolve
+    tags:
+      - "@q:broken_contract"
+      - "-quest"
+      - "+done:broken_contract"
+      - "+trait:arbiter"
+      - "+inv:silver"
+    text: >-
+      It takes an hour of haggling. {{runaway.name}} doesn't have money,
+      but the innkeeper—desperate to end this—offers to cover the cost of
+      the tools in exchange for six months of {{runaway.name}}'s labor at
+      the inn. {{master.name}} gets {{master.his}} silver and a signed
+      release. {{runaway.name}} gets a job and freedom, eventually.
+
+
+      Neither is happy. Both accept.
+
+
+      "You've got a talent for finding the middle," the innkeeper says
+      afterward, pressing a silver coin into your hand. "Not everyone does."
+
+
+      You brokered peace. It wasn't justice for anyone—just the least
+      unjust outcome available.
+    log: Negotiated a settlement between {{runaway.name}} and Guildmaster {{master.name}}. Received 1 silver.
+
+  # ============================================================
+  # HEALER PATH (stage 3 only - reactive intervention)
+  # ============================================================
+  - id: bc_healer
+    tags:
+      - "@q:broken_contract"
+      - "@q:stage_3"
+      - "-quest"
+      - "+done:broken_contract"
+      - "+trait:reactive"
+    text: >-
+      You fetch the healer from the church. By the time you return,
+      {{master.name}} has {{runaway.name}} in a chair, both of them too
+      bloodied and dazed to fight. The healer clicks her tongue at the
+      mess and sets to work.
+
+
+      In the end, {{master.name}} accepts a settlement—{{runaway.name}}
+      will work at the inn to pay off the tools, and the guild master
+      gets silver for {{master.his}} trouble and medical costs. Neither
+      party is happy. Both are bandaged.
+
+
+      "Funny time to find your conscience," the innkeeper mutters,
+      pressing nothing into your hand.
+
+
+      You didn't choose a side. You waited until there were no good
+      choices left, then picked the least bad one. That's something.
+      Maybe.
+    log: Fetched a healer after violence erupted. Brokered a bloody peace. Received nothing.
+
+  # ============================================================
+  # POST-QUEST INN VARIATIONS
+  # ============================================================
+  - id: Inn
+    tags:
+      - "@done:broken_contract"
+      - "@trait:detached"
+    text: >-
+      The inn feels the same as it ever did. If something happened here
+      once—some commotion you chose not to see—there's no sign of it now.
+      The innkeeper doesn't meet your eyes, but that might mean nothing.
+
+  - id: Inn
+    tags:
+      - "@done:broken_contract"
+      - "@trait:lawful"
+    text: >-
+      The inn is quieter since the incident. The innkeeper nods at you—respect,
+      or wariness? Hard to tell. {{runaway.name}}'s absence leaves a gap
+      in the rhythm of the place. No one mentions Ironford.
+
+  - id: Inn
+    tags:
+      - "@done:broken_contract"
+      - "@trait:defiant"
+    text: >-
+      The innkeeper gives you a complicated look when you enter—gratitude
+      and nervousness tangled together. Word travels. You're the one who
+      crossed a guild master. Some will admire that. Others won't.
+
+  - id: Inn
+    tags:
+      - "@done:broken_contract"
+      - "@trait:arbiter"
+    text: >-
+      {{runaway.name}} is behind the bar now, still quiet, but steadier.
+      {{runaway.He}} catches your eye and nods—not warmth, exactly, but
+      acknowledgment. The innkeeper watches you both, looking satisfied.
+      A problem solved, if not a wrong righted.
+
+  - id: Inn
+    tags:
+      - "@done:broken_contract"
+      - "@trait:reactive"
+    text: >-
+      {{runaway.name}} is behind the bar, a fresh scar visible at
+      {{runaway.his}} hairline. {{runaway.He}} moves more carefully now.
+      The innkeeper watches you enter, expression unreadable. The
+      settlement holds, but the cost is written on {{runaway.name}}'s face.

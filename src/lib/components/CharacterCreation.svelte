@@ -27,28 +27,27 @@
 	let characterName = $state(randomNames[Math.floor(Math.random() * randomNames.length)]);
 	let might = $state(2);
 	let guile = $state(2);
-	let magic = $state(2);
 
-	const startingPoints = $derived(gameStore.config?.startingPoints ?? 6);
-	const pointsUsed = $derived(might + guile + magic);
+	const startingPoints = $derived(gameStore.config?.startingPoints ?? 4);
+	const pointsUsed = $derived(might + guile);
 	const pointsRemaining = $derived(startingPoints - pointsUsed);
 	const canStart = $derived(pointsRemaining === 0 && characterName.trim().length > 0);
 
-	function adjustStat(stat: 'might' | 'guile' | 'magic', delta: number) {
-		const current = stat === 'might' ? might : stat === 'guile' ? guile : magic;
+	function adjustStat(stat: 'might' | 'guile', delta: number) {
+		const current = stat === 'might' ? might : guile;
 		const newValue = current + delta;
 
 		if (newValue < 1 || newValue > 5) return;
 		if (delta > 0 && pointsRemaining <= 0) return;
 
 		if (stat === 'might') might = newValue;
-		else if (stat === 'guile') guile = newValue;
-		else magic = newValue;
+		else guile = newValue;
 	}
 
 	function beginAdventure() {
 		if (canStart) {
-			gameStore.startNewGame(might, guile, magic, characterName);
+			// Magic starts at 0 and is only modified by items
+			gameStore.startNewGame(might, guile, 0, characterName);
 		}
 	}
 </script>
@@ -104,27 +103,6 @@
 				onclick={() => adjustStat('guile', 1)}
 				disabled={guile >= 5 || pointsRemaining <= 0}
 				aria-label="Increase Guile"
-			>
-				+
-			</button>
-		</div>
-	</div>
-
-	<div class="stat-row">
-		<span class="stat-label">Magic</span>
-		<div class="stat-controls">
-			<button
-				onclick={() => adjustStat('magic', -1)}
-				disabled={magic <= 1}
-				aria-label="Decrease Magic"
-			>
-				-
-			</button>
-			<span class="stat-value">{magic}</span>
-			<button
-				onclick={() => adjustStat('magic', 1)}
-				disabled={magic >= 5 || pointsRemaining <= 0}
-				aria-label="Increase Magic"
 			>
 				+
 			</button>

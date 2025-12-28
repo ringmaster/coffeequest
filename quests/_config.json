@@ -2,12 +2,12 @@
 	"startingStats": {
 		"might": 2,
 		"guile": 2,
-		"magic": 2
+		"magic": 0
 	},
 	"statsIncreaseEvery": 5,
 	"statIncreaseAmount": 1,
 	"preferredTagWeight": 5,
-	"startingPoints": 6,
+	"startingPoints": 4,
 	"statModifiers": {
 		"blessed_sword": { "might": 1 },
 		"thieves_cloak": { "guile": 1 },

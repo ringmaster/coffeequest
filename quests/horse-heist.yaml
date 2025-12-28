@@ -2,7 +2,7 @@ steps:
   - id: Stables
     tags:
       - "!quest"
-      - "!done:stable_hand"
+      - "!done:horse_heist"
     vars:
       stable_hand:
         - young stable hand
@@ -32,7 +32,7 @@ steps:
       - That sounds like your problem
   - id: accept_stable_quest
     tags:
-      - +q:stable_hand
+      - +q:horse_heist
       - +quest
     text: >-
       Relief floods the {{stable_hand}}'s face. "Thank you! {{rival}} keeps his operation at the Mud Pit east of town.
@@ -40,7 +40,7 @@ steps:
     log: Agreed to help the {{stable_hand}} find their missing horse, {{horse}}
   - id: Stables
     tags:
-      - q:stable_hand
+      - q:horse_heist
       - "!q:horse_recovered"
       - "!q:mud_pit_failed"
     text: >-
@@ -49,7 +49,7 @@ steps:
   - id: Stables
     tags:
       - "@q:horse_recovered"
-      - q:stable_hand
+      - q:horse_heist
     text: >-
       The {{stable_hand}} gasps with joy when they see {{horse}}. "You found her!" They quickly check the mare over,
       beaming. "The Tavern—we need to get there before the race. Will you come?"
@@ -60,7 +60,7 @@ steps:
   - id: Stables
     tags:
       - "@q:mud_pit_failed"
-      - q:stable_hand
+      - q:horse_heist
     text: >-
       The {{stable_hand}} reads the bad news on your face. "You couldn't get her?" Their shoulders slump. "I need to go
       to the Tavern and face the bookie. Will you at least come with me?"
@@ -71,7 +71,7 @@ steps:
     text: You walk silently with the {{stable_hand}} toward the Tavern.
   - id: Mud Pit
     tags:
-      - "@q:stable_hand"
+      - "@q:horse_heist"
       - "!q:horse_recovered"
       - "!q:mud_pit_failed"
     text: >-
@@ -158,7 +158,7 @@ steps:
       her out through a gap in the fencing.
     log: Recovered {{horse}} from the Mud Pit on a second attempt
   - id: mud_thrown_out
-    text: "{{rival}}'s men drag you to the edge of the Mud Pit and dump you in the dirt. \"Don't come back,\" one growls."
+    text: '{{rival}}''s men drag you to the edge of the Mud Pit and dump you in the dirt. "Don''t come back," one growls.'
     options:
       - label: Pay someone outside for help (2 silver)
         tags:
@@ -217,7 +217,7 @@ steps:
   - id: mud_accept_wager
     tags:
       - +trait:gambler
-    text: "{{rival}}'s grin widens. \"Bold. I like that.\" He rattles the dice. \"High roll wins.\""
+    text: '{{rival}}''s grin widens. "Bold. I like that." He rattles the dice. "High roll wins."'
     log: Accepted {{rival}}'s dice wager
     options:
       - label: Roll the dice
@@ -350,19 +350,19 @@ steps:
     log: Recovered {{horse}} by confronting {{rival}} with evidence
   - id: Mud Pit
     tags:
-      - q:stable_hand
+      - q:horse_heist
       - q:horse_recovered
     text: The Mud Pit carries on its seedy business. You have no reason to linger here with {{horse}} recovered.
   - id: Mud Pit
     tags:
-      - q:stable_hand
+      - q:horse_heist
       - q:mud_pit_failed
     text: The Mud Pit. {{rival}}'s men watch you with hostile eyes. There's nothing more you can do here.
   - id: Tavern
     tags:
       - "@q:horse_recovered"
       - "@q:rival_exposed"
-      - q:stable_hand
+      - q:horse_heist
     text: >-
       The {{stable_hand}} rushes to the bookie's table with you close behind. The bookie listens skeptically as the
       {{stable_hand}} explains—until you produce the forged withdrawal notice. The bookie's expression turns dangerous.
@@ -387,7 +387,7 @@ steps:
   - id: tavern_race_evidence_bet
     tags:
       - "-quest"
-      - +done:stable_hand
+      - +done:horse_heist
       - +inv:silver
       - +inv:silver
       - +inv:silver
@@ -403,7 +403,7 @@ steps:
   - id: tavern_race_evidence_no_bet
     tags:
       - "-quest"
-      - +done:stable_hand
+      - +done:horse_heist
       - +inv:silver
       - +inv:silver
       - +inv:silver
@@ -417,7 +417,7 @@ steps:
     tags:
       - "@q:horse_recovered"
       - "!q:rival_exposed"
-      - q:stable_hand
+      - q:horse_heist
     text: >-
       The {{stable_hand}} finds the bookie and explains that {{horse}} was... delayed. The bookie raises an eyebrow but
       allows the race to proceed. He notices you watching. "You want to place a bet? {{horse}} is running at 2-to-1."
@@ -440,7 +440,7 @@ steps:
   - id: tavern_race_normal_bet
     tags:
       - "-quest"
-      - +done:stable_hand
+      - +done:horse_heist
       - +inv:silver
       - +inv:silver
       - +inv:silver
@@ -454,7 +454,7 @@ steps:
   - id: tavern_race_normal_no_bet
     tags:
       - "-quest"
-      - +done:stable_hand
+      - +done:horse_heist
       - +inv:silver
       - +inv:silver
     text: >-
@@ -464,7 +464,7 @@ steps:
   - id: Tavern
     tags:
       - "@q:mud_pit_failed"
-      - q:stable_hand
+      - q:horse_heist
     text: >-
       The {{stable_hand}} slumps at a table near the bookie, waiting for a race they can't enter. The forfeit is called.
       Their wages change hands. They look up at you with hollow eyes. "You tried. I know you did."
@@ -473,14 +473,14 @@ steps:
   - id: tavern_apologize
     tags:
       - "-quest"
-      - +done:stable_hand
+      - +done:horse_heist
     text: >-
       The {{stable_hand}} waves off your apology. "My own fault for betting in the first place." They stare into their
       empty cup. There's nothing more to say.
     log: Failed to recover the horse—watched the {{stable_hand}} lose everything
   - id: Tavern
     tags:
-      - q:stable_hand
+      - q:horse_heist
       - "!q:horse_recovered"
       - "!q:mud_pit_failed"
     text: >-
@@ -489,5 +489,5 @@ steps:
   - id: stable_abandon_hand
     tags:
       - "-quest"
-      - +done:stable_hand
-    text: "\"Well, I can't blame you.  You did what you could,\" he says before he wanders off toward the Tavern on his own."
+      - +done:horse_heist
+    text: '"Well, I can''t blame you.  You did what you could," he says before he wanders off toward the Tavern on his own.'

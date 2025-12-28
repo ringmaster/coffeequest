@@ -6,6 +6,7 @@
 	let showConfirmReset = $state(false);
 	let showDebugInfo = $state(false);
 	let showLocations = $state(false);
+	let fileInput: HTMLInputElement;
 
 	const debugEnabled = $derived(gameStore.hasTag('debug_mode'));
 
@@ -45,6 +46,49 @@
 	function removeTag(tag: string) {
 		gameStore.removeTag(tag);
 		gameStore.save();
+	}
+
+	function savePlayerData() {
+		const data = JSON.stringify(gameStore.state, null, 2);
+		const blob = new Blob([data], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `coffeequest-save-${new Date().toISOString().slice(0, 10)}.json`;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	}
+
+	function triggerLoadPlayerData() {
+		fileInput.click();
+	}
+
+	function loadPlayerData(event: Event) {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			try {
+				const data = JSON.parse(e.target?.result as string);
+				// Validate basic structure
+				if (data.character && data.questVars !== undefined && Array.isArray(data.questLog)) {
+					gameStore.state = data;
+					gameStore.save();
+					gameStore.phase = 'navigation';
+				} else {
+					alert('Invalid save file format');
+				}
+			} catch {
+				alert('Failed to parse save file');
+			}
+		};
+		reader.readAsText(file);
+		// Reset file input so the same file can be loaded again
+		input.value = '';
 	}
 
 	function promptReset() {
@@ -108,6 +152,17 @@
 					</button>
 				</header>
 				<div class="debug-content">
+					<input
+						type="file"
+						accept=".json"
+						bind:this={fileInput}
+						onchange={loadPlayerData}
+						style="display: none;"
+					/>
+					<div class="save-load-buttons">
+						<button class="action-button" onclick={savePlayerData}>Save</button>
+						<button class="action-button" onclick={triggerLoadPlayerData}>Load</button>
+					</div>
 					<h3>Player Tags ({gameStore.state.character.metadata.length})</h3>
 					{#if gameStore.state.character.metadata.length === 0}
 						<p class="empty-message">No tags</p>
@@ -373,5 +428,26 @@
 	.tag-button:hover {
 		background: var(--color-failure);
 		color: white;
+	}
+
+	.save-load-buttons {
+		display: flex;
+		gap: 12px;
+		margin-bottom: 16px;
+	}
+
+	.action-button {
+		flex: 1;
+		padding: 10px 16px;
+		font-size: 14px;
+		border: none;
+		border-radius: 8px;
+		cursor: pointer;
+		background: var(--color-button);
+		color: var(--color-button-text);
+	}
+
+	.action-button:active {
+		opacity: 0.8;
 	}
 </style>

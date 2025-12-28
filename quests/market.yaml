@@ -181,9 +181,9 @@ steps:
         - name: Earnest
           desc: A hooded figure
           gender: male
-        - name: Mira
-          desc: An elderly woman with knowing eyes
-          gender: female
+        - name: Edam
+          desc: An elderly man with knowing eyes
+          gender: male
         - name: Silas
           desc: A pale man who rarely blinks
           gender: male

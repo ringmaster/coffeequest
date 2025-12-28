@@ -2,16 +2,17 @@ name: Baker's Flour
 steps:
   - id: Bakery
     tags:
-      - "!q:baker_flour"
-      - "!done:baker_flour"
+      - "!q:busy_baker"
+      - "!done:busy_baker"
+      - "!quest"
     vars:
       baked_item:
         - loaf of bread
         - pastry
         - small cake
     text: >-
-      The frazzled baker greets you warmly. "I'd love to serve you a {{baked_item}}, but I'm all out of flour, and I am too
-      busy to get to the market. Could you help me?"
+      The frazzled baker greets you warmly. "I'd love to serve you a {{baked_item}}, but I'm all out of flour, and I am
+      too busy to get to the market. Could you help me?"
     options:
       - label: I'll help you
         tags: []
@@ -21,7 +22,7 @@ steps:
         pass: null
   - id: bakery_accept_quest
     tags:
-      - +q:baker_flour
+      - +q:busy_baker
       - +quest
       - +inv:silver
       - +inv:silver
@@ -32,14 +33,14 @@ steps:
   - id: Bakery
     tags:
       - "!inv:flour"
-      - q:baker_flour
+      - q:busy_baker
     text: The baker is delighted to see you return, but is disapointed to see you don't have any flour.
     options:
       - Explore elsewhere
   - id: Bakery
     tags:
       - "@inv:flour"
-      - q:baker_flour
+      - q:busy_baker
     text: The baker is delighted to see you return with flour. 'Thank you! Here's a silver for your trouble.'
     options:
       - label: Accept payment
@@ -51,7 +52,7 @@ steps:
       - +inv:silver
       - +trait:assisted_baker
       - "-quest"
-      - +done:baker_flour
+      - +done:busy_baker
       - +inv:{{baked_item}}
     text: The baker hands you a silver coin, a {{baked_item}}, and smiles warmly.
     log: Delivered flour to baker and earned silver

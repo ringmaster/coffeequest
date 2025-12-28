@@ -1,0 +1,903 @@
+steps:
+  - id: Farmhouse
+    tags:
+      - "!quest"
+      - "!done:scarecrows_watch"
+    vars:
+      farmer:
+        - name: Aldo
+          gender: male
+        - name: Berta
+          gender: female
+        - name: Cormac
+          gender: male
+      entity:
+        - prankster
+        - spirit
+        - dark
+    text: >-
+      {{farmer.name}} flags you down, glancing nervously toward the fields. "You look capable. I need someone to check
+      on something for me. My scarecrow—it's been moving at night. I've seen it from the window, standing in different
+      spots come morning. I'm too old to be losing my mind, but I'm also too old to go out there alone."
+    options:
+      - I'll look into it::accept_scarecrow
+      - Sounds like the wind
+  - id: accept_scarecrow
+    tags:
+      - +quest
+      - +q:scarecrows_watch
+      - +q:entity_{{entity}}
+    text: >-
+      {{farmer.name}} grips your arm. "Thank you. It's out in the far field; you can't miss it. Just... be careful.
+      Whatever's happening out there, it isn't natural."
+    log: Agreed to investigate {{farmer.name}}'s moving scarecrow
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "!q:investigated"
+    text: >-
+      {{farmer.name}} looks up hopefully. "Did you find anything?" {{farmer.He}} sees your empty hands and sighs. "The
+      far field. The scarecrow's out there. Please—I need to know what's happening."
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:investigated"
+      - "!q:talked_farmer_after"
+    text: >-
+      {{farmer.name}} straightens when {{farmer.he}} sees you. "You've been to the field. I can see it in your face.
+      What did you find?"
+    options:
+      - Tell {{farmer.him}} everything::farmer_debrief
+      - I need to look into this more
+  - id: farmer_debrief
+    tags:
+      - +q:talked_farmer_after
+    text: >-
+      You describe what you encountered. {{farmer.name}} listens intently, {{farmer.his}} weathered face cycling through
+      fear, confusion, and resolve.
+    options:
+      - What do you think we should do?::farmer_opinion
+  - id: farmer_opinion
+    tags:
+      - "@q:entity_prankster"
+    text: >-
+      "A poacher? I haven't seen anyone out there.  I'm telling you, if it was just a poacher, I'd take care of him
+      myself!" {{farmer.name}}'s jaw tightens. "I want it gone, whatever it is. The Church won't care whether it's some
+      trespasser or a spirit—they'll say I'm imagining things. But whatever you say... Confront the wretch, or I will."
+    log: "{{farmer.name}} wants to confront the poacher directly"
+  - id: farmer_opinion
+    tags:
+      - "@q:entity_spirit"
+    text: >-
+      {{farmer.name}} is quiet for a long moment. "A spirit? Protecting my fields?" {{farmer.He}} looks toward the
+      field, expression softening. "My grandfather always said this land was blessed. If something's watching over it...
+      the Church will want it destroyed. They always do. But if it means no harm—maybe we should leave it be."
+    log: "{{farmer.name}} wants to leave the protective spirit alone"
+  - id: farmer_opinion
+    tags:
+      - "@q:entity_dark"
+    text: >-
+      {{farmer.name}}'s face goes pale. "Something... dark? Keeping worse things away?" {{farmer.He}} shudders. "I don't
+      care what it's holding back. I want it gone. Destroyed. The Church will want to capture it, study it—but I won't
+      have that thing lurking in my fields another night. Kill it."
+    log: "{{farmer.name}} wants the dark entity destroyed"
+  - id: Field
+    tags:
+      - "@q:scarecrows_watch"
+      - "!q:investigated"
+    text: >-
+      The scarecrow stands at the field's center, arms outstretched, burlap head tilted slightly. In daylight it looks
+      ordinary enough—straw stuffing, old clothes, a painted face faded by seasons. But something feels wrong. The crows
+      give it wider berth than they should.
+    options:
+      - label: Watch from hiding
+        skill: guile
+        dc: 4
+        pass: observe_success
+        fail: observe_fail
+      - label: Approach and confront it directly
+        skill: might
+        dc: 5
+        pass: confront_success
+        fail: confront_fail
+      - label: Invoke your blessing for protection
+        tags:
+          - status:blessed
+        pass: blessed_approach
+        hidden: true
+      - Leave for now
+  - id: observe_success
+    tags:
+      - +q:investigated
+      - +q:observed
+    text: >-
+      You settle into the tall grass and wait. As the sun lowers, you see it—movement. Not the scarecrow itself, but
+      something at its base.
+    options:
+      - Continue watching::observe_reveal
+    log: Successfully observed the scarecrow from hiding
+  - id: observe_reveal
+    tags:
+      - "@q:entity_prankster"
+    text: >-
+      A figure emerges from a covered pit beneath the scarecrow's post—a lean man with a bow and game bag. He adjusts
+      the scarecrow's position, scattering feed to draw birds for tomorrow's hunt. A poacher, using the "haunted"
+      scarecrow to keep {{farmer.name}} away from his hunting ground.
+    options:
+      - Confront the poacher::confront_poacher
+      - Slip away with this knowledge
+  - id: observe_reveal
+    tags:
+      - "@q:entity_spirit"
+    text: >-
+      As dusk settles, a faint luminescence gathers around the scarecrow. The burlap face turns—not mechanically, but
+      smoothly, like something alive. A presence radiates from it: watchful, patient, protective. It's guarding these
+      fields. It has been for a very long time.
+    options:
+      - Make yourself known::spirit_contact
+      - Slip away with this knowledge
+  - id: observe_reveal
+    tags:
+      - "@q:entity_dark"
+    text: >-
+      As darkness falls, the scarecrow's shadow lengthens impossibly. Something within it stirs—not light, but an
+      absence of it. You feel it notice you, feel its attention like cold fingers on your spine. It's holding something
+      back. And it knows you're watching.
+    options:
+      - Hold your ground::dark_contact
+      - Retreat carefully
+  - id: observe_fail
+    tags:
+      - +q:investigated
+      - +q:failed_observe
+    text: Your foot snaps a dry stalk. The sound carries across the quiet field.
+    options:
+      - What happens next?::observe_fail_result
+  - id: observe_fail_result
+    tags:
+      - "@q:entity_prankster"
+    text: >-
+      You hear scrambling from near the scarecrow—someone bolting through the far wheat. By the time you reach the spot,
+      they're gone. Tracks in the dirt, a dropped snare, a hastily covered pit. Someone was here. A poacher, maybe. But
+      they've fled.
+    log: Spooked the intruder—they escaped before you could identify them
+  - id: observe_fail_result
+    tags:
+      - "@q:entity_spirit"
+    text: >-
+      The scarecrow's head turns toward the sound. For a moment, you swear you see a faint glow behind its painted
+      eyes—then nothing. Whatever presence was here has withdrawn, wary of your clumsy approach. You've confirmed
+      something unnatural is present, but learned little else.
+    log: Alerted the presence—it withdrew before revealing itself
+  - id: observe_fail_result
+    tags:
+      - "@q:entity_dark"
+    text: >-
+      The shadows around the scarecrow surge toward you. Cold washes over your body, and for a terrible moment you can't
+      breathe. Then it releases you—a warning. You stumble back, gasping. Something dark inhabits that scarecrow, and it
+      doesn't want to be watched.
+    log: Encountered something dark in the field—barely escaped
+  - id: confront_success
+    tags:
+      - +q:investigated
+      - +q:confronted
+    text: You stride toward the scarecrow, ready for whatever comes. Your boldness is rewarded—or punished—with an answer.
+    options:
+      - What do you find?::confront_reveal
+    log: Confronted the scarecrow directly
+  - id: confront_reveal
+    tags:
+      - "@q:entity_prankster"
+    text: >-
+      A man scrambles out from a covered pit at the scarecrow's base, bow in hand, eyes wild. "Wait! Wait—don't turn me
+      in." He's a poacher, using the scarecrow legend to keep the farmer away from prime hunting ground. He looks
+      desperate enough to deal.
+    options:
+      - You're coming with me::poacher_to_farmer
+      - What's it worth to you?::poacher_bribe
+      - Get out of here and don't come back::release_poacher
+  - id: confront_reveal
+    tags:
+      - "@q:entity_spirit"
+    text: >-
+      As you approach, the air grows warm. The scarecrow doesn't move, but you feel a presence settle around you like a
+      gentle hand on your shoulder. Images flicker through your mind: crops flourishing, storms diverted, pests driven
+      away. A guardian. It's been protecting this farm for generations.
+    options:
+      - Acknowledge it peacefully::spirit_peaceful
+      - This is unnatural—it must end
+  - id: confront_reveal
+    tags:
+      - "@q:entity_dark"
+    text: >-
+      The shadows coalesce, and something speaks—not in words, but in pressure behind your eyes. It shows you what it
+      holds back: blighted things from the forest's edge, hungry spirits, rot that would consume the crops. It is dark,
+      yes. But it stands between this farm and something worse.
+    options:
+      - What do you want?::dark_bargain
+      - I don't make deals with shadows::dark_refuse
+  - id: confront_fail
+    tags:
+      - +q:investigated
+      - +q:failed_confront
+    text: You approach the scarecrow with purpose, but what waits there is ready for you.
+    options:
+      - What happens?::confront_fail_result
+  - id: confront_fail_result
+    tags:
+      - "@q:entity_prankster"
+      - +trait:scarecrow_fled
+    text: >-
+      A figure bursts from hiding and barrels past you before you can react—a lean man with a hunter's bag. He's gone
+      into the wheat before you can give chase. Tracks suggest a poacher using this spot, but he won't be back while
+      you're watching.
+    log: A poacher escaped—he'll likely return when things quiet down
+  - id: confront_fail_result
+    tags:
+      - "@q:entity_spirit"
+    text: >-
+      The presence withdraws as you approach, startled by your aggressive energy. The scarecrow stands lifeless,
+      ordinary. Whatever spirit inhabited it has retreated, unwilling to engage with someone who came looking for a
+      fight. You've confirmed something was here, but it won't show itself to you now.
+    log: The spirit retreated—your approach was too aggressive
+  - id: confront_fail_result
+    tags:
+      - "@q:entity_dark"
+      - +status:injured
+    text: >-
+      The shadows strike before you can react. Cold tears through you—not physical pain, but something deeper, a wound
+      to your spirit. You stagger back, barely keeping your feet. The darkness recedes, satisfied with its warning.
+      You're alive, but shaken. This thing is dangerous.
+    log: The dark entity attacked—escaped with injuries
+  - id: blessed_approach
+    tags:
+      - +q:investigated
+      - +q:used_blessing
+    text: >-
+      You speak the words of blessing as you approach. Light gathers around you, faint but unmistakable. The scarecrow's
+      painted eyes seem to track you—and whatever dwells within responds to the sacred power you carry.
+    options:
+      - What does it reveal?::blessed_reveal
+    log: Used blessing to safely approach the scarecrow
+  - id: blessed_reveal
+    tags:
+      - "@q:entity_spirit"
+    text: >-
+      The spirit emerges without fear, recognizing the blessing's light. Images flow freely: generations of protection,
+      quiet vigils through storms and blights. It bows to you—or as much as a bound spirit can bow. It will answer your
+      questions. It means no harm.
+    options:
+      - I understand. Thank you.::spirit_peaceful
+      - You've served well, but it's time to rest::spirit_release
+  - id: blessed_reveal
+    tags:
+      - "@q:entity_dark"
+    text: >-
+      The darkness recoils from your blessing, hissing like water on hot iron. But it doesn't flee—it can't. It's bound
+      here, holding back something worse. In the light of your blessing, you see what it guards against: shapes at the
+      forest's edge, hungry and patient. The dark thing looks at you with something like desperate pride.
+    options:
+      - What do you want?::dark_bargain
+      - The Church can deal with whatever you're holding back::dark_refuse
+  - id: confront_poacher
+    tags:
+      - +q:poacher_captured
+    text: >-
+      "Please," he begs. "I've got a family. The lord's forests are off-limits, but a man has to eat. I'll stop—I swear
+      it. Just don't drag me to the guards."
+    options:
+      - You're coming with me anyway::poacher_to_farmer
+      - Swear it and go::release_poacher
+      - I'll keep quiet—for a price::poacher_bribe
+  - id: poacher_bribe
+    tags:
+      - +inv:game_meat
+      - +trait:corrupt
+      - +q:poacher_bribed
+    text: >-
+      The poacher's eyes narrow, calculating. Then he reaches into his bag and pulls out a wrapped bundle—fresh game,
+      cleanly dressed. "Take it. And forget you saw me." He's gone before you can change your mind.
+    log: Accepted a bribe from the poacher to keep quiet
+  - id: release_poacher
+    tags:
+      - +q:poacher_released
+    text: >-
+      The poacher doesn't wait for you to reconsider. He grabs his gear and vanishes into the wheat, leaving only
+      trampled stalks. {{farmer.name}} won't be troubled again—probably.
+    log: Let the poacher go with a warning
+  - id: poacher_to_farmer
+    tags:
+      - +q:poacher_captured
+    text: >-
+      You march the poacher back toward the farmhouse. He doesn't resist, but his eyes keep darting to the tree line,
+      calculating whether he could make a run for it.
+    options:
+      - Deliver him to {{farmer.name}}::poacher_farmer_resolution
+  - id: spirit_contact
+    tags: []
+    text: >-
+      You step out of hiding, hands open and empty. The luminescence pulses once—acknowledgment. The spirit regards you
+      without hostility, curious about this mortal who came to watch rather than attack.
+    options:
+      - I mean no harm::spirit_peaceful
+      - What are you?::spirit_peaceful
+  - id: spirit_peaceful
+    tags:
+      - +q:spirit_peaceful
+    text: >-
+      The warmth of the spirit's presence wraps around you. It cannot speak in words, but you understand: it was bound
+      here long ago, charged with protecting these fields. It has kept its vigil faithfully. It does not wish to leave,
+      but it will accept judgment if it must.
+    log: Made peaceful contact with the protective spirit
+  - id: spirit_release
+    tags:
+      - +q:spirit_released
+      - +know:spirit_bound
+    text: >-
+      With your blessing, you speak words of release. The spirit shudders, then brightens—gratitude and relief washing
+      over you. It rises from the scarecrow like morning mist, hovering for a moment, then dissipates into the fading
+      light. The fields feel emptier. But the spirit is free.
+    log: Released the spirit from its binding
+  - id: dark_contact
+    tags: []
+    text: >-
+      You force yourself to remain still as the darkness regards you. It doesn't attack—not yet. It's waiting to see
+      what you'll do.
+    options:
+      - What do you want?::dark_bargain
+      - I won't negotiate with shadows::dark_refuse
+  - id: dark_bargain
+    tags:
+      - +q:dark_bargain
+    text: >-
+      The darkness shows you: it needs nothing from humans. It was placed here to hold back what lurks at the forest's
+      edge. It will continue until destroyed or released—but if released, what it guards against will come. It offers no
+      deal, only truth.
+    log: Learned the dark entity guards against something worse
+  - id: dark_refuse
+    tags:
+      - +q:dark_refused
+    text: >-
+      You back away from the scarecrow, refusing to engage further. The shadows settle, neither advancing nor
+      retreating. Whatever this thing is, it's bound here. It won't chase you. But it won't leave, either.
+    log: Refused to bargain with the dark entity
+  - id: Church
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:investigated"
+      - "@q:entity_prankster"
+      - "!q:talked_farmer_after"
+    text: >-
+      The priest listens to your tale with polite skepticism. "A poacher? Using fear of spirits to hunt in peace?" He
+      chuckles. "Clever, in a base sort of way. But this is a matter for the farmer, not the Church. The old man sees
+      ghosts where there are only men. Our gods protect us from true evil—a poacher is merely a nuisance."
+    options:
+      - Thank you for your time
+      - The farmer deserves to know he's not mad::church_prankster_push
+  - id: church_prankster_push
+    tags:
+      - +q:visited_church_prankster
+    text: >-
+      The priest waves a hand dismissively. "Then tell him. But don't expect us to hunt down every trespasser in the
+      fields. We have genuine spiritual matters to attend to." He turns back to his candles. The Church won't help with
+      this.
+    log: The Church dismissed the poacher as not their concern
+  - id: Church
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:investigated"
+      - "@q:entity_spirit"
+    text: >-
+      The priest's expression grows grave as you describe the spirit. "A bound guardian? Protecting the fields?" He
+      shakes his head slowly. "It matters not whether its intentions are good. Such things do not belong in our world.
+      The spirit must be released—sent to its proper rest. This is not cruelty; it is mercy. Bring me to it, and I will
+      perform the rites."
+    options:
+      - I'll take you there::church_destroy_spirit
+      - What if the farmer wants it to stay?::church_spirit_argue
+      - I need to think about this
+  - id: church_spirit_argue
+    text: >-
+      "The farmer's wishes are irrelevant to the natural order," the priest says firmly. "A spirit bound to the mortal
+      world suffers, even if it doesn't know it. And such bindings can... sour, over time. What protects today may
+      possess tomorrow. We must act while the creature remains benevolent."
+    options:
+      - Very well. I'll take you there::church_destroy_spirit
+      - I need to think about this
+    log: The Church insists the spirit must be released
+  - id: church_destroy_spirit
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+      - +status:blessed
+      - "-q:spirit_peaceful"
+      - "-q:spirit_released"
+      - +know:spirit_destroyed
+    text: >-
+      The priest accompanies you to the field. The spirit emerges at his approach—and the priest speaks words of
+      dismissal, holy light streaming from his hands. The spirit doesn't resist. It bows once toward the farmhouse, then
+      fades into nothing. "It is done," the priest says. "The farmer's fields are cleansed. And you—" he touches your
+      forehead, "—have earned the Church's blessing."
+    log: Helped the Church destroy the protective spirit—received blessing
+  - id: Church
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:investigated"
+      - "@q:entity_dark"
+    text: >-
+      The priest's face goes pale as you describe the dark presence. "This is... troubling. Such entities do not appear
+      without cause. If it truly holds something worse at bay..." He strokes his chin. "We must capture it. Contain it.
+      Study what it guards against before we risk destroying the barrier. Can you lure it from its binding? We have a
+      sanctified vessel that could hold it."
+    options:
+      - I'll help you capture it::church_capture_dark
+      - The farmer wants it destroyed outright::church_dark_argue
+      - I need to think about this
+  - id: church_dark_argue
+    text: >-
+      "Destroyed?" The priest's eyes widen. "Without knowing what it guards against? That farmer would doom his own
+      fields—perhaps the whole town—out of fear. No. We capture it first, learn what we face, then act with wisdom
+      rather than panic. This is not negotiable."
+    options:
+      - Very well. I'll help capture it::church_capture_dark
+      - I need to think about this
+    log: The Church insists on capturing the dark entity
+  - id: church_capture_dark
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+      - +status:blessed
+      - +know:dark_captured
+    text: >-
+      The priest gives you a sanctified vessel—a small iron box etched with holy symbols. At the field, you present it
+      to the darkness. It resists at first, but the priest's chanting weakens its grip on the scarecrow. With a sound
+      like tearing cloth, the shadow pours into the box. The priest seals it with trembling hands. "This will be secured
+      in the Church vaults. You've done holy work today." He blesses you before departing with his prize.
+    log: Helped the Church capture the dark entity—received blessing
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:entity_prankster"
+      - "@q:poacher_bribed"
+    text: "{{farmer.name}} looks at you expectantly. \"Well? What did you find out there?\""
+    options:
+      - Just your imagination. The scarecrow's fine.::farmhouse_prankster_lie
+      - There was a poacher. I dealt with it.::farmhouse_prankster_vague
+  - id: farmhouse_prankster_lie
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+    text: >-
+      {{farmer.name}}'s face falls. "My imagination? But I saw—" {{farmer.He}} trails off, doubt creeping in. "Maybe
+      you're right. Maybe I'm just getting old." The farmer turns away, shoulders slumped. You leave with game meat in
+      your pack and guilt in your gut.
+    log: Lied to {{farmer.name}} about the poacher
+  - id: farmhouse_prankster_vague
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+      - +ally:farmer
+    text: >-
+      {{farmer.name}}'s eyes widen. "A poacher! I knew something was wrong." {{farmer.He}} grips your arm. "You've done
+      me a great service. The fields are safe now?" You nod, and the farmer's relief is palpable. "Thank you. If you
+      ever need anything, you come to me."
+    log: Told {{farmer.name}} about the poacher—earned the farmer's gratitude
+  - id: poacher_farmer_resolution
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+      - +ally:farmer
+      - +inv:silver
+    text: >-
+      {{farmer.name}} stares at the poacher with cold fury. "You. You've been using my fields, scaring me in my own
+      home." The poacher hangs his head. {{farmer.name}} turns to you. "I'll deal with this wretch. Take this for your
+      trouble—" {{farmer.he}} presses a silver coin into your hand. "You've given an old {{farmer.him}} peace of mind."
+    log: Delivered the poacher to {{farmer.name}}—received silver
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:entity_prankster"
+      - "@q:poacher_released"
+    text: "{{farmer.name}} looks at you expectantly. \"Did you find what's been moving my scarecrow?\""
+    options:
+      - A poacher. I ran him off—he won't be back.::farmhouse_poacher_released_end
+  - id: farmhouse_poacher_released_end
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+      - +ally:farmer
+    text: >-
+      "A poacher!" {{farmer.name}} slaps {{farmer.his}} knee. "I knew I wasn't seeing things. Well, good riddance to
+      him. Thank you for putting my mind at ease. If you ever need help, you know where to find me."
+    log: Reported the poacher to {{farmer.name}}—earned gratitude
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:entity_spirit"
+      - "@q:spirit_peaceful"
+      - "!done:scarecrows_watch"
+    text: "{{farmer.name}} is waiting anxiously. \"What did you find?\""
+    options:
+      - A spirit—protecting your fields. It means no harm.::farmhouse_spirit_report
+      - I'm still looking into it
+  - id: farmhouse_spirit_report
+    tags:
+      - "!q:spirit_released"
+    text: >-
+      {{farmer.name}}'s eyes go wide. "A spirit? A real one?" {{farmer.He}} sits heavily on a stool. "Protecting us.
+      After all these years." A long silence. "The Church will want it gone, won't they? They always do." {{farmer.He}}
+      looks at you. "But if it's keeping my crops safe... can't we just leave it be?"
+    options:
+      - I'll tell the Church it's harmless—they don't need to know::protect_spirit_end
+      - The Church should decide::church_spirit_defer
+  - id: farmhouse_spirit_report
+    tags:
+      - "@q:spirit_released"
+    text: >-
+      {{farmer.name}}'s eyes go wide. "A spirit? A real one?" {{farmer.He}} sits heavily on a stool. "Protecting us.
+      After all these years." A long silence. "The Church will want it gone, won't they? They always do." {{farmer.He}}
+      looks at you. "But if it's keeping my crops safe... can't we just leave it be?"
+    options:
+      - I'll tell the Church it's harmless—they don't need to know::protect_spirit_end
+      - The Church should decide::church_spirit_defer
+      - I already released it—it's at peace now::spirit_already_released
+  - id: protect_spirit_end
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+      - +ally:farmer
+      - +know:spirit_protected
+      - "-status:blessed"
+    text: >-
+      {{farmer.name}} grabs your hand. "Thank you. Thank you." Tears glisten in {{farmer.his}} eyes. "My grandfather
+      always said there was something watching over this land. Now I know he was right." You leave knowing the Church
+      might disapprove if they ever learned the truth—but the farmer's gratitude is worth something.
+    log: Agreed to protect the spirit's secret—lost Church's blessing
+  - id: church_spirit_defer
+    text: >-
+      {{farmer.name}}'s face falls, but {{farmer.he}} nods slowly. "I suppose... I suppose that's the right thing.
+      Just—ask them to be gentle with it? It's only ever helped us."
+    options:
+      - I will. Take care.::church_spirit_defer_end
+  - id: church_spirit_defer_end
+    tags:
+      - +q:farmer_deferred_spirit
+    text: You leave the farmer to anxious waiting. The spirit's fate now rests with the Church.
+  - id: spirit_already_released
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+      - +ally:farmer
+    text: >-
+      {{farmer.name}} blinks. "Released? You mean... gone?" {{farmer.He}} looks toward the field, expression conflicted.
+      "I suppose that's for the best. It served its purpose, and now it can rest." {{farmer.He}} pats your shoulder.
+      "You did right by everyone. Thank you."
+    log: Told {{farmer.name}} the spirit was released—earned gratitude
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:entity_spirit"
+      - "@know:spirit_destroyed"
+    text: >-
+      {{farmer.name}} sees your expression and knows. "It's gone, isn't it? The spirit?" You nod. "The Church." It's not
+      a question. {{farmer.He}} turns away. "I suppose they know best. They always say they do." The farmer's voice is
+      flat. "Thank you for your help. You can go now."
+    log: "{{farmer.name}} learned the spirit was destroyed—disappointed"
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:entity_dark"
+      - "@q:dark_bargain"
+      - "!done:scarecrows_watch"
+    text: "{{farmer.name}} can see the weight on you. \"That bad, is it?\""
+    options:
+      - Something dark—but it's holding back something worse::farmhouse_dark_report
+      - I'm still looking into it
+  - id: farmhouse_dark_report
+    text: >-
+      {{farmer.name}} goes pale. "Holding back—? No. No, I don't care what it's guarding against. I want it gone.
+      Destroyed. You hear me?" {{farmer.He}} grips your arm. "The Church will want to study it, capture it, keep it
+      around. But I won't have that shadow on my land another night. End it."
+    options:
+      - I'll destroy it myself::destroy_dark_farmer_wish
+      - The Church might know best here::church_dark_defer
+      - It's already been captured by the Church::dark_already_captured
+  - id: destroy_dark_farmer_wish
+    tags:
+      - +q:farmer_wants_destruction
+    text: >-
+      {{farmer.name}} grips your arm tighter. "You mean it? You'll destroy it?" {{farmer.His}} eyes are desperate,
+      hopeful. "Dawn. That's when shadows are weakest. Go at first light, and I'll be praying for you from here."
+    log: Agreed to destroy the dark entity for {{farmer.name}}
+  - id: church_dark_defer
+    text: >-
+      {{farmer.name}}'s jaw tightens. "The Church. Of course." {{farmer.He}} turns away. "Do what you must. I'll sleep
+      with a knife under my pillow until it's settled."
+    options:
+      - I'll make sure it's dealt with::church_dark_defer_end
+  - id: church_dark_defer_end
+    tags:
+      - +q:farmer_deferred_dark
+    text: >-
+      You leave the farmer to uneasy waiting. Whatever the Church decides, {{farmer.name}} won't rest easy until that
+      shadow is gone entirely.
+  - id: dark_already_captured
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+    text: >-
+      "Captured?" {{farmer.name}}'s voice rises. "Not destroyed? They've got that—that thing locked up somewhere, still
+      existing?" {{farmer.He}} shudders. "What if it escapes? What if it—" {{farmer.He}} can't finish. "Go. Just go."
+      The farmer turns away. You've lost {{farmer.his}} trust.
+    log: "{{farmer.name}} learned the dark entity was only captured—lost trust"
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:failed_observe"
+      - "@q:entity_prankster"
+    text: "{{farmer.name}} looks at you hopefully. \"Any luck?\""
+    options:
+      - Someone was there—a poacher, I think—but he escaped::farmhouse_prankster_fled
+  - id: farmhouse_prankster_fled
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+    text: >-
+      {{farmer.name}} sighs. "At least I'm not mad. A poacher, you say? Well, maybe he'll stay away now that he knows
+      someone's looking." The farmer doesn't seem satisfied, but there's nothing more to be done. For now.
+    log: Reported the escaped poacher to {{farmer.name}}
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:failed_observe"
+      - "@q:entity_spirit"
+    text: "{{farmer.name}} searches your face. \"What did you find?\""
+    options:
+      - Something's there—but it withdrew before I could learn more::farmhouse_spirit_inconclusive
+  - id: farmhouse_spirit_inconclusive
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+    text: >-
+      {{farmer.name}} frowns. "Something, but you don't know what?" {{farmer.He}} looks toward the field. "I suppose
+      that's something. At least I know I'm not imagining it." The mystery remains unsolved, but the farmer seems
+      marginally comforted.
+    log: Reported inconclusive findings to {{farmer.name}}
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:failed_confront"
+      - "@q:entity_dark"
+    text: "{{farmer.name}} sees you limping back and rushes over. \"What happened? Are you hurt?\""
+    options:
+      - Something dark. It attacked me. I barely got away.::farmhouse_dark_failed
+  - id: farmhouse_dark_failed
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+    text: >-
+      {{farmer.name}}'s face goes white. "Dark? Attack—" {{farmer.He}} grabs your arm. "Stay here. Rest. I'll... I'll
+      figure something out." The farmer helps you to a chair, clearly terrified but trying to be brave. The scarecrow
+      still stands in the field. The problem remains.
+    log: Reported attack by dark entity—quest ended inconclusively
+  - id: Field
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:observed"
+      - "@q:entity_prankster"
+      - "!q:poacher_captured"
+      - "!q:poacher_released"
+      - "!q:poacher_bribed"
+      - "!q:visited_church_prankster"
+    text: >-
+      The scarecrow stands where you left it. The poacher's covered pit is still visible if you know where to look.
+      He'll return eventually—they always do.
+    options:
+      - Wait for him to return::confront_poacher
+      - Leave
+  - id: Field
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:observed"
+      - "@q:entity_spirit"
+      - "!q:spirit_peaceful"
+      - "!q:spirit_released"
+    text: >-
+      The scarecrow stands motionless in the fading light. You know what dwells within it now—a guardian spirit, old and
+      patient. It's aware of your presence, waiting to see what you'll do.
+    options:
+      - Approach peacefully::spirit_contact
+      - Leave it be
+  - id: Field
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:observed"
+      - "@q:entity_dark"
+      - "!q:dark_bargain"
+      - "!q:dark_refused"
+    text: >-
+      The scarecrow's shadow seems longer than it should be, even in full daylight. The darkness within knows you've
+      seen it. It waits, neither hostile nor welcoming—just watching.
+    options:
+      - Approach and speak with it::dark_contact
+      - label: Invoke your blessing for protection
+        tags:
+          - status:blessed
+        pass: blessed_reveal
+        hidden: true
+      - Leave
+  - id: Field
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:entity_dark"
+      - "@q:farmer_wants_destruction"
+      - "!done:scarecrows_watch"
+    text: >-
+      Dawn light filters through the mist as you approach the scarecrow. The shadows around it seem thinner now,
+      weaker—but still present. The darkness within stirs, sensing your intent. It knows why you've come.
+    options:
+      - label: Steel yourself and attack
+        skill: might
+        dc: 6
+        pass: dark_fight_success
+        fail: dark_fight_fail
+      - label: Draw on your blessing to strike
+        skill:
+          - might
+          - status:blessed
+        dc: 6
+        tags:
+          - status:blessed
+        pass: dark_fight_success_blessed
+        fail: dark_fight_fail
+        hidden: true
+      - This was a mistake—retreat
+  - id: dark_fight_success
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+      - +ally:farmer
+      - +know:dark_destroyed
+      - "-status:blessed"
+    text: >-
+      You pour everything into the assault—will, steel, fury. The darkness writhes, screams without sound, claws at your
+      mind. But dawn is on your side, and your determination is absolute. With a final, wrenching effort, you drive the
+      shadow out. It dissipates like smoke in sunlight. The scarecrow collapses, just straw and cloth now. You stand
+      over it, trembling, victorious.
+    options:
+      - Return to {{farmer.name}}::dark_destroyed_return_farmer
+    log: Destroyed the dark entity through sheer might
+  - id: dark_fight_success_blessed
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+      - +ally:farmer
+      - +know:dark_destroyed
+      - "-status:blessed"
+    text: >-
+      Your blessing flares as you strike, holy light searing the darkness. It shrieks—a sound felt more than heard—and
+      recoils. You press the advantage, faith and strength combined, until the shadow tears apart like rotted cloth. The
+      scarecrow crumples. The blessing fades with its purpose fulfilled, leaving you drained but triumphant.
+    options:
+      - Return to {{farmer.name}}::dark_destroyed_return_farmer
+    log: Destroyed the dark entity with blessing and might
+  - id: dark_fight_fail
+    tags:
+      - +status:injured
+      - "-q:farmer_wants_destruction"
+    text: >-
+      The darkness is stronger than you expected. Even at dawn, even with everything you have—it's not enough. Cold
+      tendrils wrap around your mind, your limbs. You feel your strength draining, your vision darkening. At the last
+      moment, survival instinct takes over and you wrench yourself free, stumbling back through the field. The shadow
+      doesn't pursue. It doesn't need to. You've been shown your place.
+    log: Failed to destroy the dark entity—barely escaped
+  - id: dark_destroyed_return_farmer
+    text: >-
+      {{farmer.name}} is waiting at the edge of the field, hands clasped, lips moving in silent prayer. When
+      {{farmer.he}} sees you walking back—whole, upright—{{farmer.he}} lets out a sob of relief. "It's done? Truly
+      done?" You nod, and the farmer's face crumples with gratitude. "Thank you. Whatever comes next... at least it
+      won't come from inside my fields." {{farmer.He}} presses silver into your hand. The Church won't be pleased when
+      they hear. But {{farmer.name}} is at peace.
+    tags:
+      - +inv:silver
+    log: "{{farmer.name}} rewarded me for destroying the dark entity"
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:entity_dark"
+      - "@q:farmer_wants_destruction"
+      - "!done:scarecrows_watch"
+    text: >-
+      {{farmer.name}} looks up sharply when you enter. "You haven't gone yet? Dawn's the time—that's what the old
+      stories say. Shadows are weakest at first light." {{farmer.He}} wrings {{farmer.his}} hands. "Please. I won't
+      sleep until that thing is gone."
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:entity_prankster"
+      - "@q:talked_farmer_after"
+      - "!q:poacher_captured"
+      - "!q:poacher_released"
+      - "!q:poacher_bribed"
+      - "!q:farmer_handled_it"
+      - "!q:visited_church_prankster"
+    text: >-
+      {{farmer.name}} looks up from {{farmer.his}} work. "Have you dealt with that poacher yet? I meant what I said—if
+      you won't confront him, I will. I'm not as feeble as I look."
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:entity_spirit"
+      - "@q:talked_farmer_after"
+      - "!q:spirit_peaceful"
+      - "!q:spirit_released"
+      - "!know:spirit_destroyed"
+    text: >-
+      {{farmer.name}} watches you from the porch. "Still thinking on what to do about our... visitor?" {{farmer.He}}
+      glances toward the field. "Take your time. It's waited this long. But don't let the Church make the decision for
+      us, eh?"
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:entity_dark"
+      - "@q:talked_farmer_after"
+      - "!q:dark_bargain"
+      - "!q:dark_refused"
+      - "!know:dark_captured"
+      - "!know:dark_destroyed"
+    text: >-
+      {{farmer.name}} hasn't slept—you can see it in {{farmer.his}} eyes. "That thing's still out there. Have you
+      figured out what to do about it? I won't rest easy until it's gone. Gone, you hear? Not captured, not contained.
+      Gone."
+  - id: Farmhouse
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:entity_prankster"
+      - "@q:talked_farmer_after"
+      - "@q:visited_church_prankster"
+      - "!q:poacher_captured"
+      - "!q:poacher_released"
+      - "!q:poacher_bribed"
+      - "!done:scarecrows_watch"
+    text: >-
+      {{farmer.name}} is sitting on the porch, cleaning a brace of rabbits. Fresh game. {{farmer.He}} looks up at you
+      with a mixture of satisfaction and disappointment. "Took care of it myself. Found the wretch's pit, waited for him
+      with my pitchfork. He won't be back." {{farmer.He}} tosses a silver coin at your feet. "For your trouble. You did
+      find him, even if you couldn't be bothered to finish the job."
+    options:
+      - Pick up the silver::farmer_handled_resolution
+  - id: farmer_handled_resolution
+    tags:
+      - "-quest"
+      - +done:scarecrows_watch
+      - +inv:silver
+    text: >-
+      You pocket the coin. {{farmer.name}} has already turned back to {{farmer.his}} rabbits, clearly done with the
+      conversation. Not the outcome you'd hoped for, but at least the problem is solved.
+    log: "{{farmer.name}} dealt with the poacher personally—received token payment"
+  - id: Church
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:entity_prankster"
+      - "@q:talked_farmer_after"
+      - "!q:poacher_captured"
+      - "!q:poacher_released"
+      - "!q:poacher_bribed"
+      - +q:visited_church_prankster
+    text: >-
+      The priest listens to your tale with polite skepticism. "A poacher? Using fear of spirits to hunt in peace?" He
+      chuckles. "Clever, in a base sort of way. But this is a matter for the farmer, not the Church. Old {{farmer.name}}
+      sees ghosts where there are only men. Our gods protect us from true evil—a poacher is merely a nuisance."
+    options:
+      - Thank you for your time
+      - The farmer deserves to know he's not mad::church_prankster_push
+  - id: Field
+    tags:
+      - "@q:scarecrows_watch"
+      - "@q:entity_prankster"
+      - "@q:visited_church_prankster"
+      - "!done:scarecrows_watch"
+    text: >-
+      The scarecrow stands alone in the field, just straw and old clothes. The poacher's pit has been filled in with
+      fresh dirt—someone's boot prints circle the area. {{farmer.name}}'s work, by the look of it. The problem has been
+      handled, though not by you.

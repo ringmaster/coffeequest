@@ -285,6 +285,11 @@ async function mergeQuests() {
 			}
 			const quest = questResult.data;
 
+			// Merge top-level option_presets from the quest file
+			if (quest.option_presets && typeof quest.option_presets === 'object') {
+				Object.assign(mergedPresets, quest.option_presets);
+			}
+
 			if (quest.steps && Array.isArray(quest.steps)) {
 				// Extract option_presets entries, patches, and regular steps
 				// Skip entries without an id (comment-only objects)
