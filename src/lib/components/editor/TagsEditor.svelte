@@ -43,7 +43,9 @@
 
 	function updateTag(index: number, operator: ParsedTag['operator'], tag: string) {
 		const newTags = [...tags];
-		newTags[index] = formatTag({ operator, tag });
+		// Parse the existing tag to preserve any comparison operators
+		const existingParsed = parseTag(tags[index]);
+		newTags[index] = formatTag({ operator, tag, comparison: existingParsed.comparison, value: existingParsed.value });
 		onChange(newTags);
 	}
 

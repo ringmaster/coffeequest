@@ -1,0 +1,1672 @@
+option_presets:
+  leave_maren:
+    - I need to think about this.
+  graveyard_return:
+    - Return to the grave::return_to_maren
+steps:
+  - id: Graveyard
+    tags:
+      - "!quest"
+      - "!done:unearthed_past"
+    text: >
+      A woman lingers near a fresh grave, though she doesn't look like she's mourning. She's studying the grounds—the
+      sight lines, the gaps in the stone wall. When she notices you watching, she freezes.
+    options:
+      - You're not here to grieve.::maren_caught
+      - Pay your respects silently and leave.
+  - id: maren_caught
+    text: >
+      She's in her 20s, with the calloused hands of someone who's worked a dozen more. Her eyes are sharp, wary.
+
+
+      "No," she admits. "I'm not." She glances at the grave. "Old Master Aldworth. I was his maid for twenty years. And
+      he was buried with something that belongs to me."
+    options:
+      - What did he take?::maren_explains
+      - Grave robbery is a serious crime.::maren_crime_warning
+      - None of my business. Good luck.
+    tags:
+      - quest
+  - id: maren_crime_warning
+    text: >
+      "You think I don't know that?" She laughs bitterly. "Prison. Maybe death, if the magistrate's in a foul mood."
+
+
+      She meets your eyes. "But what's in that grave belongs to me. It's all I have left of my mother. So yes—I know the
+      risk."
+    options:
+      - What exactly are you planning?::maren_tried
+      - I can't be involved in this.::refuse_quest
+    tags: []
+  - id: maren_explains
+    text: >
+      "My mother's locket. The only thing I had of her—a gift from my father, she always said. When she died in service,
+      old Aldworth 'kept it safe.'" Her voice turns bitter. "I was young. Powerless. I never saw it again.
+
+
+      "Now it's in the ground with a dead man who had no right to it."
+    options:
+      - Did you try asking the family?::maren_tried
+      - Why not let it go? It's been years.::maren_why_not_let_go
+      - What are you planning to do?::maren_what_planning
+  - id: maren_why_not_let_go
+    text: >
+      "Let it go?" Her voice sharpens. "It's my mother's face. The only portrait ever made of her. Would you let that
+      go?"
+
+
+      She takes a breath, steadying herself. "I've tried. For years, I tried. But knowing it's down there, rotting with
+      a man who stole it..."
+    options:
+      - Did you try asking the family?::maren_tried
+      - What are you planning to do?::maren_what_planning
+  - id: maren_what_planning
+    text: >
+      "Tomorrow night. After the watch passes." She gestures at the grave. "The earth is still fresh. It won't take long
+      to reach the coffin."
+
+
+      "I just need to open it enough to reach inside. Take what's mine. Fill it back in. No one will ever know."
+    options:
+      - I'll help you.::accept_help_immediate
+      - Let me look into this first.::accept_investigate
+      - That's insane.::maren_tried
+  - id: maren_tried
+    text: >
+      "I asked young Master Aldworth myself. Went to the manor in Town Square, hat in hand, begging for my mother's
+      locket." She shakes her head. "He told me everything buried with his father belongs to the estate. Twenty years of
+      service, and he even convinced Father Herald not to help me.
+
+
+      "So yes. I'm going to dig it up myself. Tomorrow night."
+
+
+      She meets your eyes. "I'm not asking you to help. I'm asking you not to interfere."
+    options:
+      - I'll help you.::accept_help_immediate
+      - Let me look into this first. There might be another way.::accept_investigate
+      - I can't be part of this.::refuse_quest
+      - I should report this.::threaten_report
+  - id: accept_help_immediate
+    tags:
+      - +quest
+      - +q:unearthed_past
+      - +q:committed_blind
+    text: >
+      Her eyes widen slightly. "You'd risk that? For a stranger?"
+
+
+      "My mother's locket," she says again, softer now. "There's a portrait inside. Her face. It's all I have left of
+      her."
+
+
+      She tells you to meet her here tomorrow night. The grave is fresh—the digging won't take long if there are two of
+      them.
+    options:
+      - Let's get this done.::dig_arrival
+    log: Agreed to help Maren rob old Aldworth's grave
+  - id: accept_investigate
+    tags:
+      - +quest
+      - +q:unearthed_past
+    text: >
+      She studies you. "Another way? I've tried asking. I've tried begging. What's left?"
+
+
+      "Give me a day," you say. "You mentioned the manor in Town Square. And Father Herald at the church. Let me see
+      what I can learn."
+
+
+      She doesn't look convinced, but she nods slowly. "One day. Tomorrow night, I'm digging—with or without another
+      way."
+    options:
+      - I'll find you here when I know something.
+    log: Agreed to investigate before helping Maren
+  - id: refuse_quest
+    text: >
+      She nods, unsurprised. "I didn't expect help. I've learned not to."
+
+
+      She turns back to studying the grave. You leave her to her planning.
+
+
+      Something about the encounter lingers with you as you walk away. Twenty years of service. A locket. A woman with
+      nothing left to lose.
+    options:
+      - Leave her to her fate.
+    log: Refused to help Maren with her plan
+    tags:
+      - "-quest"
+  - id: threaten_report
+    text: >
+      Her face hardens. "Report what? A woman standing in a graveyard? I haven't done anything. Yet."
+
+
+      She steps closer. "But if you bring the guard down on me, know this: I've got nothing. No family, no prospects, no
+      future. They can transport me to the colonies and I'll have lost nothing I haven't already lost."
+
+
+      "Can you say the same?"
+    options:
+      - I won't report you. But I won't help either.::refuse_quest
+      - Let me look into this first. There might be another way.::accept_investigate
+  - id: Town Square
+    tags:
+      - q:unearthed_past
+      - "!q:visited_square"
+      - "!q:committed_blind"
+    text: >
+      The Aldworth manor dominates the corner of Town Square—three stories of gray stone, its windows watching the
+      market like disapproving eyes. A young man in fine clothes stands near the entrance, speaking tersely with a
+      clerk.
+
+
+      Young Aldworth. The new master of the house.
+    options:
+      - Approach him directly.::aldworth_direct
+      - Watch and listen first.::aldworth_observe
+      - Look for servants who might talk.::aldworth_servants
+      - This can wait.
+  - id: aldworth_direct
+    tags:
+      - +q:visited_square
+    text: |
+      He notices your approach and his expression shifts—polite, but guarded. "Can I help you?"
+    options:
+      - I'm here about your father's burial. And a locket.::aldworth_locket_direct
+      - I knew your father. My condolences.::aldworth_condolences
+  - id: aldworth_locket_direct
+    tags:
+      - +q:aldworth_defensive
+    text: >
+      His face closes like a door slamming shut. "The maid sent you? I've already told her—everything buried with my
+      father is part of the estate. The matter is closed."
+
+
+      His reaction seems too sharp for a simple trinket. A worthless keepsake shouldn't make a wealthy man this
+      defensive.
+    options:
+      - Why does a locket matter so much to you?::aldworth_press
+      - She served your family for twenty years. Surely—::aldworth_twenty_years
+      - label: What are you so afraid of?
+        tags:
+          - trait:direct*2
+        pass: aldworth_confronted
+        hidden: true
+      - I understand. Good day.
+  - id: aldworth_twenty_years
+    text: >
+      "Surely nothing." He cuts you off. "Service is service. It's compensated with wages, not heirlooms."
+
+
+      His jaw tightens. "My father was generous to keep her employed as long as he did. She should be grateful, not
+      grasping."
+    options:
+      - Why does a simple locket matter so much to you?::aldworth_press
+      - graveyard_return
+  - id: aldworth_press
+    text: >
+      "It doesn't matter to me," he snaps. "That's precisely the point. What's buried is buried. My father's wishes—" He
+      stops himself.
+
+
+      "This is a family matter. That's all you need to know."
+    options:
+      - label: Family matter? She's a servant. Unless there's more to it.
+        tags:
+          - trait:direct
+        pass: aldworth_family_slip
+      - I see. Thank you for your time.
+  - id: aldworth_family_slip
+    tags:
+      - +q:family_slip
+      - +q:suspicious
+    text: |
+      Something flickers across his face. Fear? Anger? Both?
+
+      "Choose your next words carefully," he says quietly. "You're meddling in things you don't understand."
+
+      He turns and strides into the manor, leaving you in the square.
+
+      Family matter. The words hang in the air. What family?
+    options:
+      - graveyard_return
+      - Perhaps the church has answers.
+  - id: aldworth_confronted
+    tags:
+      - +q:knows_bloodline
+      - +trait:direct
+      - +trait:bold
+    text: >
+      He goes pale. For a moment you think he might call for the guard. Then his shoulders sag.
+
+
+      "How much do you know?"
+
+
+      "Enough to ask questions. Not enough to answer them."
+
+
+      He looks around, then steps closer. His voice drops. "My father... made mistakes. The maid's mother was one of
+      them. She was his daughter. Illegitimate, unacknowledged, but his."
+
+
+      He meets your eyes. "That woman—Maren—she's my father's granddaughter. She scrubbed our floors for twenty years,
+      and she has no idea who she really is."
+    options:
+      - And the locket proves it.::aldworth_locket_proof
+      - Why bury it with him? Why not destroy it?::aldworth_why_bury
+      - She deserves to know.::aldworth_refuse_cooperate
+    log: Confronted young Aldworth and learned the truth about Maren's bloodline
+  - id: aldworth_why_bury
+    text: >
+      He laughs bitterly. "You think I didn't suggest that? Father wouldn't hear of it. He said..." Aldworth pauses,
+      struggling with the words.
+
+
+      "He said it was the only honest thing he ever did for her. Keeping her face close. Even if she never knew."
+
+
+      "Guilt," you say.
+
+
+      "Love, maybe. A twisted kind. Does it matter now?"
+    options:
+      - Return the locket. Let Maren decide what it means.::aldworth_locket_proof
+      - graveyard_return
+  - id: aldworth_locket_proof
+    text: >
+      "A miniature portrait of her mother. And behind it, one of my father as a young man. Side by side, the resemblance
+      is..." He shakes his head. "Unmistakable."
+
+
+      "So yes. The locket stays in the ground. For everyone's sake."
+    options:
+      - Return it to her. Quietly. And this stays between us.::aldworth_leverage_quiet
+      - She has a right to know who she is.::aldworth_refuse_cooperate
+      - graveyard_return
+  - id: aldworth_leverage_quiet
+    tags:
+      - +trait:clever
+    text: >
+      He considers. The calculation is visible on his face—weighing scandal against a simple exchange.
+
+
+      "You'll keep this quiet? Truly?"
+
+
+      "If the locket finds its way to Maren. Quietly. No questions."
+
+
+      "...Come to the servants' entrance tomorrow. Early. It will be there."
+
+
+      He turns and walks back to the manor without another word. You've given him an out. Whether he takes it remains to
+      be seen.
+    options:
+      - graveyard_return
+    log: Negotiated with young Aldworth to return the locket quietly
+  - id: aldworth_refuse_cooperate
+    text: |
+      "What she deserves," he says coldly, "is none of your concern. This is a family matter."
+
+      "She IS family. That's the point."
+
+      His expression hardens. "Not legally. Not publicly. And that's how it will stay."
+
+      He turns on his heel and strides into the manor. The door closes firmly behind him.
+
+      You've learned what you needed. Now it's a question of what to do with it.
+    options:
+      - graveyard_return
+    log: Young Aldworth refused to return the locket
+  - id: aldworth_condolences
+    text: >
+      He softens slightly. "Thank you. It was... sudden, at the end. He had much on his mind." He pauses. "Much on his
+      conscience, Father Herald said."
+
+
+      A servant approaches with papers, and Aldworth turns away, the moment of openness gone.
+    options:
+      - Before you go—I heard there was a dispute about a locket.::aldworth_locket_direct
+      - I'll leave you to your business.
+  - id: aldworth_observe
+    tags:
+      - +q:visited_square
+    text: >
+      You linger near a market stall, watching. Aldworth conducts his business with clipped efficiency—signing papers,
+      giving orders, accepting condolences with practiced grace.
+
+
+      But twice, you notice him glance toward the church. Something weighs on him.
+
+
+      A servant emerges from the manor with a message. As she passes near you, she mutters to another: "Third time he's
+      asked about the gravesite. As if the old man's going to climb out."
+    options:
+      - Approach the servant.::servant_aside
+      - Approach Aldworth directly.::aldworth_direct
+      - I've seen enough for now.
+  - id: aldworth_servants
+    tags:
+      - +q:visited_square
+    text: >
+      You drift toward the servants' entrance of the manor, where a young woman is beating dust from a rug. She eyes you
+      warily but doesn't stop working.
+    options:
+      - Did you know old Master Aldworth well?::servant_conversation
+      - I'm looking for Maren. She used to work here.::servant_maren
+  - id: servant_conversation
+    text: >
+      "Well enough to stay out of his way," she says. "He wasn't cruel, just... particular. Especially about certain
+      things."
+
+
+      She glances toward the manor. "His room, for instance. Only Maren was allowed to clean it. Twenty years, always
+      Maren. The rest of us wondered about that."
+    options:
+      - Why Maren?::servant_whisper_reveal
+      - What was he particular about?::servant_particular
+      - Thank you. I won't keep you.
+  - id: servant_particular
+    text: >
+      "Privacy, mostly. Didn't like people in his study. Didn't like anyone touching his personal effects." She shrugs.
+      "Rich folk and their treasures. Though I never saw him treasure much except that locket."
+
+
+      She catches herself. "Never mind. I've said too much."
+    options:
+      - What locket?::servant_whisper_reveal
+      - Thank you for your time.
+  - id: servant_maren
+    text: >
+      "Maren?" The servant's expression shifts—sympathy, maybe. "Poor thing. Gave her whole life to this house and got
+      turned out the week the old master died. Young Aldworth didn't even give her a reference."
+
+
+      She lowers her voice. "Some of us thought she'd have been taken care of. The way the old master looked at her
+      sometimes... like she reminded him of someone."
+    options:
+      - Reminded him of who?::servant_whisper_reveal
+      - Thank you.
+  - id: servant_whisper_reveal
+    tags:
+      - +q:servant_whisper
+      - +q:suspicious
+    text: >
+      The servant looks around, then leans closer. "Her mother. There was talk, years ago, that old Aldworth kept a
+      miniature of Maren's mother. Painted when she was young. Don't know why a master keeps a portrait of a servant,
+      but..." She shrugs. "Rich folk are strange."
+
+
+      She returns to her work, leaving you with a fragment that doesn't quite fit—or fits too well.
+    options:
+      - graveyard_return
+      - Perhaps the church has answers.
+  - id: servant_aside
+    tags:
+      - +q:servant_whisper
+      - +q:suspicious
+    text: >
+      You catch the servant's eye. "Worried about the grave?"
+
+
+      She snorts. "Young master is. Keeps asking if the groundskeeper's seen anyone lurking." She lowers her voice.
+      "Between you and me, I think he's afraid of what's buried there as much as who might dig it up."
+
+
+      "Old master kept a portrait of Maren's mother, you know. Little painted thing. Sweet, if you didn't think too hard
+      about why."
+    options:
+      - Why would he keep that?::servant_why_portrait
+      - graveyard_return
+  - id: servant_why_portrait
+    tags:
+      - +q:suspicious
+    text: >
+      She gives you a long look. "You're asking the same questions I've been asking for twenty years."
+
+
+      "Why does a master keep a servant's portrait? Why did he watch Maren the way he did? Why did he insist she—and
+      only she—tend his private rooms?"
+
+
+      She shakes her head. "Some secrets go to the grave. Or into it."
+    options:
+      - graveyard_return
+      - Perhaps the church has answers.
+  - id: Church
+    tags:
+      - q:unearthed_past
+      - "!q:visited_church"
+      - "!q:committed_blind"
+    text: >
+      Father Herald kneels at the altar, but he's not praying—just staring at the candles, lost in thought. He startles
+      when he hears your footsteps.
+
+
+      "Forgive me. I was... elsewhere." He rises slowly, an old man carrying something heavy. "How can I help you?"
+    options:
+      - I wanted to ask about old Aldworth's burial.::herald_aldworth
+      - A woman named Maren said you refused to help her.::herald_maren_direct
+      - Just visiting. Don't let me disturb you.
+  - id: herald_aldworth
+    tags:
+      - +q:visited_church
+      - +q:priest_troubled
+    text: >
+      His face tightens. "A difficult man to bury. Not because of who he was— because of what he carried."
+
+
+      He moves to straighten candles that don't need straightening. "I heard his final confession. I cannot speak of it,
+      you understand. But some burdens... they don't stay buried just because we shovel dirt on them."
+    options:
+      - A woman came to you about a locket. Why did you refuse her?::herald_maren
+      - What kind of burden?::herald_burden
+      - I understand. Thank you, Father.
+  - id: herald_maren_direct
+    tags:
+      - +q:visited_church
+      - +q:priest_troubled
+    text: >
+      He closes his eyes briefly. "Maren. Yes. I failed her."
+
+
+      "She asked me to intervene—to convince young Aldworth to return her mother's locket. I couldn't." He turns away.
+      "It wasn't my place."
+    options:
+      - Couldn't, or wouldn't?::herald_burden
+      - She's planning to dig it up herself.::herald_dig_reaction
+      - Thank you for your honesty.
+  - id: herald_dig_reaction
+    tags:
+      - +q:visited_church
+      - +q:priest_troubled
+    text: >
+      He goes pale. "Dig up—? She would risk transportation? Prison?"
+
+
+      He paces to the altar and back. "I warned young Aldworth this would not end cleanly. A locket, he said. Just a
+      trinket. But nothing is ever just a trinket when someone is willing to open a grave for it."
+    options:
+      - Why won't you help her?::herald_burden
+      - What's in that locket that matters so much?::herald_burden
+      - I thought you should know.
+  - id: herald_burden
+    tags:
+      - +q:confession_weight
+      - +q:suspicious
+    text: >
+      "I am bound by the seal of confession," he says carefully. "I cannot tell you what old Aldworth told me in his
+      final hours."
+
+
+      He pauses. "But I can tell you this: he wept. He spoke of debts that couldn't be repaid. And he begged me to
+      ensure certain things stayed buried with him."
+
+
+      "I told him that wasn't my decision to make. But young Aldworth..." He shakes his head. "He made it his."
+    options:
+      - What things? What's in that grave that matters so much?::herald_press
+      - label: Father. She deserves to know who she is.
+        tags:
+          - trait:direct*2
+          - q:servant_whisper
+        pass: herald_knows_truth
+        hidden: true
+      - label: Father. She deserves to know who she is.
+        tags:
+          - trait:direct*2
+          - q:family_slip
+        pass: herald_knows_truth
+        hidden: true
+      - Some things stay buried. I understand.
+  - id: herald_press
+    tags:
+      - +q:protect_living
+      - +q:suspicious
+    text: >
+      "Some things are buried to protect the living," he says quietly. "Not the dead."
+
+
+      He meets your eyes. "If you care about that woman—truly care—ask yourself whether knowing the truth will heal her
+      or simply wound her in new ways."
+    options:
+      - graveyard_return
+      - The manor might have answers you can't give.
+  - id: herald_knows_truth
+    tags:
+      - +q:knows_bloodline
+      - +trait:direct
+    text: >
+      Father Herald is silent for a long moment. When he speaks, his voice is barely above a whisper.
+
+
+      "You've guessed it, haven't you? Or learned it somehow."
+
+
+      He sinks onto a pew. "Maren's mother was Aldworth's daughter. Born to a kitchen maid, raised as a servant herself,
+      never told the truth. And Maren..." He shakes his head. "Twenty years she served in her grandfather's house. He
+      watched her scrub his floors and never said a word."
+
+
+      "The locket has proof. Portraits of both of them, painted when they were young. Side by side, the resemblance is
+      undeniable."
+    options:
+      - She has a right to know.::herald_right_to_know
+      - And you think ignorance protects her?::herald_ignorance
+      - graveyard_return
+    log: Learned the truth about Maren's bloodline from Father Herald
+  - id: herald_right_to_know
+    text: >
+      "Perhaps," he says quietly. "But knowing won't give her back twenty years. It won't make the Aldworths claim her.
+      It will only add grief to grief."
+
+
+      He looks at you. "What will you do with this truth?"
+    options:
+      - Tell her. It's her right.::herald_tell_her
+      - I don't know yet.::herald_uncertainty
+      - graveyard_return
+  - id: herald_tell_her
+    text: >
+      "Perhaps you're right." He sounds exhausted. "I've kept so many secrets. Perhaps this one has poisoned me long
+      enough."
+
+
+      He looks at you. "But I cannot be the one to tell her. The seal of confession..." He shakes his head. "If she
+      learns the truth, it must come from elsewhere. From the evidence itself."
+    options:
+      - The locket would prove it.::herald_locket_proof
+      - graveyard_return
+  - id: herald_uncertainty
+    text: >
+      "Neither do I." He sighs. "I have prayed on it. I have lost sleep over it. And still I don't know if telling her
+      would be mercy or cruelty."
+
+
+      He meets your eyes. "Perhaps that's not for either of us to decide. Perhaps she should have the choice herself."
+    options:
+      - Then help me get her the locket.::herald_help_request
+      - graveyard_return
+  - id: herald_locket_proof
+    text: >
+      "Yes. The portraits inside—her mother, and old Aldworth as a young man. Side by side, the resemblance..." He
+      trails off.
+
+
+      "If she sees it, she'll know. She'll understand what it means."
+    options:
+      - graveyard_return
+  - id: herald_help_request
+    text: >
+      "I cannot openly defy the Aldworths. But..." He hesitates. "If the locket were to find its way to her through
+      other means, I would not stand in the way."
+
+
+      It's not help. But it's not opposition either.
+    options:
+      - graveyard_return
+  - id: herald_ignorance
+    text: >
+      "I think..." He trails off. "I think I don't know anymore. I've spent so long keeping secrets for dying men.
+      Perhaps I've forgotten what it costs the living."
+
+
+      He looks older suddenly. Tired.
+
+
+      "Do what you think is right. I won't stop you. I've done enough stopping."
+    options:
+      - graveyard_return
+  - id: herald_maren
+    text: >
+      "Because I was asked not to." He sounds ashamed. "Young Aldworth came to me before she did. He said it was a
+      family matter. He said disturbing his father's grave—even symbolically—would be a desecration."
+
+
+      "I should have questioned that. I didn't."
+    options:
+      - It's not too late to help her.::herald_reconsider
+      - A family matter. Interesting choice of words.::herald_family_matter_response
+      - Thank you, Father.
+  - id: herald_family_matter_response
+    tags:
+      - +q:suspicious
+    text: >
+      The priest's expression flickers—just for a moment. "A choice of words. The Aldworths are... protective of their
+      legacy."
+
+
+      He won't meet your eyes. "I have duties to attend to."
+    options:
+      - graveyard_return
+      - The manor might have answers you can't give.
+  - id: herald_reconsider
+    text: >
+      He shakes his head slowly. "I cannot go against the family's wishes. Not openly. But..."
+
+
+      He looks at you. "If someone were to resolve this quietly... if the locket were simply returned and no graves
+      disturbed... I would not ask questions."
+
+
+      It's not help. But it's not opposition either.
+    options:
+      - graveyard_return
+      - The manor might have answers you can't give.
+  - id: return_to_maren
+    tags:
+      - q:unearthed_past
+      - "!q:knows_bloodline"
+      - "!q:suspicious"
+      - "!q:committed_blind"
+    text: |
+      Maren is where you left her, watching the grave. She looks up as you approach.
+
+      "Well? Did you find another way?"
+
+      You have nothing concrete to offer—just the sense that something deeper is being hidden.
+    options:
+      - I'll help you dig.::confirm_dig_blind
+      - I'll create a distraction while you work.::confirm_distraction
+      - I couldn't find anything. I can't be part of this.::abandon_no_knowledge
+      - I'm going to report this.::final_report
+  - id: return_to_maren
+    tags:
+      - q:unearthed_past
+      - "!q:knows_bloodline"
+      - "@q:suspicious"
+      - "!q:committed_blind"
+    text: |
+      Maren is where you left her. Something in your expression makes her pause.
+
+      "What is it? What did you find?"
+    options:
+      - There's something strange going on. Aldworth is hiding something.::maren_suspicion
+      - Nothing that changes anything. Are you still going through with this?::confirm_dig_blind
+  - id: maren_suspicion
+    text: >
+      "Hiding what?"
+
+
+      You tell her what you've gathered—the defensive reactions, the talk of "family matters," the portrait of her
+      mother that old Aldworth kept.
+
+
+      Her jaw tightens. "They're hiding something about my mother. And they buried it with him."
+
+
+      She looks at the grave with new intensity. "I need to see what's in that locket."
+    options:
+      - Then I'll help you.::confirm_dig_suspicious
+      - I'll create a distraction while you work.::confirm_distraction
+      - Maren, whatever it is—is it worth transportation?::maren_worth_it
+      - I can't. I'm sorry.::maren_alone_suspicious
+  - id: maren_worth_it
+    text: >
+      "Is it worth—?" She stares at you. "My mother's face. The only proof she ever existed. The only thing connecting
+      me to who I was before I became their servant."
+
+
+      Her voice hardens. "Yes. It's worth it."
+    options:
+      - Then I'll help you.::confirm_dig_suspicious
+      - I'll create a distraction.::confirm_distraction
+      - I understand. But I can't be part of this.::maren_alone_suspicious
+  - id: return_to_maren
+    tags:
+      - q:unearthed_past
+      - "@q:knows_bloodline"
+      - "!q:committed_blind"
+    text: |
+      Maren is where you left her. She reads your face immediately.
+
+      "You learned something." It's not a question. "Tell me."
+    options:
+      - The truth about your mother. And about you.::tell_maren_truth
+      - Nothing you need to know. Are you still doing this?::withhold_truth
+  - id: tell_maren_truth
+    text: >
+      You tell her. All of it.
+
+
+      Her mother was old Aldworth's daughter. Illegitimate, unacknowledged, but his blood. That makes Maren his
+      granddaughter. Young Aldworth's cousin—or near enough. She served twenty years in her own grandfather's house, and
+      he never told her.
+
+
+      She doesn't speak for a long moment. When she does, her voice is flat.
+
+
+      "Twenty years. Twenty years I scrubbed his floors. Called him 'sir.' And he knew. He knew what I was to him."
+
+
+      She looks at you, eyes wet but hard. "You found this out. You came back to tell me. So tell me—what do I do now?"
+    log: Told Maren the truth about her bloodline
+    options:
+      - Get the locket. You deserve proof of who you are.::advise_dig
+      - Confront Aldworth. Make him return it.::advise_confront
+      - Use this as leverage. He'll return it to keep this quiet.::advise_leverage
+      - Walk away. This truth will only poison what's left of your life.::advise_abandon
+      - I don't know. But I'll stand with you whatever you decide.::advise_solidarity
+  - id: withhold_truth
+    text: |
+      She stares at you. "You found something. I can see it in your face. And you won't tell me?"
+
+      "It doesn't change what you want. The locket. Your mother's face. That's what matters."
+
+      "Then why do you look like that?"
+    options:
+      - Fine. You deserve the truth.::tell_maren_truth
+      - Some things should stay buried. Trust me.::advise_abandon_no_truth
+      - Just help me understand—is the locket worth your freedom?::confirm_dig_withheld
+  - id: advise_dig
+    tags:
+      - +trait:just
+    text: |
+      "Get the locket," you say. "You deserve proof of who you are."
+
+      She nods slowly. "I thought knowing would make me less certain. It doesn't. It makes me more."
+
+      She grips your arm. "Tonight. Meet me here after dark."
+    options:
+      - label: I'll be here.
+        pass: dig_arrival_informed
+    log: Advised Maren to dig up the locket
+  - id: advise_confront
+    tags:
+      - +trait:just
+      - +trait:direct
+    text: |
+      "Confront him," you say. "Walk into that manor and make him look you in the eye. Make him return what he stole."
+
+      "You'll come with me?"
+
+      "I'll come with you."
+
+      "Then we go now. Before I lose my nerve."
+    options:
+      - label: Lead the way.
+        pass: confrontation_arrival
+    log: Advised Maren to confront young Aldworth directly
+  - id: advise_leverage
+    tags:
+      - +trait:clever
+    text: >
+      "Use this," you say. "He's terrified of this secret getting out. Give him a chance to make it go away quietly."
+
+
+      She hesitates. "You mean... threaten him?"
+
+
+      "I mean give him a reason to do the right thing."
+
+
+      She considers. "You do it. He won't listen to me—I'm just the maid. But you... you're someone he doesn't know.
+      Someone he can't predict."
+    options:
+      - label: I'll talk to him.
+        pass: leverage_arrival
+    log: Agreed to leverage young Aldworth for the locket
+  - id: advise_abandon
+    tags:
+      - +trait:dutiful
+    text: >
+      "Walk away," you say. "This truth—it won't give you what you want. It'll just be a new wound."
+
+
+      She stares at you. "You're asking me to leave my mother's locket in the ground with a man who—" She stops. Takes a
+      breath.
+
+
+      "With my grandfather. The man who watched me scrub his floors and never said a word."
+
+
+      "Yes. I am."
+    options:
+      - Some things are better not knowing.::persuade_abandon
+      - I'm sorry. I shouldn't have said anything.::revert_to_action
+  - id: advise_abandon_no_truth
+    tags:
+      - +trait:dutiful
+      - +trait:clever
+    text: |
+      "Trust me," you say. "Whatever's in that locket—it won't bring you peace. Some things are buried for a reason."
+
+      She searches your face. "You know something. Something you think will hurt me."
+
+      "I think you've been hurt enough."
+    options:
+      - Let it go, Maren. Please.::persuade_abandon
+      - I'm sorry. Do what you need to do.::confirm_dig_withheld
+  - id: persuade_abandon
+    text: >
+      "The risk is too high," you press. "Transportation. Prison. And for what? A piece of metal? A portrait you've
+      lived without for decades?"
+
+
+      She wavers. You can see the exhaustion in her—twenty years of service, a week of grief, and now this.
+
+
+      "Maybe you're right," she whispers. "Maybe knowing is enough. Maybe..."
+
+
+      She looks at the grave one more time.
+    options:
+      - label: Let it rest, Maren.
+        skill: guile
+        dc: 4
+        pass: abandon_success
+        fail: abandon_fail
+      - I'll stay with you. As long as you need.::stay_with_maren
+  - id: stay_with_maren
+    text: >
+      You sit with her among the gravestones until the moon rises higher. She doesn't speak. Neither do you.
+
+
+      Finally, she stands. "I can't walk away. Not knowing what I know now. But I won't ask you to help me break the
+      law."
+
+
+      "What will you do?"
+
+
+      "What I was always going to do. Tomorrow night."
+    options:
+      - Then I'll be here.::confirm_dig_informed
+      - I understand. Good luck, Maren.::abandon_refuse_help
+  - id: abandon_success
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+    text: |
+      She weeps then—quietly, shoulders shaking. When she's done, she wipes her eyes and straightens.
+
+      "I know who I am. I know who my mother was. That's more than I had yesterday."
+
+      She touches the gravestone—just once, briefly.
+
+      "Rest in peace, grandfather. You bastard."
+
+      She walks away without looking back. You watch her go, wondering if you did the right thing.
+
+      Wondering if there was a right thing.
+    log: Convinced Maren to let the past stay buried
+  - id: abandon_fail
+    text: |
+      For a moment she wavers. Then her expression hardens.
+
+      "No. No, I can't. I've lived my whole life not knowing. I won't die the same way."
+
+      She looks at you. "Help me or don't. But I'm going to see my mother's face tonight."
+    options:
+      - Then I'll help.::confirm_dig_informed
+      - I can't be part of this. I'm sorry.::abandon_refuse_help
+  - id: abandon_refuse_help
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+      - +q:maren_alone
+    text: >
+      She nods. No anger—just resignation.
+
+
+      "I didn't expect help. I've learned not to."
+
+
+      She turns back to the grave. You leave her there, a woman with nothing left to lose, planning to dig up her past
+      with her bare hands if she has to.
+
+
+      You hear later that the grave was disturbed that night. You hear later that a woman was seen fleeing through the
+      streets.
+
+
+      You never hear what happened to Maren.
+    log: Left Maren to dig alone
+  - id: advise_solidarity
+    tags:
+      - +trait:bold
+    text: |
+      "I don't know," you admit. "But I'll stand with you. Whatever you decide."
+
+      She looks at you for a long moment.
+
+      "I've never had anyone say that to me before."
+
+      She looks at the grave. At the manor looming over Town Square. Back to you.
+
+      "Do you think they'd give it back? If I asked one more time, with someone beside me?"
+    options:
+      - It's worth trying.::advise_confront
+      - They've had twenty years of chances. Take what's yours.::advise_dig
+  - id: revert_to_action
+    text: |
+      She shakes her head. "No. You told me the truth. That's more than anyone else has done."
+
+      She looks at the grave. "But I still need to see her face. I need to hold the proof in my hands."
+    options:
+      - Then I'll help you dig.::confirm_dig_informed
+      - Let me try leverage first. Give Aldworth a chance to do this quietly.::advise_leverage
+      - I can't. I'm sorry.::abandon_refuse_help
+  - id: confirm_dig_blind
+    tags:
+      - +trait:just
+      - +trait:bold
+      - +q:dig_blind
+    text: >
+      "I'll help you," you say.
+
+
+      Her eyes widen. "You'd risk that? For a stranger?"
+
+
+      "For someone who deserves her mother's locket."
+
+
+      She grips your arm. "Tonight. After dark. The watch passes through here once an hour—we'll have time if we're
+      quick."
+    options:
+      - label: I'll be here.
+        pass: dig_arrival
+    log: Agreed to help Maren dig up the grave
+  - id: confirm_dig_suspicious
+    tags:
+      - +trait:just
+      - +trait:bold
+    text: |
+      "Then I'll help you," you say. "Tonight."
+
+      She nods grimly. "After dark. The watch passes once an hour."
+
+      Whatever the Aldworths are hiding, you'll find out together.
+    options:
+      - label: I'll be here.
+        pass: dig_arrival
+    log: Agreed to help Maren dig up the grave
+  - id: confirm_dig_informed
+    tags:
+      - +trait:just
+    text: |
+      "Then I'll help you," you say.
+
+      She grips your arm. "You know what's in there. What it means."
+
+      "I know. That's why I'm helping."
+
+      "Tonight then. After dark."
+    options:
+      - label: I'll be here.
+        pass: dig_arrival_informed
+    log: Agreed to help Maren dig up the grave, knowing the truth
+  - id: confirm_dig_withheld
+    tags:
+      - +trait:just
+      - +q:dig_withheld
+    text: >
+      "Just help me understand," you say. "Is the locket worth your freedom?"
+
+
+      "My mother's face," she says. "Her memory. The only thing I have left of who I was before I became the Aldworths'
+      maid."
+
+
+      She meets your eyes. "Yes. It's worth it."
+
+
+      "Then I'll help."
+    options:
+      - label: Tonight.
+        pass: dig_arrival
+    log: Agreed to help Maren dig up the grave, concealing what you know
+  - id: confirm_distraction
+    tags:
+      - +trait:just
+      - +trait:clever
+    text: |
+      "I'll create a distraction," you say. "Draw the watch away. You do what you need to do."
+
+      She hesitates. "You'd still be an accomplice. If we're caught—"
+
+      "Then don't get caught."
+
+      She almost smiles. Almost. "Tonight. After dark."
+    options:
+      - label: I'll find a way to draw the watch.
+        pass: distraction_setup
+    log: Agreed to create a distraction while Maren digs
+  - id: dig_arrival
+    tags:
+      - q:unearthed_past
+    text: |
+      The moon is thin. Maren waits by the grave with a spade, little more than a shadow among shadows.
+
+      "The watch passed ten minutes ago," she whispers. "We have time. If we're quick."
+
+      The earth is fresh, at least. The digging will be easier than if they'd waited.
+    options:
+      - label: Start digging.
+        skill: might
+        dc: 4
+        pass: dig_success
+        fail: dig_caught
+  - id: dig_arrival_informed
+    tags:
+      - q:unearthed_past
+      - "@q:knows_bloodline"
+    text: |
+      The moon is thin. Maren waits by the grave with a spade, little more than a shadow among shadows.
+
+      "I keep thinking about what you told me," she says quietly. "Twenty years. He watched me every day and never..."
+
+      She shakes her head. "Let's just do this."
+    options:
+      - label: Start digging.
+        skill: might
+        dc: 4
+        pass: dig_success_informed
+        fail: dig_caught
+  - id: dig_success
+    text: |
+      Your spade hits wood. Maren's hands shake as she pries the coffin lid open just enough to reach inside.
+
+      Her fingers find the locket. She clutches it to her chest, and for a moment neither of you breathe.
+
+      "Fill it in," she whispers. "Quickly."
+
+      You work fast, smoothing the earth as best you can. By the time the watch returns, you're both gone.
+    options:
+      - What's inside?::locket_reveal_blind
+  - id: dig_success_informed
+    text: |
+      Your spade hits wood. Maren's hands shake as she pries the coffin lid open just enough to reach inside.
+
+      Her fingers find the locket. She clutches it to her chest.
+
+      "I almost don't want to open it," she whispers. "You already told me the truth. But I need to see."
+
+      You fill the grave back in together, working in silence.
+    options:
+      - She opens the locket.::locket_reveal_informed
+  - id: locket_reveal_blind
+    text: >-
+      Later, in the shadow of the church wall, she opens it with trembling hands.
+
+
+      Two painted miniatures in a hinged gold case. On the left, a man in his prime—dark hair, proud bearing. On the
+      right, a girl. Five or six years old.
+
+
+      Maren stares at the child's face. Her hand drifts to her own cheek.
+
+
+      "That's my mother," she whispers. "I can see myself in her. But why is she..." She looks at the other portrait.
+      Her brow furrows. "That's him. Old Aldworth. Younger, but it's him."
+
+
+      She looks between the two faces. A wealthy man. A child. Posed together in a locket he kept for decades.
+
+
+      "I don't understand. Why would he have this? Why would he keep her portrait with him until he died?"
+    options:
+      - I'm sorry. I don't know.::locket_reveal_blind_end
+    tags: []
+  - id: locket_reveal_blind_end
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+    text: >-
+      You have no answer to give her.
+
+
+      She closes the locket and holds it tight. Her mother's face—that much she has. But the rest of it, the why of it,
+      stays buried with the man in the grave behind you.
+
+
+      "I thought this would give me answers," she says quietly. "It just gave me more questions."
+
+
+      She walks away into the night. You watch her go, wondering if some truths are better left incomplete.
+    log: Helped Maren recover her mother's locket—she discovered the truth alone
+  - id: locket_reveal_informed
+    text: >
+      She opens it in the shadow of the church wall.
+
+
+      Two portraits, just as you described. Her mother. And old Aldworth. Side by side, the resemblance undeniable.
+
+
+      "Proof," she whispers. "I exist. I was always real, even when they pretended I wasn't."
+
+
+      She closes the locket and holds it tight.
+
+
+      "Thank you. For helping me. For telling me the truth." She pauses. "I don't know what I'll do now. But I know who
+      I am. That's more than I had yesterday."
+    options:
+      - What will you do now?::maren_future
+      - Will you claim what's yours?::maren_claim
+    log: Helped Maren recover her mother's locket and learn the truth
+  - id: maren_future
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+    text: >
+      She closes the locket and holds it tight.
+
+
+      "I don't know yet. Maybe nothing. Maybe everything." She looks toward the distant manor. "I'm not the same person
+      I was yesterday. I need time to understand who I am now."
+
+
+      She turns to you. "Thank you. For helping me. For telling me the truth. Whatever comes next—I'll face it knowing
+      who I really am."
+  - id: maren_claim
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+    text: >
+      She laughs—short, bitter, surprised. "Claim what? A name they'll deny? An inheritance they'll fight? I'm a maid's
+      daughter to them. A maid's granddaughter. That won't change because of a locket."
+
+
+      She looks at the portraits one more time. "But I know. I know who my mother was. Who I am." She closes the locket.
+      "That's more than I had yesterday. It's enough."
+  - id: dig_caught
+    text: |
+      Lantern light sweeps across the graveyard. "Who's there?"
+
+      A watchman. You have seconds.
+    options:
+      - label: Run.
+        skill: guile
+        dc: 4
+        pass: dig_escape
+        fail: dig_arrested
+      - Distract him. Let Maren finish.::dig_sacrifice
+      - Surrender.::dig_surrender
+  - id: dig_escape
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+      - +q:grave_disturbed
+    text: >
+      You grab Maren's arm and run. The watchman shouts, but the graveyard is full of shadows and you know the town
+      better than he does.
+
+
+      You lose him near the port, gasping in an alley between warehouses.
+
+
+      "Did you get it?"
+
+
+      She opens her hand. The locket gleams in the moonlight.
+
+
+      "They'll know the grave was disturbed," you warn her.
+
+
+      "Let them wonder." She opens the locket, and even in the darkness you can see her face change as she understands
+      what the portraits mean.
+
+
+      But she has what she came for. And some truths, once seen, can never be unseen.
+    log: Escaped the watchman with the locket
+  - id: dig_arrested
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+      - +status:criminal
+    text: >
+      You don't make it ten steps before the whistle sounds. More lanterns. More voices. They cut you off at the
+      cemetery gate.
+
+
+      The watch captain looks at the disturbed grave, at the dirt on your hands, at Maren clutching something to her
+      chest.
+
+
+      "Grave robbers," he says, with grim satisfaction. "The magistrate will want to hear about this."
+
+
+      As they lead you away, Maren catches your eye. Even now, she's holding the locket. Whatever happens, she has her
+      mother's face.
+
+
+      Small comfort, where you're both going.
+    log: Arrested for grave robbery
+  - id: dig_surrender
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+      - +status:criminal
+    text: >
+      You raise your hands. "We surrender."
+
+
+      The watchman's lantern swings toward Maren, still half-crouched by the open grave. Her fingers are wrapped around
+      something small—the locket.
+
+
+      "Both of them," the watchman calls. More boots on gravel. More lights.
+
+
+      As they bind your hands, Maren catches your eye. She's still holding the locket. Whatever comes next, she has her
+      mother's face.
+    log: Surrendered to the watch after being caught at the grave
+  - id: dig_sacrifice
+    text: >
+      "Go," you hiss at Maren. "Finish it. I'll handle him."
+
+
+      You step out from behind the gravestone, hands raised. "Evening, watchman. Bit late for a stroll?"
+
+
+      He swings the lantern toward you, suspicious. Behind him, in the darkness, you hear the quiet scrape of metal on
+      wood.
+    options:
+      - label: Talk your way out.
+        skill: guile
+        dc: 5
+        pass: sacrifice_success
+        fail: sacrifice_caught
+  - id: sacrifice_success
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+    text: >
+      You spin a story—paying respects to a lost friend, didn't realize the hour, so sorry to disturb. The watchman is
+      skeptical but not suspicious enough to search the grounds.
+
+
+      By the time he moves on, Maren is gone. You find her later, at the edge of town, clutching the locket.
+
+
+      "You got it."
+
+
+      She opens it to show you. Two portraits. The truth, held in the palm of her hand.
+
+
+      "Because of you," she says. "I won't forget."
+    log: Distracted the watchman while Maren recovered the locket
+  - id: sacrifice_caught
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+      - +status:criminal
+    text: >
+      The watchman doesn't buy it. His eyes narrow, and he blows his whistle before you can stop him.
+
+
+      They find the grave disturbed. They find Maren hiding behind a mausoleum, locket clutched to her chest. They find
+      you with dirt on your boots and lies on your tongue.
+
+
+      "Both of them," the captain says. "Let the magistrate sort it out."
+
+
+      As they lead you away, Maren mouths two words: "Thank you."
+
+
+      Whatever comes next, she has her mother's face. You gave her that much.
+    log: Caught while trying to distract the watchman
+  - id: distraction_setup
+    tags:
+      - q:unearthed_past
+    text: >
+      You need to draw the watch away from the graveyard. There are a few possibilities.
+
+
+      You could start a commotion at the Tavern—a fight, perhaps, or a false alarm. You could report a suspicious figure
+      at the Port. Or you could simply wait for the watch to pass and hope Maren is fast enough.
+    options:
+      - label: Start trouble at the Tavern.
+        skill: guile
+        dc: 4
+        pass: distraction_tavern_success
+        fail: distraction_fail
+      - label: False report at the Guardhouse.
+        skill: guile
+        dc: 5
+        pass: distraction_guard_success
+        fail: distraction_fail
+      - Trust Maren to handle it alone.::distraction_trust
+  - id: distraction_tavern_success
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+    text: >
+      The fight you start at the Tavern is convincing enough to draw three watchmen off their rounds. By the time order
+      is restored, you're long gone—and so is Maren.
+
+
+      You find her at dawn, waiting outside your door. She looks exhausted but triumphant.
+
+
+      "I got it." She shows you the locket. Two portraits. "I know who I am now."
+
+
+      She doesn't explain what the portraits mean. She doesn't have to.
+
+
+      "Thank you. For everything."
+    log: Created a distraction while Maren recovered the locket
+  - id: distraction_guard_success
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+      - +q:false_report
+    text: >
+      Your report of suspicious activity at the Port sends half the night watch running. The graveyard is deserted for
+      nearly an hour.
+
+
+      Maren makes good use of the time.
+
+
+      You find her at dawn, locket in hand, eyes red from weeping or sleeplessness or both.
+
+
+      "It's done," she says. "I know who I am."
+
+
+      The guards will wonder about your false report. Best to lay low for a while.
+    log: Created a distraction while Maren recovered the locket
+  - id: distraction_fail
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+      - +status:criminal
+    text: >
+      Your distraction draws attention—but not away from the graveyard. Toward it. Toward you.
+
+
+      By the time you realize your mistake, it's too late. The watch finds Maren with her hands in the dirt.
+
+
+      They arrest you both.
+
+
+      The magistrate is not lenient with grave robbers, even accomplices. Even those who never touched the grave
+      themselves.
+    log: Caught while trying to create a distraction
+  - id: distraction_trust
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+    text: |
+      You wait at the edge of town, listening to the night. An hour passes. Two.
+
+      At dawn, Maren finds you. Dirt under her fingernails. Exhaustion in her eyes. And in her hand, the locket.
+
+      "I did it," she says. "Alone. But knowing you were here—that someone would know if I didn't come back—"
+
+      She opens the locket. Two portraits. A truth she'll carry forever.
+
+      "Thank you."
+    log: Maren recovered the locket alone
+  - id: confrontation_arrival
+    text: >
+      The Aldworth manor looms in the evening light. Maren hesitates at the servants' entrance—habit—then straightens
+      and walks to the front door.
+
+
+      Young Aldworth answers himself. His expression shifts from annoyance to alarm when he sees who it is.
+
+
+      "You. I told you—"
+
+
+      "I know what's in the locket," Maren says. Her voice doesn't waver. "I know what my mother was to your father.
+      What I am to you."
+
+
+      The color drains from his face.
+    options:
+      - Give her the locket. Now.::confront_demand
+      - Watch how he responds.::confront_watch
+  - id: confront_watch
+    text: |
+      Aldworth's face cycles through shock, denial, and finally a kind of desperate calculation.
+
+      "You don't understand," he says. "If this gets out—the family name—"
+
+      "I don't care about your family name," Maren says. "I care about my mother's locket."
+
+      He looks between the two of you, cornered.
+    options:
+      - Give her the locket. This doesn't have to get worse.::confront_demand
+      - We're not leaving without it.::confront_demand
+  - id: confront_demand
+    text: |
+      "Give her the locket," you say. "Now. Or the whole town learns what the Aldworths have been hiding."
+
+      Aldworth's jaw works. For a moment you think he'll call for the guard.
+
+      Then his shoulders slump.
+
+      "Wait here."
+    options:
+      - We'll wait.::confront_resolution
+  - id: confront_resolution
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+      - +q:aldworth_enemy
+    text: |
+      He returns with the locket. Shoves it at Maren without meeting her eyes.
+
+      "Take it. And never come here again. Never speak of this. To anyone."
+
+      Maren opens it right there on the doorstep. The two portraits. Proof.
+
+      "I don't want your money," she says quietly. "I don't want your name. I just wanted my mother's face."
+
+      She walks away without looking back. You follow, leaving Aldworth in his doorway, watching you go.
+
+      He'll be an enemy now. But Maren has what she needed.
+
+      It's enough.
+    log: Confronted young Aldworth and recovered the locket
+  - id: leverage_arrival
+    text: |
+      You find a moment alone with Aldworth near the manor. No witnesses. No servants within earshot.
+
+      "A word about your father's burial."
+
+      His expression tightens. "What about it?"
+
+      "The locket he was buried with. It belonged to his daughter. Not your sister—the other one."
+
+      He goes very still.
+    options:
+      - Return it to Maren. Quietly. This stays between us.::leverage_soft
+      - Return it, or the whole town knows by morning.::leverage_hard
+  - id: leverage_soft
+    text: >
+      "I'm not here to threaten you," you say. "I'm offering you a way out. Return the locket. No one needs to know what
+      it means."
+
+
+      He studies you for a long moment. Weighing risks.
+
+
+      "You'll keep this quiet?"
+
+
+      "If the locket finds its way to Maren? Yes."
+
+
+      "...Come to the servants' entrance tomorrow. Early. It will be there."
+    options:
+      - I'll hold you to that.::leverage_success
+  - id: leverage_hard
+    tags:
+      - +trait:direct
+    text: >
+      "Return the locket," you say. "Or by tomorrow morning, everyone from the docks to the church will know what old
+      Aldworth did. What he hid. Who scrubbed his floors for twenty years without knowing who she really was."
+
+
+      His face contorts with rage—then fear—then a kind of exhausted defeat.
+
+
+      "You're no different from any other blackmailer."
+
+
+      "Maybe not. But Maren deserves her mother's locket. Make this right."
+
+
+      "...Fine. Come to the servants' entrance. Tomorrow. Early."
+    options:
+      - Don't make me come back.::leverage_success
+  - id: leverage_success
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+      - +q:aldworth_leverage
+    text: >
+      The locket is there the next morning, wrapped in cloth, left on the step like something shameful.
+
+
+      You bring it to Maren. She opens it with trembling hands. Two portraits. The truth.
+
+
+      "How did you—"
+
+
+      "The Aldworths owed you. I helped them see that."
+
+
+      She doesn't ask for details. Maybe she understands. Maybe she doesn't want to know.
+
+
+      "Thank you," she says. "For everything."
+
+
+      Somewhere in the manor, young Aldworth is wondering what you might do with what you know. That's a problem for
+      another day.
+
+
+      Today, Maren has her mother's face. It's enough.
+    log: Leveraged young Aldworth into returning the locket
+  - id: final_report
+    tags:
+      - +trait:dutiful
+      - +trait:direct
+    text: >
+      "I'm going to report this," you say. "Grave robbery is a serious crime. I won't be party to it."
+
+
+      Maren's face hardens. "Then go. Tell your guards. They'll thank you, I'm sure. Another servant punished for
+      wanting what's hers."
+
+
+      She turns back to the grave. "I'll be gone before they arrive. I've got nothing left to lose."
+    options:
+      - Go to the Guardhouse.::report_guardhouse
+      - Wait—maybe there's another way.::accept_investigate
+  - id: report_guardhouse
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+    text: >
+      The guards thank you for the report. They stake out the graveyard that night.
+
+
+      Maren doesn't come. She's smarter than that.
+
+
+      You hear she left town the next day. No one knows where she went. The locket stays buried with old Aldworth, and
+      the truth stays buried with it.
+
+
+      Sometimes you wonder if you did the right thing.
+
+
+      You never find out for certain.
+    log: Reported Maren's plan to the guard—she fled before they could catch her
+  - id: abandon_no_knowledge
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+    text: |
+      She nods slowly. "I understand. This isn't your fight."
+
+      "I hope you find what you're looking for."
+
+      "I will." She turns back to the grave. "One way or another."
+
+      You leave the graveyard behind. Whatever happens tomorrow night, you won't be part of it.
+    log: Declined to help Maren after investigation
+  - id: maren_alone_suspicious
+    tags:
+      - "-quest"
+      - +done:unearthed_past
+      - +q:maren_alone
+    text: |
+      She nods. No anger—just that same weary resignation.
+
+      "I didn't expect help. I've learned not to."
+
+      You leave her there, a woman with nothing left to lose, staring at a grave that holds more than bones.
+
+      You hear later that the grave was disturbed. You never hear what happened to Maren.
+    log: Left Maren to dig alone after learning of her suspicions
+  - id: Graveyard
+    tags:
+      - q:unearthed_past
+      - "!q:knows_bloodline"
+      - "!q:suspicious"
+      - "!q:committed_blind"
+    text: |
+      Maren is still here, watching the grave.
+    options:
+      - Approach her.::return_to_maren
+      - Not yet—I need to keep looking.
+  - id: Graveyard
+    tags:
+      - q:unearthed_past
+      - "!q:knows_bloodline"
+      - "@q:suspicious"
+      - "!q:committed_blind"
+    text: |
+      Maren is where you left her, watching the grave.
+    options:
+      - Tell her what you found.::return_to_maren
+      - Not yet.
+  - id: Graveyard
+    tags:
+      - q:unearthed_past
+      - "@q:knows_bloodline"
+      - "!q:committed_blind"
+    text: |
+      Maren is where you left her.
+    options:
+      - Tell her what you learned.::return_to_maren
+      - Not yet.
+  - id: Town Square
+    tags:
+      - q:unearthed_past
+      - "@q:visited_square"
+      - "!q:committed_blind"
+    text: >
+      The Aldworth manor watches the square with its many windows. You've already spoken to the household here. Unless
+      something has changed, there's nothing more to learn in this place.
+    options:
+      - Leave.
+  - id: Church
+    tags:
+      - q:unearthed_past
+      - "@q:visited_church"
+      - "!q:committed_blind"
+    text: |
+      Father Herald is at his duties. He notices you but doesn't approach.
+
+      You've already spoken with him. His conscience is troubled, but his tongue is bound.
+    options:
+      - Leave.

@@ -1,0 +1,208 @@
+name: First Visit Introductions
+description: >
+  First-time location descriptions for new players.
+  These patches prepend atmospheric text on the player's first visit to each location.
+  Only shown for level 1 players; higher levels may see different descriptions.
+
+steps:
+  # === Northern Row ===
+
+  - id: "@patch:Haunted Grove"
+    tags: ["!level>1", "!visited:haunted_grove", "+visited:haunted_grove"]
+    text:
+      prepend: >
+        Gnarled trees twist toward a bruised sky, their branches clawing at the mist
+        that clings to everything. The air is thick with the scent of decay and
+        something older—something watching.
+
+
+  - id: "@patch:Forest"
+    tags: ["!level>1", "!visited:forest", "+visited:forest"]
+    text:
+      prepend: >
+        Sunlight filters through the canopy in golden shafts, illuminating a carpet
+        of fallen leaves. Bird calls echo between ancient oaks, and a well-worn path
+        winds deeper into the green.
+
+
+  - id: "@patch:Mud Pit"
+    tags: ["!level>1", "!visited:mud_pit", "+visited:mud_pit"]
+    text:
+      prepend: >
+        A churned expanse of thick brown mud stretches before you, dotted with
+        wooden planks that serve as treacherous walkways. The smell is earthy and
+        pungent, and something large shifts beneath the surface.
+
+
+  # === Second Row ===
+
+  - id: "@patch:Field"
+    tags: ["!level>1", "!visited:field", "+visited:field"]
+    text:
+      prepend: >
+        Golden wheat sways in gentle waves under the open sky. Scarecrows stand
+        sentinel at intervals, their button eyes following your movement with
+        unsettling patience.
+
+
+  - id: "@patch:Farmhouse"
+    tags: ["!level>1", "!visited:farmhouse", "+visited:farmhouse"]
+    text:
+      prepend: >
+        A sturdy stone farmhouse sits amid vegetable gardens and chicken coops.
+        Smoke curls from the chimney, carrying the promise of warm bread and
+        honest conversation.
+
+
+  - id: "@patch:Tavern"
+    tags: ["!level>1", "!visited:tavern", "+visited:tavern"]
+    text:
+      prepend: >
+        Raucous laughter and the clink of tankards spill through the tavern's
+        weathered doors. A faded sign creaks overhead, and the smell of roasted
+        meat beckons you inside.
+
+
+  # === Third Row ===
+
+  - id: "@patch:Old Mill"
+    tags: ["!level>1", "!visited:old_mill", "+visited:old_mill"]
+    text:
+      prepend: >
+        The great wheel turns slowly, groaning with age as water cascades over
+        its mossy paddles. Flour dust drifts from the windows like lazy snow,
+        and the stones rumble with endless grinding.
+
+
+  - id: "@patch:Stables"
+    tags: ["!level>1", "!visited:stables", "+visited:stables"]
+    text:
+      prepend: >
+        The warm smell of hay and horse envelops you as you approach the wooden
+        stables. Magnificent steeds peer over their stall doors with intelligent
+        eyes, while stable hands hurry about their duties.
+
+
+  - id: "@patch:Inn"
+    tags: ["!level>1", "!visited:inn", "+visited:inn"]
+    text:
+      prepend: >
+        A welcoming glow emanates from the inn's mullioned windows. The building
+        leans slightly with age but radiates warmth and the promise of a soft bed
+        and hot meal.
+
+
+  # === Fourth Row ===
+
+  - id: "@patch:Graveyard"
+    tags: ["!level>1", "!visited:graveyard", "+visited:graveyard"]
+    text:
+      prepend: >
+        Weathered headstones lean at odd angles among overgrown grass. A wrought-iron
+        fence surrounds the quiet grounds, its gate hanging open with a mournful creak.
+        The dead rest here—mostly.
+
+
+  - id: "@patch:Town Square"
+    tags: ["!level>1", "!visited:town_square", "+visited:town_square"]
+    text:
+      prepend: >
+        The heart of the village bustles with activity. A stone fountain burbles
+        at the center, surrounded by townsfolk going about their daily business.
+        Notice boards plaster the walls with requests and warnings.
+
+
+  - id: "@patch:Guardhouse"
+    tags: ["!level>1", "!visited:guardhouse", "+visited:guardhouse"]
+    text:
+      prepend: >
+        A squat stone building flies the town's banner from its peaked roof.
+        Guards in worn armor lounge by the entrance, their watchful eyes tracking
+        everyone who passes.
+
+
+  # === Fifth Row ===
+
+  - id: "@patch:Church"
+    tags: ["!level>1", "!visited:church", "+visited:church"]
+    text:
+      prepend: >
+        Stained glass windows cast rainbow light across worn pews. The scent of
+        incense hangs in the air, and somewhere above, bells wait in patient silence.
+        A sense of peace—or perhaps something more—settles over you.
+
+
+  - id: "@patch:Market"
+    tags: ["!level>1", "!visited:market", "+visited:market"]
+    text:
+      prepend: >
+        A riot of colors and sounds assaults your senses. Merchants hawk their wares
+        from crowded stalls, customers haggle fiercely, and the smell of exotic spices
+        mingles with fresh bread and ripe fruit.
+
+
+  - id: "@patch:Armory"
+    tags: ["!level>1", "!visited:armory", "+visited:armory"]
+    text:
+      prepend: >
+        Steel gleams from every surface. Swords, shields, and suits of armor line
+        the walls in deadly array. The proprietor eyes you with the calculating
+        gaze of someone who knows the price of violence.
+
+
+  # === Sixth Row ===
+
+  - id: "@patch:Library"
+    tags: ["!level>1", "!visited:library", "+visited:library"]
+    text:
+      prepend: >
+        Towering shelves groan under the weight of countless tomes. Dust motes
+        dance in shafts of light from high windows, and the musty smell of old
+        paper fills your lungs. Knowledge—and perhaps secrets—waits here.
+
+
+  - id: "@patch:Bakery"
+    tags: ["!level>1", "!visited:bakery", "+visited:bakery"]
+    text:
+      prepend: >
+        Warmth and the intoxicating aroma of fresh bread wash over you. Golden
+        loaves cool on racks, pastries glisten with sugar, and the baker works
+        with flour-dusted hands.
+
+
+  - id: "@patch:Blacksmith"
+    tags: ["!level>1", "!visited:blacksmith", "+visited:blacksmith"]
+    text:
+      prepend: >
+        Heat radiates from the forge in waves, and the ring of hammer on steel
+        echoes rhythmically. Sparks fly like angry fireflies as molten metal
+        bends to the smith's will.
+
+
+  # === Seventh Row ===
+
+  - id: "@patch:Island"
+    tags: ["!level>1", "!visited:island", "+visited:island"]
+    text:
+      prepend: >
+        A small island rises from the water, accessible only by a rickety wooden
+        bridge. Seabirds wheel overhead, and the salt breeze carries whispers of
+        secrets the mainland has forgotten.
+
+
+  - id: "@patch:Port"
+    tags: ["!level>1", "!visited:port", "+visited:port"]
+    text:
+      prepend: >
+        Ships of all sizes bob at anchor, their masts a forest of wood and rope.
+        Sailors load cargo while merchants argue over prices, and the cry of
+        gulls mingles with shouted orders.
+
+
+  - id: "@patch:Seamstress"
+    tags: ["!level>1", "!visited:seamstress", "+visited:seamstress"]
+    text:
+      prepend: >
+        Bolts of fabric in every imaginable color line the walls. A nimble-fingered
+        seamstress works at her station, needle flashing, while half-finished
+        garments hang like elegant ghosts.

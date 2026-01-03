@@ -272,6 +272,156 @@ describe('applyPatches', () => {
 		expect(result.id).toBe('baker_buy');
 		expect(result.log).toBe('Visited the bakery');
 	});
+
+	it('adds mutation tags from patches to step tags', () => {
+		const patches: StepPatch[] = [
+			{
+				target: 'baker_buy',
+				tags: ['!visited_bakery', '+visited_bakery'],
+				text: { prepend: 'First time here! ' }
+			}
+		];
+
+		// Patch applies when player doesn't have visited_bakery
+		const result = applyPatches(baseStep, patches, []);
+
+		expect(result.text).toBe('First time here! The baker shows you her wares.');
+		expect(result.tags).toContain('+visited_bakery');
+	});
+
+	it('does not apply patch when blocked by mutation tag granted earlier', () => {
+		const patches: StepPatch[] = [
+			{
+				target: 'baker_buy',
+				tags: ['!visited_bakery', '+visited_bakery'],
+				text: { prepend: 'First time here! ' }
+			}
+		];
+
+		// Player already has visited_bakery - patch should not apply
+		const result = applyPatches(baseStep, patches, ['visited_bakery']);
+
+		expect(result.text).toBe('The baker shows you her wares.');
+		expect(result.tags).not.toContain('+visited_bakery');
+	});
+
+	it('applies patch with @level>1 comparison when player is level 2+', () => {
+		const patches: StepPatch[] = [
+			{
+				target: 'baker_buy',
+				tags: ['@level>1'],
+				text: { prepend: 'With experienced eyes, you notice... ' }
+			}
+		];
+
+		// Player has 2 level tags (level 2)
+		const result = applyPatches(baseStep, patches, ['level', 'level']);
+
+		expect(result.text).toBe('With experienced eyes, you notice... The baker shows you her wares.');
+	});
+
+	it('does not apply patch with @level>1 when player is level 1', () => {
+		const patches: StepPatch[] = [
+			{
+				target: 'baker_buy',
+				tags: ['@level>1'],
+				text: { prepend: 'With experienced eyes, you notice... ' }
+			}
+		];
+
+		// Player has 1 level tag (level 1)
+		const result = applyPatches(baseStep, patches, ['level']);
+
+		expect(result.text).toBe('The baker shows you her wares.');
+	});
+
+	it('applies patch with !level>2 when player is level 2 or below', () => {
+		const patches: StepPatch[] = [
+			{
+				target: 'baker_buy',
+				tags: ['!level>2'],
+				text: { append: ' (Beginner view)' }
+			}
+		];
+
+		// Player has 2 level tags (level 2) - not MORE than 2
+		const result = applyPatches(baseStep, patches, ['level', 'level']);
+
+		expect(result.text).toBe('The baker shows you her wares. (Beginner view)');
+	});
+
+	it('does not apply patch with !level>2 when player is level 3', () => {
+		const patches: StepPatch[] = [
+			{
+				target: 'baker_buy',
+				tags: ['!level>2'],
+				text: { append: ' (Beginner view)' }
+			}
+		];
+
+		// Player has 3 level tags (level 3) - more than 2
+		const result = applyPatches(baseStep, patches, ['level', 'level', 'level']);
+
+		expect(result.text).toBe('The baker shows you her wares.');
+	});
+
+	it('applies patch with @inv:silver=3 when player has exactly 3 silver', () => {
+		const patches: StepPatch[] = [
+			{
+				target: 'baker_buy',
+				tags: ['@inv:silver=3'],
+				text: { append: ' You could afford the special bread.' }
+			}
+		];
+
+		const result = applyPatches(baseStep, patches, ['inv:silver', 'inv:silver', 'inv:silver']);
+
+		expect(result.text).toBe('The baker shows you her wares. You could afford the special bread.');
+	});
+
+	it('does not apply patch with @inv:silver=3 when player has 2 silver', () => {
+		const patches: StepPatch[] = [
+			{
+				target: 'baker_buy',
+				tags: ['@inv:silver=3'],
+				text: { append: ' You could afford the special bread.' }
+			}
+		];
+
+		const result = applyPatches(baseStep, patches, ['inv:silver', 'inv:silver']);
+
+		expect(result.text).toBe('The baker shows you her wares.');
+	});
+
+	it('applies patch with @level<3 when player is level 2', () => {
+		const patches: StepPatch[] = [
+			{
+				target: 'baker_buy',
+				tags: ['@level<3'],
+				text: { prepend: 'As a novice, ' }
+			}
+		];
+
+		const result = applyPatches(baseStep, patches, ['level', 'level']);
+
+		expect(result.text).toBe('As a novice, The baker shows you her wares.');
+	});
+
+	it('combines comparison with other conditions', () => {
+		const patches: StepPatch[] = [
+			{
+				target: 'baker_buy',
+				tags: ['@level>1', '!visited_bakery', '+visited_bakery'],
+				text: { prepend: 'First time here as a veteran! ' }
+			}
+		];
+
+		// Level 2, hasn't visited
+		const result = applyPatches(baseStep, patches, ['level', 'level']);
+
+		expect(result.text).toBe('First time here as a veteran! The baker shows you her wares.');
+		expect(result.tags).toContain('+visited_bakery');
+	});
 });
 
 describe('expandOption', () => {

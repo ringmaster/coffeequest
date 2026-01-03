@@ -76,25 +76,72 @@ function expandStepOptions(
 }
 
 /**
+ * Count occurrences of each tag in a set (converts Set to counts Map)
+ */
+function countTags(tags: Set<string>): Map<string, number> {
+	const counts = new Map<string, number>();
+	for (const tag of tags) {
+		counts.set(tag, (counts.get(tag) || 0) + 1);
+	}
+	return counts;
+}
+
+/**
+ * Evaluate a comparison condition against a tag count
+ */
+function evaluateComparison(count: number, comparison: '=' | '<' | '>' | null, value: number | null): boolean {
+	if (comparison === null || value === null) {
+		return count >= 1;
+	}
+	switch (comparison) {
+		case '=': return count === value;
+		case '<': return count < value;
+		case '>': return count > value;
+		default: return count >= 1;
+	}
+}
+
+/**
  * Check if option requirements are met
+ * Supports comparison operators: tag=N, tag<N, tag>N
  */
 function checkOptionRequirements(
 	optionTags: string[],
 	playerTags: Set<string>
 ): { available: boolean; missingTags: string[] } {
 	const missingTags: string[] = [];
+	const playerCounts = countTags(playerTags);
 
 	for (const rawTag of optionTags) {
-		const { operator, tag } = parseTag(rawTag);
+		const parsed = parseTag(rawTag);
+		const playerCount = playerCounts.get(parsed.tag) || 0;
 
-		// Only @ and bare tags are requirements (! is block, + - are mutations)
-		if (operator === '@' || operator === '') {
-			if (!playerTags.has(tag)) {
-				missingTags.push(tag);
+		// Skip mutation operators
+		if (parsed.operator === '+' || parsed.operator === '-') {
+			continue;
+		}
+
+		if (parsed.operator === '@' || parsed.operator === '') {
+			// Required tag
+			if (parsed.comparison !== null) {
+				if (!evaluateComparison(playerCount, parsed.comparison, parsed.value)) {
+					missingTags.push(rawTag);
+				}
+			} else {
+				if (playerCount < 1) {
+					missingTags.push(parsed.tag);
+				}
 			}
-		} else if (operator === '!') {
-			if (playerTags.has(tag)) {
-				missingTags.push(`!${tag}`);
+		} else if (parsed.operator === '!') {
+			// Blocked tag
+			if (parsed.comparison !== null) {
+				if (evaluateComparison(playerCount, parsed.comparison, parsed.value)) {
+					missingTags.push(rawTag);
+				}
+			} else {
+				if (playerCount > 0) {
+					missingTags.push(`!${parsed.tag}`);
+				}
 			}
 		}
 	}
@@ -120,6 +167,7 @@ function extractMutations(optionTags: string[]): { add: string[]; remove: string
 
 /**
  * Find the best matching step for a location and tag state
+ * Supports comparison operators: tag=N, tag<N, tag>N
  */
 function findMatchingStep(
 	steps: RawStep[],
@@ -127,6 +175,7 @@ function findMatchingStep(
 	tags: Set<string>
 ): { step: RawStep; index: number } | null {
 	const matches: { step: RawStep; index: number; score: number }[] = [];
+	const playerCounts = countTags(tags);
 
 	for (let i = 0; i < steps.length; i++) {
 		const step = steps[i];
@@ -137,18 +186,40 @@ function findMatchingStep(
 		let score = 0;
 
 		for (const rawTag of step.tags ?? []) {
-			const { operator, tag } = parseTag(rawTag);
+			const parsed = parseTag(rawTag);
+			const playerCount = playerCounts.get(parsed.tag) || 0;
 
-			if (operator === '@' || operator === '') {
-				if (!tags.has(tag)) {
-					match = false;
-					break;
+			// Skip mutation operators
+			if (parsed.operator === '+' || parsed.operator === '-') {
+				continue;
+			}
+
+			if (parsed.operator === '@' || parsed.operator === '') {
+				// Required tag
+				if (parsed.comparison !== null) {
+					if (!evaluateComparison(playerCount, parsed.comparison, parsed.value)) {
+						match = false;
+						break;
+					}
+				} else {
+					if (playerCount < 1) {
+						match = false;
+						break;
+					}
 				}
 				score++;
-			} else if (operator === '!') {
-				if (tags.has(tag)) {
-					match = false;
-					break;
+			} else if (parsed.operator === '!') {
+				// Blocked tag
+				if (parsed.comparison !== null) {
+					if (evaluateComparison(playerCount, parsed.comparison, parsed.value)) {
+						match = false;
+						break;
+					}
+				} else {
+					if (playerCount > 0) {
+						match = false;
+						break;
+					}
 				}
 				score++;
 			}
@@ -168,6 +239,7 @@ function findMatchingStep(
 
 /**
  * Apply patches to a step based on current tags
+ * Supports comparison operators: tag=N, tag<N, tag>N
  */
 function applyPatches(
 	baseStep: RawStep,
@@ -177,6 +249,7 @@ function applyPatches(
 ): RawStep {
 	// Find applicable patches
 	const patches: RawStep[] = [];
+	const playerCounts = countTags(tags);
 
 	for (const step of steps) {
 		if (!isPatchStep(step)) continue;
@@ -186,16 +259,39 @@ function applyPatches(
 		// Check patch conditions
 		let applies = true;
 		for (const rawTag of step.tags ?? []) {
-			const { operator, tag } = parseTag(rawTag);
-			if (operator === '@') {
-				if (!tags.has(tag)) {
-					applies = false;
-					break;
+			const parsed = parseTag(rawTag);
+			const playerCount = playerCounts.get(parsed.tag) || 0;
+
+			// Skip mutation operators (they're processed during execution)
+			if (parsed.operator === '+' || parsed.operator === '-') {
+				continue;
+			}
+
+			if (parsed.operator === '@' || parsed.operator === '') {
+				// Required tag
+				if (parsed.comparison !== null) {
+					if (!evaluateComparison(playerCount, parsed.comparison, parsed.value)) {
+						applies = false;
+						break;
+					}
+				} else {
+					if (playerCount < 1) {
+						applies = false;
+						break;
+					}
 				}
-			} else if (operator === '!') {
-				if (tags.has(tag)) {
-					applies = false;
-					break;
+			} else if (parsed.operator === '!') {
+				// Blocked tag
+				if (parsed.comparison !== null) {
+					if (evaluateComparison(playerCount, parsed.comparison, parsed.value)) {
+						applies = false;
+						break;
+					}
+				} else {
+					if (playerCount > 0) {
+						applies = false;
+						break;
+					}
 				}
 			}
 		}
@@ -208,12 +304,20 @@ function applyPatches(
 	if (patches.length === 0) return baseStep;
 
 	// Clone and apply patches
-	const result = { ...baseStep };
+	const result = { ...baseStep, tags: [...(baseStep.tags ?? [])] };
 	const prepends: string[] = [];
 	const appends: string[] = [];
 	let replacement: string | null = null;
 
 	for (const patch of patches) {
+		// Add mutation tags from patch to step tags (will be processed during simulation)
+		for (const rawTag of patch.tags ?? []) {
+			const { operator } = parseTag(rawTag);
+			if (operator === '+' || operator === '-') {
+				result.tags.push(rawTag);
+			}
+		}
+
 		// Text modifications
 		if (typeof patch.text === 'object' && patch.text !== null) {
 			const textMod = patch.text as { prepend?: string; append?: string; replace?: string };

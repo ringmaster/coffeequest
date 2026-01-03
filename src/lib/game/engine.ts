@@ -1,5 +1,62 @@
 import type { Step, StepOption, StatName, SkillCheckResult, SkillBonus, SkillSource, RawStepOption, RawStep, OptionPresetsEntry, StepDebugInfo, TagAnalysis, RawStepPatch, StepPatch, TextModification, VarOptions } from '$lib/types/game';
+import type { TagOperator, ComparisonOperator, ParsedTag } from '$lib/types/editor';
 import { gameStore } from '$lib/stores/gameState.svelte';
+
+/**
+ * Parse a tag string into operator, tag name, and optional comparison
+ * Examples:
+ *   "@level>1" → { operator: '@', tag: 'level', comparison: '>', value: 1 }
+ *   "!inv:silver=3" → { operator: '!', tag: 'inv:silver', comparison: '=', value: 3 }
+ *   "+visited:market" → { operator: '+', tag: 'visited:market', comparison: null, value: null }
+ */
+function parseTag(raw: string): ParsedTag {
+	let operator: TagOperator = '';
+	let rest = raw;
+
+	// Extract prefix operator
+	if (rest.startsWith('@')) {
+		operator = '@';
+		rest = rest.slice(1);
+	} else if (rest.startsWith('!')) {
+		operator = '!';
+		rest = rest.slice(1);
+	} else if (rest.startsWith('+')) {
+		operator = '+';
+		rest = rest.slice(1);
+	} else if (rest.startsWith('-')) {
+		operator = '-';
+		rest = rest.slice(1);
+	}
+
+	// Check for comparison operator (=, <, >) followed by a number
+	const comparisonMatch = rest.match(/^(.+?)([=<>])(\d+)$/);
+	if (comparisonMatch) {
+		return {
+			operator,
+			tag: comparisonMatch[1],
+			comparison: comparisonMatch[2] as ComparisonOperator,
+			value: parseInt(comparisonMatch[3], 10)
+		};
+	}
+
+	return { operator, tag: rest, comparison: null, value: null };
+}
+
+/**
+ * Evaluate a comparison condition against a tag count
+ */
+function evaluateComparison(count: number, comparison: ComparisonOperator, value: number | null): boolean {
+	if (comparison === null || value === null) {
+		// No comparison: require at least 1
+		return count >= 1;
+	}
+	switch (comparison) {
+		case '=': return count === value;
+		case '<': return count < value;
+		case '>': return count > value;
+		default: return count >= 1;
+	}
+}
 
 /**
  * Transition to navigation phase, but check for level up first.
@@ -152,27 +209,47 @@ export function processPatchData(
 
 /**
  * Evaluate patch tag conditions against player tags.
+ * Supports comparison operators: tag=N, tag<N, tag>N
  * Patches use @tag (or bare tag) to require and !tag to forbid.
- * +tag and -tag are not valid on patches (ignored with warning).
+ * +tag and -tag are mutation operators processed during execution.
  */
 function evaluatePatchConditions(patchTags: string[], playerTags: string[]): boolean {
-	const playerTagSet = new Set(playerTags);
+	// Count player's tags
+	const playerCounts = new Map<string, number>();
+	for (const tag of playerTags) {
+		playerCounts.set(tag, (playerCounts.get(tag) || 0) + 1);
+	}
 
 	for (const rawTag of patchTags) {
-		// Skip mutation operators (not valid on patches)
-		if (rawTag.startsWith('+') || rawTag.startsWith('-')) {
-			console.warn(`Patch has invalid mutation tag: ${rawTag} (patches cannot mutate tags)`);
+		const parsed = parseTag(rawTag);
+
+		// Skip mutation operators (they don't affect conditions, but are processed during execution)
+		if (parsed.operator === '+' || parsed.operator === '-') {
 			continue;
 		}
 
-		if (rawTag.startsWith('!')) {
-			// Forbid tag
-			const tag = gameStore.renderText(rawTag.substring(1));
-			if (playerTagSet.has(tag)) return false;
+		// Render variables in the tag name
+		const renderedTag = gameStore.renderText(parsed.tag);
+		const playerCount = playerCounts.get(renderedTag) || 0;
+
+		if (parsed.operator === '!') {
+			// Blocked tag: condition must be FALSE for player
+			if (parsed.comparison !== null) {
+				if (evaluateComparison(playerCount, parsed.comparison, parsed.value)) {
+					return false;
+				}
+			} else {
+				if (playerCount > 0) return false;
+			}
 		} else {
-			// Require tag (@ or bare)
-			const tag = gameStore.renderText(rawTag.startsWith('@') ? rawTag.substring(1) : rawTag);
-			if (!playerTagSet.has(tag)) return false;
+			// Required tag (@ or bare): condition must be TRUE for player
+			if (parsed.comparison !== null) {
+				if (!evaluateComparison(playerCount, parsed.comparison, parsed.value)) {
+					return false;
+				}
+			} else {
+				if (playerCount < 1) return false;
+			}
 		}
 	}
 	return true;
@@ -230,6 +307,15 @@ export function applyPatches(
 
 	// Apply patches in order
 	for (const patch of applicable) {
+		// Add mutation tags from patch to step tags (will be processed during executeStep)
+		if (patch.tags) {
+			for (const tag of patch.tags) {
+				if (tag.startsWith('+') || tag.startsWith('-')) {
+					result.tags.push(tag);
+				}
+			}
+		}
+
 		// Options: append
 		if (patch.options && patch.options.length > 0) {
 			result.options = [...(result.options ?? []), ...patch.options];
@@ -262,43 +348,64 @@ export function getDisplayStep(baseStep: Step): Step {
 }
 
 /**
- * Check if player has enough of each required tag
- * Counts occurrences of each tag in the requirements and compares to player's tags
+ * Check if player meets all tag requirements
+ * Supports comparison operators: tag=N (exactly N), tag<N (fewer than N), tag>N (more than N)
  * Tags containing {{variables}} are rendered before comparison
  */
 function hasRequiredTags(tags: string[], playerMetadata: string[]): boolean {
-	// Count required tags (plain and @ tags, excluding blocked/grant/consume)
-	const requiredCounts = new Map<string, number>();
-	const blockedTags = new Set<string>();
-
-	for (const tag of tags) {
-		if (tag.startsWith('!')) {
-			// Render variables in blocked tags
-			const renderedTag = gameStore.renderText(tag.substring(1));
-			blockedTags.add(renderedTag);
-		} else if (!tag.startsWith('+') && !tag.startsWith('-')) {
-			// Render variables in required tags
-			const baseTag = tag.startsWith('@') ? tag.substring(1) : tag;
-			const required = gameStore.renderText(baseTag);
-			requiredCounts.set(required, (requiredCounts.get(required) || 0) + 1);
-		}
-	}
-
-	// Check blocked tags
-	for (const blocked of blockedTags) {
-		if (playerMetadata.includes(blocked)) {
-			return false;
-		}
-	}
-
-	// Count player's tags
+	// Count player's tags upfront
 	const playerCounts = new Map<string, number>();
 	for (const tag of playerMetadata) {
 		playerCounts.set(tag, (playerCounts.get(tag) || 0) + 1);
 	}
 
-	// Check if player has enough of each required tag
-	for (const [tag, requiredCount] of requiredCounts) {
+	// Track required tags without comparisons for legacy counting behavior
+	const legacyRequiredCounts = new Map<string, number>();
+
+	for (const rawTag of tags) {
+		const parsed = parseTag(rawTag);
+
+		// Skip mutation operators (+ and -)
+		if (parsed.operator === '+' || parsed.operator === '-') {
+			continue;
+		}
+
+		// Render variables in the tag name
+		const renderedTag = gameStore.renderText(parsed.tag);
+		const playerCount = playerCounts.get(renderedTag) || 0;
+
+		if (parsed.operator === '!') {
+			// Blocked tag: condition must be FALSE for player
+			// !tag means player must NOT have the tag
+			// !tag>3 means player must NOT have more than 3 (i.e., must have 3 or fewer)
+			if (parsed.comparison !== null) {
+				// With comparison: block if comparison is TRUE
+				if (evaluateComparison(playerCount, parsed.comparison, parsed.value)) {
+					return false;
+				}
+			} else {
+				// No comparison: block if player has any
+				if (playerCount > 0) {
+					return false;
+				}
+			}
+		} else {
+			// Required tag (@ or bare): condition must be TRUE for player
+			if (parsed.comparison !== null) {
+				// With comparison: require comparison to be TRUE
+				if (!evaluateComparison(playerCount, parsed.comparison, parsed.value)) {
+					return false;
+				}
+			} else {
+				// No comparison: use legacy counting behavior
+				// Multiple occurrences of same tag in requirements = require that many copies
+				legacyRequiredCounts.set(renderedTag, (legacyRequiredCounts.get(renderedTag) || 0) + 1);
+			}
+		}
+	}
+
+	// Check legacy required counts (tags without comparison operators)
+	for (const [tag, requiredCount] of legacyRequiredCounts) {
 		const playerCount = playerCounts.get(tag) || 0;
 		if (playerCount < requiredCount) {
 			return false;

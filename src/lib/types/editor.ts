@@ -39,10 +39,15 @@ export interface StepTreeGroup {
 	stepCount: number;
 }
 
-// Parsed tag with operator
+// Parsed tag with operator and optional comparison
+export type TagOperator = '@' | '!' | '+' | '-' | '';
+export type ComparisonOperator = '=' | '<' | '>' | null;
+
 export interface ParsedTag {
-	operator: '@' | '!' | '+' | '-' | '';
+	operator: TagOperator;
 	tag: string;
+	comparison: ComparisonOperator;
+	value: number | null;
 }
 
 // Lint result

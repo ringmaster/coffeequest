@@ -1,5 +1,5 @@
 import type { GameConfig, RawStep, RawStepOption } from '$lib/types/game';
-import type { QuestFile, LintResult, CoverageRow, ParsedTag, StepNode, TreeNode, StepTreeGroup } from '$lib/types/editor';
+import type { QuestFile, LintResult, CoverageRow, ParsedTag, StepNode, TreeNode, StepTreeGroup, TagOperator, ComparisonOperator } from '$lib/types/editor';
 
 const PATCH_PREFIX = '@patch:';
 
@@ -19,25 +19,85 @@ export function getPatchTarget(step: RawStep): string | null {
 }
 
 /**
- * Parse a tag string into operator and tag name
+ * Parse a tag string into operator, tag name, and optional comparison
+ * Examples:
+ *   "@level>1" → { operator: '@', tag: 'level', comparison: '>', value: 1 }
+ *   "!inv:silver=3" → { operator: '!', tag: 'inv:silver', comparison: '=', value: 3 }
+ *   "+visited:market" → { operator: '+', tag: 'visited:market', comparison: null, value: null }
  */
 export function parseTag(raw: string): ParsedTag {
-	if (raw.startsWith('@')) return { operator: '@', tag: raw.slice(1) };
-	if (raw.startsWith('!')) return { operator: '!', tag: raw.slice(1) };
-	if (raw.startsWith('+')) return { operator: '+', tag: raw.slice(1) };
-	if (raw.startsWith('-')) return { operator: '-', tag: raw.slice(1) };
-	return { operator: '', tag: raw };
+	let operator: TagOperator = '';
+	let rest = raw;
+
+	// Extract prefix operator
+	if (rest.startsWith('@')) {
+		operator = '@';
+		rest = rest.slice(1);
+	} else if (rest.startsWith('!')) {
+		operator = '!';
+		rest = rest.slice(1);
+	} else if (rest.startsWith('+')) {
+		operator = '+';
+		rest = rest.slice(1);
+	} else if (rest.startsWith('-')) {
+		operator = '-';
+		rest = rest.slice(1);
+	}
+
+	// Check for comparison operator (=, <, >) followed by a number
+	const comparisonMatch = rest.match(/^(.+?)([=<>])(\d+)$/);
+	if (comparisonMatch) {
+		return {
+			operator,
+			tag: comparisonMatch[1],
+			comparison: comparisonMatch[2] as ComparisonOperator,
+			value: parseInt(comparisonMatch[3], 10)
+		};
+	}
+
+	return { operator, tag: rest, comparison: null, value: null };
 }
 
 /**
  * Format a parsed tag back to string
  */
 export function formatTag(parsed: ParsedTag): string {
-	return parsed.operator + parsed.tag;
+	let result = parsed.operator + parsed.tag;
+	if (parsed.comparison !== null && parsed.value !== null) {
+		result += parsed.comparison + parsed.value;
+	}
+	return result;
+}
+
+/**
+ * Count occurrences of each tag in a set
+ */
+function countTags(tags: Set<string>): Map<string, number> {
+	const counts = new Map<string, number>();
+	for (const tag of tags) {
+		counts.set(tag, (counts.get(tag) || 0) + 1);
+	}
+	return counts;
+}
+
+/**
+ * Evaluate a comparison condition against a tag count
+ */
+function evaluateComparison(count: number, comparison: ComparisonOperator, value: number | null): boolean {
+	if (comparison === null || value === null) {
+		return count >= 1;
+	}
+	switch (comparison) {
+		case '=': return count === value;
+		case '<': return count < value;
+		case '>': return count > value;
+		default: return count >= 1;
+	}
 }
 
 /**
  * Check if a step matches the given location and active tags
+ * Supports comparison operators: tag=N, tag<N, tag>N
  */
 function stepMatchesFilters(step: RawStep, location: string, activeTags: Set<string>): boolean {
 	// Patches don't match locations directly
@@ -46,19 +106,37 @@ function stepMatchesFilters(step: RawStep, location: string, activeTags: Set<str
 	// Must match location (case-insensitive)
 	if (step.id.toLowerCase() !== location.toLowerCase()) return false;
 
+	const playerCounts = countTags(activeTags);
+
 	// Check all tag conditions
 	for (const rawTag of step.tags ?? []) {
-		const { operator, tag } = parseTag(rawTag);
+		const parsed = parseTag(rawTag);
+		const playerCount = playerCounts.get(parsed.tag) || 0;
 
-		// @ or bare: require tag
-		if (operator === '@' || operator === '') {
-			if (!activeTags.has(tag)) return false;
+		// Skip mutation operators
+		if (parsed.operator === '+' || parsed.operator === '-') {
+			continue;
 		}
-		// !: forbid tag
-		else if (operator === '!') {
-			if (activeTags.has(tag)) return false;
+
+		if (parsed.operator === '@' || parsed.operator === '') {
+			// Required tag
+			if (parsed.comparison !== null) {
+				if (!evaluateComparison(playerCount, parsed.comparison, parsed.value)) {
+					return false;
+				}
+			} else {
+				if (playerCount < 1) return false;
+			}
+		} else if (parsed.operator === '!') {
+			// Blocked tag
+			if (parsed.comparison !== null) {
+				if (evaluateComparison(playerCount, parsed.comparison, parsed.value)) {
+					return false;
+				}
+			} else {
+				if (playerCount > 0) return false;
+			}
 		}
-		// + and - are mutations, not conditions (ignore for matching)
 	}
 
 	return true;
