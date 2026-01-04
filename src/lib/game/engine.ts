@@ -8,13 +8,21 @@ import { gameStore } from '$lib/stores/gameState.svelte';
  *   "@level>1" → { operator: '@', tag: 'level', comparison: '>', value: 1 }
  *   "!inv:silver=3" → { operator: '!', tag: 'inv:silver', comparison: '=', value: 3 }
  *   "+visited:market" → { operator: '+', tag: 'visited:market', comparison: null, value: null }
+ *   "^quest" → { operator: '^', tag: 'quest', ... } (base step must have tag)
+ *   "^!internal" → { operator: '^!', tag: 'internal', ... } (base step must NOT have tag)
  */
 function parseTag(raw: string): ParsedTag {
 	let operator: TagOperator = '';
 	let rest = raw;
 
-	// Extract prefix operator
-	if (rest.startsWith('@')) {
+	// Extract prefix operator (check multi-char operators first)
+	if (rest.startsWith('^!')) {
+		operator = '^!';
+		rest = rest.slice(2);
+	} else if (rest.startsWith('^')) {
+		operator = '^';
+		rest = rest.slice(1);
+	} else if (rest.startsWith('@')) {
 		operator = '@';
 		rest = rest.slice(1);
 	} else if (rest.startsWith('!')) {
@@ -208,16 +216,28 @@ export function processPatchData(
 }
 
 /**
- * Evaluate patch tag conditions against player tags.
+ * Evaluate patch tag conditions against player tags and base step tags.
  * Supports comparison operators: tag=N, tag<N, tag>N
- * Patches use @tag (or bare tag) to require and !tag to forbid.
+ * Patches use @tag (or bare tag) to require and !tag to forbid (player tags).
+ * Use ^tag to require base step has tag, ^!tag to require base step does NOT have tag.
  * +tag and -tag are mutation operators processed during execution.
  */
-function evaluatePatchConditions(patchTags: string[], playerTags: string[]): boolean {
+function evaluatePatchConditions(
+	patchTags: string[],
+	playerTags: string[],
+	baseStepTags: string[]
+): boolean {
 	// Count player's tags
 	const playerCounts = new Map<string, number>();
 	for (const tag of playerTags) {
 		playerCounts.set(tag, (playerCounts.get(tag) || 0) + 1);
+	}
+
+	// Build set of base step tags (strip operators for matching)
+	const stepTagSet = new Set<string>();
+	for (const rawTag of baseStepTags) {
+		const parsed = parseTag(rawTag);
+		stepTagSet.add(parsed.tag);
 	}
 
 	for (const rawTag of patchTags) {
@@ -230,6 +250,23 @@ function evaluatePatchConditions(patchTags: string[], playerTags: string[]): boo
 
 		// Render variables in the tag name
 		const renderedTag = gameStore.renderText(parsed.tag);
+
+		// Handle step-condition operators (^ and ^!)
+		if (parsed.operator === '^') {
+			// Required: base step must have this tag
+			if (!stepTagSet.has(renderedTag)) {
+				return false;
+			}
+			continue;
+		} else if (parsed.operator === '^!') {
+			// Blocked: base step must NOT have this tag
+			if (stepTagSet.has(renderedTag)) {
+				return false;
+			}
+			continue;
+		}
+
+		// Handle player tag conditions (@ ! or bare)
 		const playerCount = playerCounts.get(renderedTag) || 0;
 
 		if (parsed.operator === '!') {
@@ -259,6 +296,7 @@ function evaluatePatchConditions(patchTags: string[], playerTags: string[]): boo
  * Apply text modifications from patches to base text.
  * Order: prepends (in patch order) + base + appends (in patch order)
  * If any replace exists, it overrides everything (last one wins).
+ * Adds <br> between prepend/base and base/append for visual separation.
  */
 function applyTextModifications(baseText: string, patches: StepPatch[]): string {
 	const prepends: string[] = [];
@@ -275,7 +313,16 @@ function applyTextModifications(baseText: string, patches: StepPatch[]): string 
 		return replacement;
 	}
 
-	return prepends.join('') + baseText + appends.join('');
+	const parts: string[] = [];
+	if (prepends.length > 0) {
+		parts.push(prepends.join('<br>'));
+	}
+	parts.push(baseText);
+	if (appends.length > 0) {
+		parts.push(appends.join('<br>'));
+	}
+
+	return parts.join('<br>');
 }
 
 /**
@@ -287,9 +334,10 @@ export function applyPatches(
 	patches: StepPatch[],
 	playerTags: string[]
 ): Step {
-	// Filter to applicable patches
+	// Filter to applicable patches (check against both player tags and base step tags)
+	const baseStepTags = baseStep.tags ?? [];
 	const applicable = patches.filter((p) =>
-		evaluatePatchConditions(p.tags ?? [], playerTags)
+		evaluatePatchConditions(p.tags ?? [], playerTags, baseStepTags)
 	);
 
 	if (applicable.length === 0) return baseStep;
@@ -367,6 +415,11 @@ function hasRequiredTags(tags: string[], playerMetadata: string[]): boolean {
 
 		// Skip mutation operators (+ and -)
 		if (parsed.operator === '+' || parsed.operator === '-') {
+			continue;
+		}
+
+		// Skip internal tags (prefixed with _) - these are for patch targeting only
+		if (parsed.tag.startsWith('_')) {
 			continue;
 		}
 
@@ -861,7 +914,19 @@ export function selectOption(option: StepOption): void {
 		if (nextStep) {
 			loadStep(nextStep);
 		} else {
-			gameStore.errorMessage = 'Something went wrong. Returning to navigation.';
+			// Provide debug info if debug mode is enabled
+			const debugInfo = getStepDebugInfo(option.pass);
+			if (gameStore.hasTag('debug_mode')) {
+				if (debugInfo.length === 0) {
+					gameStore.errorMessage = `Step not found: "${option.pass}" - no steps with this ID exist.`;
+				} else {
+					gameStore.errorMessage = `Step blocked: "${option.pass}" - ${debugInfo.length} step(s) found but none match player tags.`;
+				}
+				gameStore.debugStepInfo = debugInfo;
+			} else {
+				gameStore.errorMessage = 'Something went wrong. Returning to navigation.';
+				gameStore.debugStepInfo = [];
+			}
 			gameStore.phase = 'navigation';
 		}
 	} else {
@@ -907,7 +972,19 @@ export function continueAfterSkillCheck(): void {
 		if (nextStep) {
 			loadStep(nextStep);
 		} else {
-			gameStore.errorMessage = 'Something went wrong. Returning to navigation.';
+			// Provide debug info if debug mode is enabled
+			const debugInfo = getStepDebugInfo(nextStepId);
+			if (gameStore.hasTag('debug_mode')) {
+				if (debugInfo.length === 0) {
+					gameStore.errorMessage = `Step not found: "${nextStepId}" - no steps with this ID exist.`;
+				} else {
+					gameStore.errorMessage = `Step blocked: "${nextStepId}" - ${debugInfo.length} step(s) found but none match player tags.`;
+				}
+				gameStore.debugStepInfo = debugInfo;
+			} else {
+				gameStore.errorMessage = 'Something went wrong. Returning to navigation.';
+				gameStore.debugStepInfo = [];
+			}
 			gameStore.phase = 'navigation';
 		}
 	} else {

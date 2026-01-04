@@ -38,6 +38,13 @@ steps:
       Laughter erupts from inside the guardhouse—someone's telling a story about the captain's wife. The guards are
       too amused to notice you.
 
+  - id: Guardhouse
+    tags: [_default]
+    text: >-
+      A guard sits at the duty desk, half-attending to a ledger. He glances up
+      as you enter.
+      "Something to report?"
+
   # Inn
   - id: Inn
     tags: [quest]

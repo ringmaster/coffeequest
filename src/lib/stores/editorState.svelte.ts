@@ -24,13 +24,21 @@ export function getPatchTarget(step: RawStep): string | null {
  *   "@level>1" → { operator: '@', tag: 'level', comparison: '>', value: 1 }
  *   "!inv:silver=3" → { operator: '!', tag: 'inv:silver', comparison: '=', value: 3 }
  *   "+visited:market" → { operator: '+', tag: 'visited:market', comparison: null, value: null }
+ *   "^quest" → { operator: '^', tag: 'quest', ... } (base step must have tag)
+ *   "^!internal" → { operator: '^!', tag: 'internal', ... } (base step must NOT have tag)
  */
 export function parseTag(raw: string): ParsedTag {
 	let operator: TagOperator = '';
 	let rest = raw;
 
-	// Extract prefix operator
-	if (rest.startsWith('@')) {
+	// Extract prefix operator (check multi-char operators first)
+	if (rest.startsWith('^!')) {
+		operator = '^!';
+		rest = rest.slice(2);
+	} else if (rest.startsWith('^')) {
+		operator = '^';
+		rest = rest.slice(1);
+	} else if (rest.startsWith('@')) {
 		operator = '@';
 		rest = rest.slice(1);
 	} else if (rest.startsWith('!')) {
@@ -534,13 +542,37 @@ class EditorStore {
 		return Array.from(tags).sort();
 	});
 
-	// Derived: All non-patch step IDs (for patch target dropdown)
+	// Derived: All non-patch step IDs from current file
 	allStepIds = $derived.by(() => {
 		if (!this.questFile) return [];
 		return this.questFile.steps
 			.filter((s) => !isPatchStep(s))
 			.map((s) => s.id)
 			.sort();
+	});
+
+	// Derived: All step IDs from ALL quest files (for patch target dropdown)
+	// Includes steps from external files, deduplicated and sorted
+	allGlobalStepIds = $derived.by(() => {
+		const ids = new Set<string>();
+
+		// Add from all loaded steps (merged from all quest files)
+		for (const step of this.allSteps) {
+			if (!isPatchStep(step)) {
+				ids.add(step.id);
+			}
+		}
+
+		// Also include current file steps (in case file hasn't been saved yet)
+		if (this.questFile) {
+			for (const step of this.questFile.steps) {
+				if (!isPatchStep(step)) {
+					ids.add(step.id);
+				}
+			}
+		}
+
+		return Array.from(ids).sort();
 	});
 
 	// Derived: All variables defined across all steps (for cross-step variable reference)

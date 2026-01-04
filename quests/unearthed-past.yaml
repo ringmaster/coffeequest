@@ -1,8 +1,6 @@
 option_presets:
   leave_maren:
     - I need to think about this.
-  graveyard_return:
-    - Return to the grave::return_to_maren
 steps:
   - id: Graveyard
     tags:
@@ -26,7 +24,8 @@ steps:
       - Grave robbery is a serious crime.::maren_crime_warning
       - None of my business. Good luck.
     tags:
-      - quest
+      - +quest
+      - +q:unearthed_past
   - id: maren_crime_warning
     text: >
       "You think I don't know that?" She laughs bitterly. "Prison. Maybe death, if the magistrate's in a foul mood."
@@ -137,13 +136,15 @@ steps:
     log: Refused to help Maren with her plan
     tags:
       - "-quest"
+      - +done:unearthed_past
+      - +open:report_maren
   - id: threaten_report
     text: >
       Her face hardens. "Report what? A woman standing in a graveyard? I haven't done anything. Yet."
 
 
       She steps closer. "But if you bring the guard down on me, know this: I've got nothing. No family, no prospects, no
-      future. They can transport me to the colonies and I'll have lost nothing I haven't already lost."
+      future. They can cast me out and I'll have lost nothing I haven't already lost."
 
 
       "Can you say the same?"
@@ -152,12 +153,12 @@ steps:
       - Let me look into this first. There might be another way.::accept_investigate
   - id: Town Square
     tags:
-      - q:unearthed_past
+      - "@q:unearthed_past"
       - "!q:visited_square"
       - "!q:committed_blind"
     text: >
       The Aldworth manor dominates the corner of Town Square—three stories of gray stone, its windows watching the
-      market like disapproving eyes. A young man in fine clothes stands near the entrance, speaking tersely with a
+      square like disapproving eyes. A young man in fine clothes stands near the entrance, speaking tersely with a
       clerk.
 
 
@@ -188,11 +189,7 @@ steps:
     options:
       - Why does a locket matter so much to you?::aldworth_press
       - She served your family for twenty years. Surely—::aldworth_twenty_years
-      - label: What are you so afraid of?
-        tags:
-          - trait:direct*2
-        pass: aldworth_confronted
-        hidden: true
+      - What are you so afraid of?::aldworth_confronted
       - I understand. Good day.
   - id: aldworth_twenty_years
     text: >
@@ -203,7 +200,8 @@ steps:
       grasping."
     options:
       - Why does a simple locket matter so much to you?::aldworth_press
-      - graveyard_return
+      - Perhaps there are answers elsewhere.
+    tags: []
   - id: aldworth_press
     text: >
       "It doesn't matter to me," he snaps. "That's precisely the point. What's buried is buried. My father's wishes—" He
@@ -212,15 +210,13 @@ steps:
 
       "This is a family matter. That's all you need to know."
     options:
-      - label: Family matter? She's a servant. Unless there's more to it.
-        tags:
-          - trait:direct
-        pass: aldworth_family_slip
+      - Family matter? She's a servant. Unless there's more to it.::aldworth_family_slip
       - I see. Thank you for your time.
   - id: aldworth_family_slip
     tags:
       - +q:family_slip
       - +q:suspicious
+      - +trait:direct
     text: |
       Something flickers across his face. Fear? Anger? Both?
 
@@ -230,8 +226,11 @@ steps:
 
       Family matter. The words hang in the air. What family?
     options:
-      - graveyard_return
-      - Perhaps the church has answers.
+      - Perhaps there are answers elsewhere.
+      - label: Perhaps the church has answers.
+        tags:
+          - "!q:visited_church"
+        hidden: true
   - id: aldworth_confronted
     tags:
       - +q:knows_bloodline
@@ -273,7 +272,7 @@ steps:
       "Love, maybe. A twisted kind. Does it matter now?"
     options:
       - Return the locket. Let Maren decide what it means.::aldworth_locket_proof
-      - graveyard_return
+      - I need to think about this.
   - id: aldworth_locket_proof
     text: >
       "A miniature portrait of her mother. And behind it, one of my father as a young man. Side by side, the resemblance
@@ -282,9 +281,10 @@ steps:
 
       "So yes. The locket stays in the ground. For everyone's sake."
     options:
-      - Return it to her. Quietly. And this stays between us.::aldworth_leverage_quiet
+      - Return it to her quietly and this can stay between us.::aldworth_leverage_quiet
       - She has a right to know who she is.::aldworth_refuse_cooperate
-      - graveyard_return
+      - Perhaps there are answers elsewhere.
+    tags: []
   - id: aldworth_leverage_quiet
     tags:
       - +trait:clever
@@ -304,7 +304,7 @@ steps:
       He turns and walks back to the manor without another word. You've given him an out. Whether he takes it remains to
       be seen.
     options:
-      - graveyard_return
+      - Perhaps there are answers elsewhere.
     log: Negotiated with young Aldworth to return the locket quietly
   - id: aldworth_refuse_cooperate
     text: |
@@ -318,7 +318,7 @@ steps:
 
       You've learned what you needed. Now it's a question of what to do with it.
     options:
-      - graveyard_return
+      - I need to think about this.
     log: Young Aldworth refused to return the locket
   - id: aldworth_condolences
     text: >
@@ -334,7 +334,7 @@ steps:
     tags:
       - +q:visited_square
     text: >
-      You linger near a market stall, watching. Aldworth conducts his business with clipped efficiency—signing papers,
+      You linger near the fountain, watching. Aldworth conducts his business with clipped efficiency—signing papers,
       giving orders, accepting condolences with practiced grace.
 
 
@@ -401,8 +401,7 @@ steps:
 
       She returns to her work, leaving you with a fragment that doesn't quite fit—or fits too well.
     options:
-      - graveyard_return
-      - Perhaps the church has answers.
+      - Perhaps there are answers elsewhere.
   - id: servant_aside
     tags:
       - +q:servant_whisper
@@ -419,7 +418,7 @@ steps:
       about why."
     options:
       - Why would he keep that?::servant_why_portrait
-      - graveyard_return
+      - I've seen enough for now.
   - id: servant_why_portrait
     tags:
       - +q:suspicious
@@ -433,11 +432,10 @@ steps:
 
       She shakes her head. "Some secrets go to the grave. Or into it."
     options:
-      - graveyard_return
-      - Perhaps the church has answers.
+      - Perhaps there are answers elsewhere.
   - id: Church
     tags:
-      - q:unearthed_past
+      - "@q:unearthed_past"
       - "!q:visited_church"
       - "!q:committed_blind"
     text: >
@@ -483,7 +481,7 @@ steps:
       - +q:visited_church
       - +q:priest_troubled
     text: >
-      He goes pale. "Dig up—? She would risk transportation? Prison?"
+      He goes pale. "Dig up—? She would risk exile? Prison?"
 
 
       He paces to the altar and back. "I warned young Aldworth this would not end cleanly. A locket, he said. Just a
@@ -510,14 +508,12 @@ steps:
       - What things? What's in that grave that matters so much?::herald_press
       - label: Father. She deserves to know who she is.
         tags:
-          - trait:direct*2
-          - q:servant_whisper
+          - "@q:servant_whisper"
         pass: herald_knows_truth
         hidden: true
       - label: Father. She deserves to know who she is.
         tags:
-          - trait:direct*2
-          - q:family_slip
+          - "@q:family_slip"
         pass: herald_knows_truth
         hidden: true
       - Some things stay buried. I understand.
@@ -532,8 +528,11 @@ steps:
       He meets your eyes. "If you care about that woman—truly care—ask yourself whether knowing the truth will heal her
       or simply wound her in new ways."
     options:
-      - graveyard_return
-      - The manor might have answers you can't give.
+      - I need to think about this.
+      - label: Perhaps the manor has answers you can't give.
+        tags:
+          - "!q:visited_square"
+        hidden: true
   - id: herald_knows_truth
     tags:
       - +q:knows_bloodline
@@ -555,7 +554,7 @@ steps:
     options:
       - She has a right to know.::herald_right_to_know
       - And you think ignorance protects her?::herald_ignorance
-      - graveyard_return
+      - I need to think about this.
     log: Learned the truth about Maren's bloodline from Father Herald
   - id: herald_right_to_know
     text: >
@@ -567,7 +566,7 @@ steps:
     options:
       - Tell her. It's her right.::herald_tell_her
       - I don't know yet.::herald_uncertainty
-      - graveyard_return
+      - I need to think about this.
   - id: herald_tell_her
     text: >
       "Perhaps you're right." He sounds exhausted. "I've kept so many secrets. Perhaps this one has poisoned me long
@@ -578,7 +577,7 @@ steps:
       learns the truth, it must come from elsewhere. From the evidence itself."
     options:
       - The locket would prove it.::herald_locket_proof
-      - graveyard_return
+      - I need to think about this.
   - id: herald_uncertainty
     text: >
       "Neither do I." He sighs. "I have prayed on it. I have lost sleep over it. And still I don't know if telling her
@@ -588,7 +587,7 @@ steps:
       He meets your eyes. "Perhaps that's not for either of us to decide. Perhaps she should have the choice herself."
     options:
       - Then help me get her the locket.::herald_help_request
-      - graveyard_return
+      - I need to think about this.
   - id: herald_locket_proof
     text: >
       "Yes. The portraits inside—her mother, and old Aldworth as a young man. Side by side, the resemblance..." He
@@ -597,7 +596,7 @@ steps:
 
       "If she sees it, she'll know. She'll understand what it means."
     options:
-      - graveyard_return
+      - I need to think about this.
   - id: herald_help_request
     text: >
       "I cannot openly defy the Aldworths. But..." He hesitates. "If the locket were to find its way to her through
@@ -606,7 +605,7 @@ steps:
 
       It's not help. But it's not opposition either.
     options:
-      - graveyard_return
+      - I need to think about this.
   - id: herald_ignorance
     text: >
       "I think..." He trails off. "I think I don't know anymore. I've spent so long keeping secrets for dying men.
@@ -618,7 +617,7 @@ steps:
 
       "Do what you think is right. I won't stop you. I've done enough stopping."
     options:
-      - graveyard_return
+      - I need to think about this.
   - id: herald_maren
     text: >
       "Because I was asked not to." He sounds ashamed. "Young Aldworth came to me before she did. He said it was a
@@ -640,8 +639,11 @@ steps:
 
       He won't meet your eyes. "I have duties to attend to."
     options:
-      - graveyard_return
-      - The manor might have answers you can't give.
+      - I need to think about this.
+      - label: Perhaps the manor has answers you can't give.
+        tags:
+          - "!q:visited_square"
+        hidden: true
   - id: herald_reconsider
     text: >
       He shakes his head slowly. "I cannot go against the family's wishes. Not openly. But..."
@@ -653,11 +655,14 @@ steps:
 
       It's not help. But it's not opposition either.
     options:
-      - graveyard_return
-      - The manor might have answers you can't give.
+      - I need to think about this.
+      - label: Perhaps the manor has answers you can't give.
+        tags:
+          - "!q:visited_square"
+        hidden: true
   - id: return_to_maren
     tags:
-      - q:unearthed_past
+      - "@q:unearthed_past"
       - "!q:knows_bloodline"
       - "!q:suspicious"
       - "!q:committed_blind"
@@ -674,7 +679,7 @@ steps:
       - I'm going to report this.::final_report
   - id: return_to_maren
     tags:
-      - q:unearthed_past
+      - "@q:unearthed_past"
       - "!q:knows_bloodline"
       - "@q:suspicious"
       - "!q:committed_blind"
@@ -701,7 +706,7 @@ steps:
     options:
       - Then I'll help you.::confirm_dig_suspicious
       - I'll create a distraction while you work.::confirm_distraction
-      - Maren, whatever it is—is it worth transportation?::maren_worth_it
+      - Maren, whatever it is—is it worth being cast out?::maren_worth_it
       - I can't. I'm sorry.::maren_alone_suspicious
   - id: maren_worth_it
     text: >
@@ -716,7 +721,7 @@ steps:
       - I understand. But I can't be part of this.::maren_alone_suspicious
   - id: return_to_maren
     tags:
-      - q:unearthed_past
+      - "@q:unearthed_past"
       - "@q:knows_bloodline"
       - "!q:committed_blind"
     text: |
@@ -842,7 +847,7 @@ steps:
       - I'm sorry. Do what you need to do.::confirm_dig_withheld
   - id: persuade_abandon
     text: >
-      "The risk is too high," you press. "Transportation. Prison. And for what? A piece of metal? A portrait you've
+      "The risk is too high," you press. "Exile. Prison. And for what? A piece of metal? A portrait you've
       lived without for decades?"
 
 
@@ -1038,7 +1043,7 @@ steps:
     log: Agreed to create a distraction while Maren digs
   - id: dig_arrival
     tags:
-      - q:unearthed_past
+      - "@q:unearthed_past"
     text: |
       The moon is thin. Maren waits by the grave with a spade, little more than a shadow among shadows.
 
@@ -1053,7 +1058,7 @@ steps:
         fail: dig_caught
   - id: dig_arrival_informed
     tags:
-      - q:unearthed_past
+      - "@q:unearthed_past"
       - "@q:knows_bloodline"
     text: |
       The moon is thin. Maren waits by the grave with a spade, little more than a shadow among shadows.
@@ -1316,7 +1321,7 @@ steps:
     log: Caught while trying to distract the watchman
   - id: distraction_setup
     tags:
-      - q:unearthed_past
+      - "@q:unearthed_past"
     text: >
       You need to draw the watch away from the graveyard. There are a few possibilities.
 
@@ -1619,7 +1624,7 @@ steps:
     log: Left Maren to dig alone after learning of her suspicions
   - id: Graveyard
     tags:
-      - q:unearthed_past
+      - "@q:unearthed_past"
       - "!q:knows_bloodline"
       - "!q:suspicious"
       - "!q:committed_blind"
@@ -1630,7 +1635,7 @@ steps:
       - Not yet—I need to keep looking.
   - id: Graveyard
     tags:
-      - q:unearthed_past
+      - "@q:unearthed_past"
       - "!q:knows_bloodline"
       - "@q:suspicious"
       - "!q:committed_blind"
@@ -1641,7 +1646,7 @@ steps:
       - Not yet.
   - id: Graveyard
     tags:
-      - q:unearthed_past
+      - "@q:unearthed_past"
       - "@q:knows_bloodline"
       - "!q:committed_blind"
     text: |
@@ -1651,7 +1656,7 @@ steps:
       - Not yet.
   - id: Town Square
     tags:
-      - q:unearthed_past
+      - "@q:unearthed_past"
       - "@q:visited_square"
       - "!q:committed_blind"
     text: >
@@ -1661,7 +1666,7 @@ steps:
       - Leave.
   - id: Church
     tags:
-      - q:unearthed_past
+      - "@q:unearthed_past"
       - "@q:visited_church"
       - "!q:committed_blind"
     text: |
@@ -1670,3 +1675,56 @@ steps:
       You've already spoken with him. His conscience is troubled, but his tongue is bound.
     options:
       - Leave.
+  - id: "@patch:Guardhouse"
+    tags:
+      - open:report_maren
+      - "!quest"
+      - ^_default
+    text:
+      append: >-
+        You think of Maren from the graveyard; A woman with nothing left to lose, planning to dig up what she believes
+        is hers.
+    options:
+      - label: There's a woman planning to rob a grave.
+        tags:
+          - "@open:report_maren"
+        pass: report_maren_yes
+        hidden: true
+      - label: ...No. Nothing to report.
+        tags:
+          - open:report_maren
+        pass: report_maren_no
+        hidden: true
+  - id: report_maren_yes
+    tags:
+      - "-open:report_maren"
+      - +done:unearthed_past
+      - +trait:dutiful
+    text: >-
+      You tell the guard about the woman at the graveyard and the freshgrave she was watching.
+
+
+      He nods and makes a note in his ledger. "Grave robbery is a serious offense. We'll put someone on it. Thank you,
+      citizen."
+
+
+      You hear later that the guard staked out the graveyard for three nights.  Maren never came. Someone said they saw
+      her on the north road, walking alone with nothing but a sack over her shoulder.
+    log: Reported Maren's plan to the guard—she fled before they could catch her
+  - id: report_maren_no
+    tags:
+      - "-open:report_maren"
+      - +done:unearthed_past
+    text: >-
+      "Nothing to report," you say.
+
+
+      The guard grunts and returns to his ledger.
+
+
+      You think of Maren as you leave. The graveyard. Whatever happens tonight, you won't be part of it—but you won't
+      stop it either.
+
+
+      You never hear what became of her.
+    log: Chose not to report Maren to the guard

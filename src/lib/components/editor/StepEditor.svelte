@@ -41,8 +41,8 @@
 	}
 
 	function handleTargetChange(e: Event) {
-		const select = e.target as HTMLSelectElement;
-		editingStep.id = '@patch:' + select.value;
+		const input = e.target as HTMLInputElement;
+		editingStep.id = '@patch:' + input.value;
 		updateStep();
 	}
 
@@ -125,18 +125,25 @@
 		<!-- Patch-specific fields -->
 		<div class="field">
 			<label for="patch-target">Target Step</label>
-			<select id="patch-target" value={patchTarget ?? ''} onchange={handleTargetChange}>
-				<option value="">Select target step...</option>
-				{#each editorStore.allStepIds as stepId}
+			<input
+				id="patch-target"
+				type="text"
+				list="patch-target-list"
+				value={patchTarget ?? ''}
+				oninput={handleTargetChange}
+				placeholder="Enter or select target step ID..."
+			/>
+			<datalist id="patch-target-list">
+				{#each editorStore.allGlobalStepIds as stepId}
 					<option value={stepId}>{stepId}</option>
 				{/each}
-			</select>
-			<div class="field-hint">The step this patch modifies when its conditions are met</div>
+			</datalist>
+			<div class="field-hint">The step this patch modifies when its conditions are met (can target steps in other files)</div>
 		</div>
 
 		<TagsEditor tags={editingStep.tags ?? []} onChange={handleTagsChange} />
 		<div class="field-hint tags-hint">
-			Use @tag to require tags, !tag to forbid. Patch applies only when conditions match.
+			Use @tag/!tag for player conditions, ^tag/^!tag for base step conditions. Patch applies when all match.
 		</div>
 
 		<VariablesEditor vars={editingStep.vars} onChange={handleVarsChange} />

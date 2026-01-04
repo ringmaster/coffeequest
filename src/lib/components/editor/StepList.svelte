@@ -244,7 +244,7 @@
 		{/if}
 
 		{#if filteredPatches.length > 0}
-			<div class="tree-group patches-group">
+			<div class="tree-group">
 				<button
 					class="group-header"
 					onclick={() => toggleGroup('__patches__')}
@@ -259,7 +259,7 @@
 					<div class="group-children">
 						{#each filteredPatches as node (node.stepIndex)}
 							<button
-								class="tree-node patch"
+								class="tree-node"
 								class:selected={editorStore.selectedStepIndex === node.stepIndex}
 								onclick={() => selectStep(node.stepIndex)}
 							>
@@ -498,11 +498,6 @@
 		border-color: var(--color-failure);
 	}
 
-	.tree-node.patch {
-		background: #fff8e6;
-		border-color: var(--color-accent);
-	}
-
 	.node-content {
 		display: flex;
 		align-items: center;
@@ -591,11 +586,6 @@
 
 	.orphaned-group .group-header {
 		background: #fff8e6;
-	}
-
-	.patches-group .group-header {
-		background: #fff8e6;
-		border-color: var(--color-accent);
 	}
 
 	.step-list-actions {

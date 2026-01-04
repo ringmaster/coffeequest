@@ -40,7 +40,8 @@ export interface StepTreeGroup {
 }
 
 // Parsed tag with operator and optional comparison
-export type TagOperator = '@' | '!' | '+' | '-' | '';
+// ^ prefix checks base step tags (for patches), ^! checks step does NOT have tag
+export type TagOperator = '@' | '!' | '+' | '-' | '^' | '^!' | '';
 export type ComparisonOperator = '=' | '<' | '>' | null;
 
 export interface ParsedTag {

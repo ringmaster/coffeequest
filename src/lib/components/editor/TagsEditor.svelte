@@ -20,6 +20,10 @@
 				return 'Add';
 			case '-':
 				return 'Remove';
+			case '^':
+				return 'Step Has';
+			case '^!':
+				return 'Step Lacks';
 			default:
 				return 'Require';
 		}
@@ -28,17 +32,27 @@
 	function getOperatorClass(op: ParsedTag['operator']): string {
 		switch (op) {
 			case '@':
-			case '':
 				return 'require';
+			case '':
+				return 'internal';
 			case '!':
 				return 'forbid';
 			case '+':
 				return 'add';
 			case '-':
 				return 'remove';
+			case '^':
+				return 'step-has';
+			case '^!':
+				return 'step-lacks';
 			default:
 				return 'require';
 		}
+	}
+
+	// Check if tag name starts with _ (internal tag for patch targeting)
+	function isInternalTag(tagName: string): boolean {
+		return tagName.startsWith('_');
 	}
 
 	function updateTag(index: number, operator: ParsedTag['operator'], tag: string) {
@@ -82,7 +96,7 @@
 			<div class="tag-item {getOperatorClass(parsed.operator)}">
 				{#if editingIndex === index}
 					<select
-						value={parsed.operator || '@'}
+						value={parsed.operator}
 						onchange={(e) => {
 							const op = (e.target as HTMLSelectElement).value as ParsedTag['operator'];
 							updateTag(index, op, parsed.tag);
@@ -92,19 +106,24 @@
 						<option value="!">! Forbid</option>
 						<option value="+">+ Add</option>
 						<option value="-">- Remove</option>
+						<option value="^">^ Step Has</option>
+						<option value="^!">^! Step Lacks</option>
+						<option value="">(none)</option>
 					</select>
 					<input
 						type="text"
 						value={parsed.tag}
 						onchange={(e) => {
-							updateTag(index, parsed.operator || '@', (e.target as HTMLInputElement).value);
+							updateTag(index, parsed.operator, (e.target as HTMLInputElement).value);
 						}}
 						onblur={() => (editingIndex = null)}
 						list="all-tags"
 					/>
 				{:else}
 					<button class="tag-button" onclick={() => (editingIndex = index)} title="Click to edit">
-						<span class="operator">{parsed.operator || '@'}</span>
+						{#if parsed.operator}
+							<span class="operator">{parsed.operator}</span>
+						{/if}
 						<span class="tag-name">{parsed.tag}</span>
 					</button>
 				{/if}
@@ -134,7 +153,8 @@
 
 	<div class="field-hint">
 		<strong>@</strong> require &bull; <strong>!</strong> forbid &bull; <strong>+</strong> add &bull;
-		<strong>-</strong> remove
+		<strong>-</strong> remove &bull; <strong>^</strong> step has &bull; <strong>^!</strong> step lacks &bull;
+		<strong>_prefix</strong> internal (no operator)
 	</div>
 </div>
 
@@ -188,6 +208,21 @@
 	.tag-item.remove {
 		background: #fff3e0;
 		border: 1px solid #ff9800;
+	}
+
+	.tag-item.step-has {
+		background: #f3e5f5;
+		border: 1px solid #9c27b0;
+	}
+
+	.tag-item.step-lacks {
+		background: #fce4ec;
+		border: 1px solid #e91e63;
+	}
+
+	.tag-item.internal {
+		background: #eceff1;
+		border: 1px solid #607d8b;
 	}
 
 	.tag-button {
