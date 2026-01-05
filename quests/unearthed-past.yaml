@@ -17,8 +17,8 @@ steps:
       She's in her 20s, with the calloused hands of someone who's worked a dozen more. Her eyes are sharp, wary.
 
 
-      "No," she admits. "I'm not." She glances at the grave. "Old Master Aldworth. I was his maid for twenty years. And
-      he was buried with something that belongs to me."
+      "No," she admits. "I'm not." She glances at the grave. "Old Master Aldworth. I lived and served in his household
+      my entire life. And he was buried with something that belongs to me."
     options:
       - What did he take?::maren_explains
       - Grave robbery is a serious crime.::maren_crime_warning
@@ -73,8 +73,8 @@ steps:
   - id: maren_tried
     text: >
       "I asked young Master Aldworth myself. Went to the manor in Town Square, hat in hand, begging for my mother's
-      locket." She shakes her head. "He told me everything buried with his father belongs to the estate. Twenty years of
-      service, and he even convinced Father Herald not to help me.
+      locket." She shakes her head. "He told me everything buried with his father belongs to the estate. All these years
+      of service, and he even convinced Father Herald not to help me.
 
 
       "So yes. I'm going to dig it up myself. Tomorrow night."
@@ -129,8 +129,8 @@ steps:
       She turns back to studying the grave. You leave her to her planning.
 
 
-      Something about the encounter lingers with you as you walk away. Twenty years of service. A locket. A woman with
-      nothing left to lose.
+      Something about the encounter lingers with you as you walk away. Years of service. A locket. A woman with nothing
+      left to lose.
     options:
       - Leave her to her fate.
     log: Refused to help Maren with her plan
@@ -189,7 +189,7 @@ steps:
       defensive.
     options:
       - Why does a locket matter so much to you?::aldworth_press
-      - She served your family for twenty years. Surely—::aldworth_twenty_years
+      - She served your family her whole life. Surely...::aldworth_twenty_years
       - What are you so afraid of?::aldworth_confronted
       - I understand. Good day.
   - id: aldworth_twenty_years
@@ -251,8 +251,8 @@ steps:
       them. She was his daughter. Illegitimate, unacknowledged, but his."
 
 
-      He meets your eyes. "That woman—Maren—she's my father's granddaughter. She scrubbed our floors for twenty years,
-      and she has no idea who she really is."
+      He meets your eyes. "That woman—Maren—she's my father's granddaughter. She scrubbed our floors for years, and she
+      has no idea who she really is."
     options:
       - And the locket proves it.::aldworth_locket_proof
       - Why bury it with him? Why not destroy it?::aldworth_why_bury
@@ -363,7 +363,7 @@ steps:
       things."
 
 
-      She glances toward the manor. "His room, for instance. Only Maren was allowed to clean it. Twenty years, always
+      She glances toward the manor. "His room, for instance. Only Maren was allowed to clean it. For years, always
       Maren. The rest of us wondered about that."
     options:
       - Why Maren?::servant_whisper_reveal
@@ -424,7 +424,7 @@ steps:
     tags:
       - +q:suspicious
     text: >
-      She gives you a long look. "You're asking the same questions I've been asking for twenty years."
+      She gives you a long look. "You're asking the same questions I've been asking since I learned of it."
 
 
       "Why does a master keep a servant's portrait? Why did he watch Maren the way he did? Why did he insist she—and
@@ -546,8 +546,8 @@ steps:
 
 
       He sinks onto a pew. "Maren's mother was Aldworth's daughter. Born to a kitchen maid, raised as a servant herself,
-      never told the truth. And Maren..." He shakes his head. "Twenty years she served in her grandfather's house. He
-      watched her scrub his floors and never said a word."
+      never told the truth. And Maren..." He shakes his head. "Her whole life she lived in her grandfather's house and
+      he watched her scrub his floors and never said a word."
 
 
       "The locket has proof. Portraits of both of them, painted when they were young. Side by side, the resemblance is
@@ -559,8 +559,8 @@ steps:
     log: Learned the truth about Maren's bloodline from Father Herald
   - id: herald_right_to_know
     text: >
-      "Perhaps," he says quietly. "But knowing won't give her back twenty years. It won't make the Aldworths claim her.
-      It will only add grief to grief."
+      "Perhaps," he says quietly. "But knowing won't give her back her life. It won't make the Aldworths claim her. It
+      will only add grief to grief."
 
 
       He looks at you. "What will you do with this truth?"
@@ -738,17 +738,19 @@ steps:
 
 
       Her mother was old Aldworth's daughter. Illegitimate, unacknowledged, but his blood. That makes Maren his
-      granddaughter. Young Aldworth's cousin—or near enough. She served twenty years in her own grandfather's house, and
-      he never told her.
+      granddaughter. Young Aldworth's cousin—or near enough. She lived and served twenty years in her own grandfather's
+      house, and he never told her.
 
 
       She doesn't speak for a long moment. When she does, her voice is flat.
 
 
-      "Twenty years. Twenty years I scrubbed his floors. Called him 'sir.' And he knew. He knew what I was to him."
+      "Twenty years. When I was old enough to carry a bucket, I scrubbed his floors. Called him 'sir.' And he knew. He
+      knew what I was to him."
 
 
-      She looks at you, eyes wet but hard. "You found this out. You came back to tell me. So tell me—what do I do now?"
+      She looks at you, eyes wet but hard. "You found this out. You came back to tell me. So tell me — what do I do
+      now?"
     log: Told Maren the truth about her bloodline
     options:
       - Get the locket. You deserve proof of who you are.::advise_dig
@@ -852,7 +854,7 @@ steps:
       for decades?"
 
 
-      She wavers. You can see the exhaustion in her—twenty years of service, a week of grief, and now this.
+      She wavers. You can see the exhaustion in her — years of service, a week of grief, and now this.
 
 
       "Maybe you're right," she whispers. "Maybe knowing is enough. Maybe..."
@@ -946,7 +948,7 @@ steps:
       "Do you think they'd give it back? If I asked one more time, with someone beside me?"
     options:
       - It's worth trying.::advise_confront
-      - They've had twenty years of chances. Take what's yours.::advise_dig
+      - They've had a lifetime of chances. Take what's yours.::advise_dig
   - id: revert_to_action
     text: |
       She shakes her head. "No. You told me the truth. That's more than anyone else has done."
@@ -1030,17 +1032,23 @@ steps:
     tags:
       - +trait:just
       - +trait:clever
-    text: |
-      "I'll create a distraction," you say. "Draw the watch away. You do what you need to do."
+    text: >
+      "I'll create a distraction," you say. "I'll start a tavern brawl or draw the watch away while you do what you need
+      to do."
+
 
       She hesitates. "You'd still be an accomplice. If we're caught—"
 
+
       "Then don't get caught."
+
 
       She almost smiles. Almost. "Tonight. After dark."
     options:
-      - label: I'll find a way to draw the watch.
-        pass: distraction_setup
+      - label: Make trouble
+        tags:
+          - +q:create_distraction
+        pass: null
     log: Agreed to create a distraction while Maren digs
   - id: dig_arrival
     tags:
@@ -1327,79 +1335,13 @@ steps:
       You need to draw the watch away from the graveyard. There are a few possibilities.
 
 
-      You could start a commotion at the Tavern—a fight, perhaps, or a false alarm. You could report a suspicious figure
-      at the Port. Or you could simply wait for the watch to pass and hope Maren is fast enough.
+      You could start a commotion at the Tavern—a fight, perhaps, or a false alarm. You could file a false report at the
+      Guardhouse. Or you could simply wait for the watch to pass and hope Maren is fast enough.
     options:
-      - label: Start trouble at the Tavern.
-        skill: guile
-        dc: 4
-        pass: distraction_tavern_success
-        fail: distraction_fail
-      - label: False report at the Guardhouse.
-        skill: guile
-        dc: 5
-        pass: distraction_guard_success
-        fail: distraction_fail
+      - label: I'll find a way to cause trouble.
+        tags:
+          - +q:create_distraction
       - Trust Maren to handle it alone.::distraction_trust
-  - id: distraction_tavern_success
-    tags:
-      - "-quest"
-      - +done:unearthed_past
-    text: >
-      The fight you start at the Tavern is convincing enough to draw three watchmen off their rounds. By the time order
-      is restored, you're long gone—and so is Maren.
-
-
-      You find her at dawn, waiting outside your door. She looks exhausted but triumphant.
-
-
-      "I got it." She shows you the locket. Two portraits. "I know who I am now."
-
-
-      She doesn't explain what the portraits mean. She doesn't have to.
-
-
-      "Thank you. For everything."
-    log: Created a distraction while Maren recovered the locket
-  - id: distraction_guard_success
-    tags:
-      - "-quest"
-      - +done:unearthed_past
-      - +q:false_report
-    text: >
-      Your report of suspicious activity at the Port sends half the night watch running. The graveyard is deserted for
-      nearly an hour.
-
-
-      Maren makes good use of the time.
-
-
-      You find her at dawn, locket in hand, eyes red from weeping or sleeplessness or both.
-
-
-      "It's done," she says. "I know who I am."
-
-
-      The guards will wonder about your false report. Best to lay low for a while.
-    log: Created a distraction while Maren recovered the locket
-  - id: distraction_fail
-    tags:
-      - "-quest"
-      - +done:unearthed_past
-      - +status:criminal
-    text: >
-      Your distraction draws attention—but not away from the graveyard. Toward it. Toward you.
-
-
-      By the time you realize your mistake, it's too late. The watch finds Maren with her hands in the dirt.
-
-
-      They arrest you both.
-
-
-      The magistrate is not lenient with grave robbers, even accomplices. Even those who never touched the grave
-      themselves.
-    log: Caught while trying to create a distraction
   - id: distraction_trust
     tags:
       - "-quest"
@@ -1515,7 +1457,7 @@ steps:
       - +trait:direct
     text: >
       "Return the locket," you say. "Or by tomorrow morning, everyone from the docks to the church will know what old
-      Aldworth did. What he hid. Who scrubbed his floors for twenty years without knowing who she really was."
+      Aldworth did. What he hid. Who scrubbed his floors for years without knowing who she really was."
 
 
       His face contorts with rage—then fear—then a kind of exhausted defeat.
@@ -1714,3 +1656,139 @@ steps:
 
       You never hear what became of her.
     log: Chose not to report Maren to the guard
+  - id: "@patch:distraction_tavern_fight_success"
+    tags:
+      - "@q:unearthed_past"
+    text:
+      append: |-
+
+
+        You find Maren at dawn, waiting outside your door. She looks exhausted but triumphant.
+
+        "I got it." She shows you the locket. Two portraits. "I know who I am now."
+
+        She doesn't explain what the portraits mean. She doesn't have to.
+
+        "Thank you. For everything."
+    tags_apply:
+      - "-quest"
+      - +done:unearthed_past
+    log: Created a distraction at the Tavern while Maren recovered the locket
+  - id: "@patch:distraction_tavern_commotion_success"
+    tags:
+      - "@q:unearthed_past"
+    text:
+      append: |-
+
+
+        You find Maren at dawn, waiting outside your door. She looks exhausted but triumphant.
+
+        "I got it." She shows you the locket. Two portraits. "I know who I am now."
+
+        She doesn't explain what the portraits mean. She doesn't have to.
+
+        "Thank you. For everything."
+    tags_apply:
+      - "-quest"
+      - +done:unearthed_past
+    log: Created a distraction at the Tavern while Maren recovered the locket
+  - id: "@patch:distraction_guard_report_success"
+    tags:
+      - "@q:unearthed_past"
+    text:
+      append: |-
+
+
+        You find Maren at dawn, locket in hand, eyes red from weeping or sleeplessness or both.
+
+        "It's done," she says. "I know who I am."
+
+        The guards will wonder about your false report. Best to lay low for a while.
+    tags_apply:
+      - "-quest"
+      - +done:unearthed_past
+    log: Created a distraction at the Guardhouse while Maren recovered the locket
+  - id: "@patch:distraction_guard_warehouse_success"
+    tags:
+      - "@q:unearthed_past"
+    text:
+      append: |-
+
+
+        You find Maren at dawn, locket in hand, eyes red from weeping or sleeplessness or both.
+
+        "It's done," she says. "I know who I am."
+    tags_apply:
+      - "-quest"
+      - +done:unearthed_past
+    log: Created a distraction at the Guardhouse while Maren recovered the locket
+  - id: "@patch:distraction_tavern_fight_fail"
+    tags:
+      - "@q:unearthed_past"
+    text:
+      append: >-
+
+
+        By the time you talk your way free, it's too late. Word reaches you the next day: a woman was caught disturbing
+        a grave in the cemetery. The magistrate was not lenient.
+
+
+        You never see Maren again.
+    tags_apply:
+      - "-quest"
+      - +done:unearthed_past
+      - +q:maren_arrested
+    log: Distraction failed—Maren was caught
+  - id: "@patch:distraction_tavern_commotion_fail"
+    tags:
+      - "@q:unearthed_past"
+    text:
+      append: >-
+
+
+        By the time you talk your way free, it's too late. Word reaches you the next day: a woman was caught disturbing
+        a grave in the cemetery. The magistrate was not lenient.
+
+
+        You never see Maren again.
+    tags_apply:
+      - "-quest"
+      - +done:unearthed_past
+      - +q:maren_arrested
+    log: Distraction failed—Maren was caught
+  - id: "@patch:distraction_guard_report_fail"
+    tags:
+      - "@q:unearthed_past"
+    text:
+      append: >-
+
+
+        They hold you until morning. By then, the damage is done. Word reaches the guardhouse: a woman was caught
+        disturbing a grave in the cemetery. Your false report looks even worse now.
+
+
+        You never see Maren again. But you have other problems.
+    tags_apply:
+      - "-quest"
+      - +done:unearthed_past
+      - +status:criminal
+      - +q:maren_arrested
+    log: Distraction failed—both you and Maren face consequences
+  - id: "@patch:distraction_guard_warehouse_fail"
+    tags:
+      - "@q:unearthed_past"
+    text:
+      append: >-
+
+
+        They hold you until morning. By then, the damage is done. Word reaches the guardhouse: a woman was caught
+        disturbing a grave in the cemetery. Your false report looks even worse now.
+
+
+        You never see Maren again. But you have other problems.
+    tags_apply:
+      - "-quest"
+      - +done:unearthed_past
+      - +status:criminal
+      - +q:maren_arrested
+    log: Distraction failed—both you and Maren face consequences

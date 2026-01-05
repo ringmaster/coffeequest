@@ -393,6 +393,58 @@ When players aren't ready to proceed, give them an out:
 
 The "I need to investigate more" option has no `pass` target, ending the interaction and letting the player leave to gather more evidence.
 
+### Options Must Not Imply Travel to Map Locations
+
+Options should never suggest traveling to a location that the player can reach via the map. The player navigates between locations by entering coordinates—options that bypass this break immersion and skip the physical journey.
+
+**Bad** — Options imply traveling to map locations:
+```yaml
+- id: plan_distraction
+  text: You need to draw the watch away. Where will you cause trouble?
+  options:
+    - label: Start a fight at the Tavern
+      skill: guile
+      dc: 4
+      pass: tavern_fight_success
+      fail: distraction_fail
+    - label: Make a false report at the Guardhouse
+      skill: guile
+      dc: 5
+      pass: guard_report_success
+      fail: distraction_fail
+```
+
+**Good** — End the interaction and let the player travel on the map:
+```yaml
+- id: plan_distraction
+  tags:
+    - +q:ready_to_distract
+  text: >
+    You need to draw the watch away from the graveyard. The Tavern or the
+    Guardhouse would be good places to cause a commotion.
+  options:
+    - I'll find a way to cause trouble.
+
+# Then at each location, check for the quest state:
+- id: Tavern
+  tags:
+    - "@q:ready_to_distract"
+  text: The tavern is busy tonight. A well-timed brawl would draw attention...
+  options:
+    - label: Start a fight
+      skill: guile
+      dc: 4
+      pass: distraction_success
+      fail: distraction_fail
+    - Not here. I'll try somewhere else.
+```
+
+This pattern:
+- Respects the map as the primary navigation mechanism
+- Lets players change their mind and go somewhere else
+- Keeps skill checks at the location where they make narrative sense
+- Allows for location-specific text and context
+
 ### Proportional Rewards
 
 Reward quality should match effort invested:

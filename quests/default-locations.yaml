@@ -371,19 +371,19 @@ steps:
 
   # Field
   - id: Field
-    tags: [quest, "+test3"]
+    tags: [quest]
     text: >-
       Wheat sways in golden waves under the afternoon sun in the field. A scarecrow presides over the emptiness, its
       button eyes fixed on the horizon.
 
   - id: Field
-    tags: [quest, "+test1"]
+    tags: [quest]
     text: >-
       Grasshoppers leap away from your footsteps as you cross the field. In the distance, someone's scythe catches
       the light. Harvest will come soon.
 
   - id: Field
-    tags: [quest, "+test2"]
+    tags: [quest]
     text: >-
       The field stretches flat and endless, broken only by a lone tree offering shade to no one. Heat shimmers off
       the grain.

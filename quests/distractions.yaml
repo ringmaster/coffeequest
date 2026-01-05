@@ -1,0 +1,185 @@
+# Generic distraction mini-quests
+# These can be triggered by any quest that grants +q:create_distraction
+# Quest-specific outcomes should be added via patches
+
+steps:
+  # Tavern - Start a fight or commotion
+  - id: Tavern
+    tags:
+      - "@q:create_distraction"
+    text: >
+      The tavern is busy tonight. Sailors argue over dice, merchants nurse their ales, and a bard in the corner
+      plays something mournful. Plenty of opportunity for chaos, if you're looking to cause some.
+    options:
+      - label: Start a fight.
+        skill: might
+        dc: 4
+        pass: distraction_tavern_fight_success
+        fail: distraction_tavern_fight_fail
+      - label: Cause a commotion—spill drinks, knock over tables.
+        skill: guile
+        dc: 3
+        pass: distraction_tavern_commotion_success
+        fail: distraction_tavern_commotion_fail
+      - I'll find another way.
+
+  - id: distraction_tavern_fight_success
+    tags:
+      - "-q:create_distraction"
+      - +q:distraction_success
+      - +q:distraction_tavern
+    text: >
+      You pick your target carefully—a drunk with a chip on his shoulder, nursing a grudge along with his ale.
+      A few well-placed words, a "accidental" shove, and suddenly fists are flying.
+
+
+      The brawl spreads like fire through dry grass. Someone throws a chair. Glass shatters. The barkeep shouts
+      for the watch.
+
+
+      By the time the guards arrive, you've slipped out the back. The commotion should keep them busy for a while.
+    options:
+      - Slip away into the night.
+
+  - id: distraction_tavern_fight_fail
+    tags:
+      - "-q:create_distraction"
+      - +q:distraction_fail
+      - +q:distraction_tavern
+    text: >
+      You pick your target—but he picks you right back. Before you can land the first blow, he's got you by the
+      collar, bellowing for the watch.
+
+
+      "This one's starting trouble!" he roars. "Tried to sucker-punch me!"
+
+
+      The guards arrive faster than you expected. Your distraction worked—just not the way you intended.
+    options:
+      - This isn't going well.
+
+  - id: distraction_tavern_commotion_success
+    tags:
+      - "-q:create_distraction"
+      - +q:distraction_success
+      - +q:distraction_tavern
+    text: >
+      You stumble into a serving girl, sending her tray of ales crashing across a table of merchants. They leap
+      up, shouting. You apologize profusely while "accidentally" knocking over a candle into someone's lap.
+
+
+      Chaos spreads. Accusations fly. Someone claims theft. The barkeep sends a boy running for the watch.
+
+
+      You slip out during the confusion, leaving behind a tavern in uproar.
+    options:
+      - Slip away into the night.
+
+  - id: distraction_tavern_commotion_fail
+    tags:
+      - "-q:create_distraction"
+      - +q:distraction_fail
+      - +q:distraction_tavern
+    text: >
+      Your "accidental" stumble is a little too obvious. The serving girl sidesteps you neatly, and a burly
+      regular grabs your arm.
+
+
+      "Seen you watching. You're up to something."
+
+
+      The barkeep sends for the watch. So much for subtlety.
+    options:
+      - This isn't going well.
+
+  # Guardhouse - False report
+  - id: Guardhouse
+    tags:
+      - "@q:create_distraction"
+      - "!quest"
+    text: >
+      The guardhouse is quiet at this hour. A bored sergeant sits behind a desk, and you can hear dice rattling
+      somewhere in the back. If you could send them running after a phantom threat, they'd leave their posts
+      unattended.
+    options:
+      - label: Report suspicious activity at the Port.
+        skill: guile
+        dc: 5
+        pass: distraction_guard_report_success
+        fail: distraction_guard_report_fail
+      - label: Claim you saw someone breaking into a warehouse.
+        skill: guile
+        dc: 4
+        pass: distraction_guard_warehouse_success
+        fail: distraction_guard_warehouse_fail
+      - I'll find another way.
+
+  - id: distraction_guard_report_success
+    tags:
+      - "-q:create_distraction"
+      - +q:distraction_success
+      - +q:distraction_guard
+      - +q:false_report
+    text: >
+      "Suspicious figures at the Port," you say, breathless with feigned urgency. "Three of them, maybe four.
+      Armed. Looked like they were casing the warehouses."
+
+
+      The sergeant's boredom vanishes. He barks orders, and within minutes half the night watch is running
+      toward the docks.
+
+
+      You wait until they're gone, then slip away. The guardhouse stands nearly empty behind you.
+    options:
+      - Slip away into the night.
+
+  - id: distraction_guard_report_fail
+    tags:
+      - "-q:create_distraction"
+      - +q:distraction_fail
+      - +q:distraction_guard
+    text: >
+      "Suspicious figures at the Port," you say. But something in your voice gives you away—too rehearsed,
+      maybe, or not breathless enough.
+
+
+      The sergeant's eyes narrow. "Is that so? And you ran all the way here to tell us, did you? Funny—you're
+      not even winded."
+
+
+      He gestures to a guard. "Keep this one here while we check it out. Something smells wrong."
+    options:
+      - This isn't going well.
+
+  - id: distraction_guard_warehouse_success
+    tags:
+      - "-q:create_distraction"
+      - +q:distraction_success
+      - +q:distraction_guard
+    text: >
+      "Break-in at the Merchant's warehouse!" you gasp. "I saw them prying the door open—two men, maybe three.
+      They had crowbars!"
+
+
+      The guards don't wait for details. They grab their weapons and run, leaving only a single watchman at the
+      desk. He's too busy writing up your report to notice you slip out.
+    options:
+      - Slip away into the night.
+
+  - id: distraction_guard_warehouse_fail
+    tags:
+      - "-q:create_distraction"
+      - +q:distraction_fail
+      - +q:distraction_guard
+    text: >
+      Your story about the warehouse break-in is good—but not good enough. The sergeant sends two guards to
+      check, and keeps you waiting.
+
+
+      "Standard procedure," he says. "Need to verify the report before we can let you go."
+
+
+      When the guards return with news that the warehouse is locked tight and undisturbed, the sergeant's
+      expression turns cold.
+    options:
+      - This isn't going well.
