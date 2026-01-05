@@ -151,6 +151,7 @@ steps:
     options:
       - I won't report you. But I won't help either.::refuse_quest
       - Let me look into this first. There might be another way.::accept_investigate
+      - I'm sorry. I can't ignore this.::final_report
   - id: Town Square
     tags:
       - "@q:unearthed_past"
@@ -847,8 +848,8 @@ steps:
       - I'm sorry. Do what you need to do.::confirm_dig_withheld
   - id: persuade_abandon
     text: >
-      "The risk is too high," you press. "Exile. Prison. And for what? A piece of metal? A portrait you've
-      lived without for decades?"
+      "The risk is too high," you press. "Exile. Prison. And for what? A piece of metal? A portrait you've lived without
+      for decades?"
 
 
       She wavers. You can see the exhaustion in her—twenty years of service, a week of grief, and now this.
@@ -1561,7 +1562,6 @@ steps:
     log: Leveraged young Aldworth into returning the locket
   - id: final_report
     tags:
-      - +trait:dutiful
       - +trait:direct
     text: >
       "I'm going to report this," you say. "Grave robbery is a serious crime. I won't be party to it."
@@ -1573,28 +1573,14 @@ steps:
 
       She turns back to the grave. "I'll be gone before they arrive. I've got nothing left to lose."
     options:
-      - Go to the Guardhouse.::report_guardhouse
+      - label: I'll do what I must.
+        tags:
+          - "-quest"
+          - +done:unearthed_past
+          - +open:report_maren
+        pass: null
       - Wait—maybe there's another way.::accept_investigate
-  - id: report_guardhouse
-    tags:
-      - "-quest"
-      - +done:unearthed_past
-    text: >
-      The guards thank you for the report. They stake out the graveyard that night.
-
-
-      Maren doesn't come. She's smarter than that.
-
-
-      You hear she left town the next day. No one knows where she went. The locket stays buried with old Aldworth, and
-      the truth stays buried with it.
-
-
-      Sometimes you wonder if you did the right thing.
-
-
-      You never find out for certain.
-    log: Reported Maren's plan to the guard—she fled before they could catch her
+    log: Reported Maren's plan to the authorities
   - id: abandon_no_knowledge
     tags:
       - "-quest"

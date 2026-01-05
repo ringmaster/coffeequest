@@ -33,14 +33,14 @@ steps:
   - id: Bakery
     tags:
       - "!inv:flour"
-      - q:busy_baker
+      - "@q:busy_baker"
     text: The baker is delighted to see you return, but is disapointed to see you don't have any flour.
     options:
       - Explore elsewhere
   - id: Bakery
     tags:
       - "@inv:flour"
-      - q:busy_baker
+      - "@q:busy_baker"
     text: The baker is delighted to see you return with flour. 'Thank you! Here's a silver for your trouble.'
     options:
       - label: Accept payment

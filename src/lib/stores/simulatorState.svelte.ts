@@ -165,16 +165,26 @@ function extractMutations(optionTags: string[]): { add: string[]; remove: string
 	return { add, remove };
 }
 
+export interface StepMatch {
+	step: RawStep;
+	index: number;
+	score: number;
+}
+
 /**
- * Find the best matching step for a location and tag state
+ * Find all matching steps for a location and tag state
+ * Returns them sorted by score (highest first)
  * Supports comparison operators: tag=N, tag<N, tag>N
+ * Handles special prefixes:
+ * - _ prefix: Internal tags for patch targeting only (skipped during filtering)
+ * - ^ prefix: Patch condition operators (skipped - only relevant for patches)
  */
-function findMatchingStep(
+function findAllMatchingSteps(
 	steps: RawStep[],
 	location: string,
 	tags: Set<string>
-): { step: RawStep; index: number } | null {
-	const matches: { step: RawStep; index: number; score: number }[] = [];
+): StepMatch[] {
+	const matches: StepMatch[] = [];
 	const playerCounts = countTags(tags);
 
 	for (let i = 0; i < steps.length; i++) {
@@ -187,12 +197,23 @@ function findMatchingStep(
 
 		for (const rawTag of step.tags ?? []) {
 			const parsed = parseTag(rawTag);
-			const playerCount = playerCounts.get(parsed.tag) || 0;
 
 			// Skip mutation operators
 			if (parsed.operator === '+' || parsed.operator === '-') {
 				continue;
 			}
+
+			// Skip patch condition operators (^ and ^!) - only used on patches
+			if (parsed.operator === '^' || parsed.operator === '^!') {
+				continue;
+			}
+
+			// Skip internal tags (prefixed with _) - these are for patch targeting only
+			if (parsed.tag.startsWith('_')) {
+				continue;
+			}
+
+			const playerCount = playerCounts.get(parsed.tag) || 0;
 
 			if (parsed.operator === '@' || parsed.operator === '') {
 				// Required tag
@@ -230,16 +251,32 @@ function findMatchingStep(
 		}
 	}
 
-	if (matches.length === 0) return null;
-
-	// Return highest scoring match
+	// Sort by score (highest first), then shuffle within same score for randomness
 	matches.sort((a, b) => b.score - a.score);
+	return matches;
+}
+
+/**
+ * Find the best matching step for a location and tag state
+ * Wrapper around findAllMatchingSteps for backward compatibility
+ */
+function findMatchingStep(
+	steps: RawStep[],
+	location: string,
+	tags: Set<string>
+): { step: RawStep; index: number } | null {
+	const matches = findAllMatchingSteps(steps, location, tags);
+	if (matches.length === 0) return null;
 	return { step: matches[0].step, index: matches[0].index };
 }
 
 /**
  * Apply patches to a step based on current tags
  * Supports comparison operators: tag=N, tag<N, tag>N
+ * Handles special prefixes:
+ * - ^ prefix: Patch applies only if base step has this tag
+ * - ^! prefix: Patch applies only if base step does NOT have this tag
+ * - _ prefix: Internal tags on base step for patch targeting
  */
 function applyPatches(
 	baseStep: RawStep,
@@ -251,6 +288,13 @@ function applyPatches(
 	const patches: RawStep[] = [];
 	const playerCounts = countTags(tags);
 
+	// Build set of base step tags (strip operators for matching)
+	const baseStepTagSet = new Set<string>();
+	for (const rawTag of baseStep.tags ?? []) {
+		const parsed = parseTag(rawTag);
+		baseStepTagSet.add(parsed.tag);
+	}
+
 	for (const step of steps) {
 		if (!isPatchStep(step)) continue;
 		const target = getPatchTarget(step);
@@ -260,12 +304,31 @@ function applyPatches(
 		let applies = true;
 		for (const rawTag of step.tags ?? []) {
 			const parsed = parseTag(rawTag);
-			const playerCount = playerCounts.get(parsed.tag) || 0;
 
 			// Skip mutation operators (they're processed during execution)
 			if (parsed.operator === '+' || parsed.operator === '-') {
 				continue;
 			}
+
+			// Handle step-condition operators (^ and ^!)
+			if (parsed.operator === '^') {
+				// Required: base step must have this tag
+				if (!baseStepTagSet.has(parsed.tag)) {
+					applies = false;
+					break;
+				}
+				continue;
+			} else if (parsed.operator === '^!') {
+				// Blocked: base step must NOT have this tag
+				if (baseStepTagSet.has(parsed.tag)) {
+					applies = false;
+					break;
+				}
+				continue;
+			}
+
+			// Handle player tag conditions (@ ! or bare)
+			const playerCount = playerCounts.get(parsed.tag) || 0;
 
 			if (parsed.operator === '@' || parsed.operator === '') {
 				// Required tag
@@ -358,44 +421,91 @@ class SimulatorStore {
 	history = $state<HistoryEntry[]>([]);
 	historyIndex = $state(-1);
 	selectedOutcome = $state<'pass' | 'fail'>('pass');
+	selectedAlternativeIndex = $state(0);
 
-	// Derived: Current step matching location + tags (uses ALL steps from ALL quest files)
+	// Derived: Effective steps - merges edited questFile.steps with allSteps
+	// This ensures the simulator sees edits immediately without page reload
+	effectiveSteps = $derived.by((): RawStep[] => {
+		const baseSteps = editorStore.allSteps;
+		const editedSteps = editorStore.questFile?.steps;
+
+		if (!editedSteps || editedSteps.length === 0) {
+			return baseSteps;
+		}
+
+		// Create signatures for edited steps (id + tags JSON)
+		const editedSignatures = new Set(
+			editedSteps.map(s => `${s.id}::${JSON.stringify(s.tags ?? [])}`)
+		);
+
+		// Filter out steps from allSteps that match edited signatures
+		const filteredBase = baseSteps.filter(
+			s => !editedSignatures.has(`${s.id}::${JSON.stringify(s.tags ?? [])}`)
+		);
+
+		// Combine: edited steps + remaining base steps
+		return [...editedSteps, ...filteredBase];
+	});
+
+	// Derived: All matching steps for current location + tags
+	allMatchingSteps = $derived.by((): StepMatch[] => {
+		if (!this.active || !this.location || this.effectiveSteps.length === 0) return [];
+		return findAllMatchingSteps(this.effectiveSteps, this.location, this.tags);
+	});
+
+	// Derived: Current step (selected from alternatives)
+	// IMPORTANT: Access all dependencies before any early returns to ensure proper tracking
 	currentStep = $derived.by((): { step: RawStep; index: number } | null => {
-		if (!this.active || !this.location || editorStore.allSteps.length === 0) return null;
-		return findMatchingStep(editorStore.allSteps, this.location, this.tags);
+		const matches = this.allMatchingSteps;
+		const altIndex = this.selectedAlternativeIndex;
+
+		if (matches.length === 0) return null;
+		const idx = Math.min(altIndex, matches.length - 1);
+		const match = matches[idx];
+		return { step: match.step, index: match.index };
 	});
 
 	// Derived: Current step with patches applied
+	// IMPORTANT: Access all dependencies before any early returns to ensure proper tracking
 	patchedStep = $derived.by((): RawStep | null => {
-		if (!this.currentStep || editorStore.allSteps.length === 0) return null;
+		const current = this.currentStep;
+		const steps = this.effectiveSteps;
+		const playerTags = this.tags;
+
+		if (!current || steps.length === 0) return null;
 		return applyPatches(
-			this.currentStep.step,
-			editorStore.allSteps,
-			this.tags,
+			current.step,
+			steps,
+			playerTags,
 			editorStore.allPresets
 		);
 	});
 
 	// Derived: Available options for current step
+	// IMPORTANT: Access all dependencies before any early returns to ensure proper tracking
 	availableOptions = $derived.by((): ResolvedOption[] => {
-		if (!this.patchedStep || editorStore.allSteps.length === 0) return [];
+		const patched = this.patchedStep;
+		const steps = this.effectiveSteps;
+		const playerTags = this.tags;
+
+		if (!patched || steps.length === 0) return [];
 
 		const rawOptions = expandStepOptions(
-			this.patchedStep.options,
+			patched.options,
 			editorStore.allPresets
 		);
 
 		return rawOptions.map((opt) => {
 			const expanded = expandOption(opt);
-			const { available, missingTags } = checkOptionRequirements(expanded.tags, this.tags);
+			const { available, missingTags } = checkOptionRequirements(expanded.tags, playerTags);
 			const mutations = extractMutations(expanded.tags);
 
 			// Also include mutations from target step's tags
 			if (expanded.pass && !expanded.skill) {
 				const targetMatch = findMatchingStep(
-					editorStore.allSteps,
+					steps,
 					expanded.pass,
-					this.tags
+					playerTags
 				);
 				if (targetMatch) {
 					for (const rawTag of targetMatch.step.tags ?? []) {
@@ -422,6 +532,7 @@ class SimulatorStore {
 		this.history = [];
 		this.historyIndex = -1;
 		this.resolvedVars = {};
+		this.selectedAlternativeIndex = 0;
 
 		// Default to first location
 		if (editorStore.allLocations.length > 0) {
@@ -436,6 +547,7 @@ class SimulatorStore {
 	setLocation(location: string): void {
 		const previousLocation = this.location;
 		this.location = location;
+		this.selectedAlternativeIndex = 0; // Reset alternative selection
 
 		// Record history for arriving at a new location (after setting location so currentStep updates)
 		if (location && location !== previousLocation) {
@@ -527,8 +639,8 @@ class SimulatorStore {
 		}
 
 		// Apply target step tag mutations
-		if (target && editorStore.allSteps.length > 0) {
-			const targetMatch = findMatchingStep(editorStore.allSteps, target, this.tags);
+		if (target && this.effectiveSteps.length > 0) {
+			const targetMatch = findMatchingStep(this.effectiveSteps, target, this.tags);
 			if (targetMatch) {
 				for (const rawTag of targetMatch.step.tags ?? []) {
 					const { operator, tag } = parseTag(rawTag);
@@ -638,9 +750,34 @@ class SimulatorStore {
 		this.history = [];
 		this.historyIndex = -1;
 		this.resolvedVars = {};
+		this.selectedAlternativeIndex = 0;
 
 		if (editorStore.allLocations.length > 0) {
 			this.location = editorStore.allLocations[0].id;
+		}
+	}
+
+	/**
+	 * Select an alternative step (when multiple steps match current location/tags)
+	 * Updates the current history entry to reflect the new selection
+	 */
+	selectAlternative(index: number): void {
+		if (index < 0 || index >= this.allMatchingSteps.length) return;
+		if (index === this.selectedAlternativeIndex) return;
+
+		this.selectedAlternativeIndex = index;
+
+		// Update the current history entry to reflect the new step
+		if (this.historyIndex >= 0 && this.history.length > 0) {
+			const match = this.allMatchingSteps[index];
+			const updatedEntry = { ...this.history[this.historyIndex] };
+			updatedEntry.stepId = match.step.id;
+			updatedEntry.stepIndex = match.index;
+			this.history = [
+				...this.history.slice(0, this.historyIndex),
+				updatedEntry,
+				...this.history.slice(this.historyIndex + 1)
+			];
 		}
 	}
 

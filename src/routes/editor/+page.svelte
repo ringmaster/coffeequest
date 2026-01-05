@@ -4,6 +4,7 @@
 	import StepList from '$lib/components/editor/StepList.svelte';
 	import Simulator from '$lib/components/editor/Simulator.svelte';
 	import LintPanel from '$lib/components/editor/LintPanel.svelte';
+	import { FlowchartModal } from '$lib/components/editor/flowchart';
 	import type { PageData } from './$types';
 	import type { QuestFile } from '$lib/types/editor';
 
@@ -18,6 +19,7 @@
 	let selectedFile = $state<string>('');
 	let loading = $state(false);
 	let errorMessage = $state<string | null>(null);
+	let showFlowchart = $state(false);
 
 	async function loadFile(filename: string) {
 		if (!filename) return;
@@ -112,6 +114,9 @@
 
 		<div class="header-right">
 			{#if editorStore.questFile}
+				<button onclick={() => showFlowchart = true} class="flowchart-button">
+					Flowchart
+				</button>
 				<button onclick={saveFile} disabled={loading || !editorStore.isDirty} class="save-button">
 					{loading ? 'Saving...' : 'Save'}
 				</button>
@@ -159,6 +164,8 @@
 	</main>
 
 	<LintPanel />
+
+	<FlowchartModal bind:open={showFlowchart} />
 </div>
 
 <style>
@@ -230,6 +237,22 @@
 
 	.save-button:not(:disabled):hover {
 		opacity: 0.9;
+	}
+
+	.flowchart-button {
+		padding: 0.5rem 1rem;
+		background: var(--color-surface);
+		color: var(--color-text);
+		border: 1px solid var(--color-border);
+		border-radius: 4px;
+		cursor: pointer;
+		font-family: inherit;
+	}
+
+	.flowchart-button:hover {
+		background: var(--color-accent);
+		color: white;
+		border-color: var(--color-accent);
 	}
 
 	.error-banner {

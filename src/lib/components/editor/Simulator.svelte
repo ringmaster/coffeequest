@@ -2,6 +2,17 @@
 	import { simulatorStore, type ResolvedOption } from '$lib/stores/simulatorState.svelte';
 	import { editorStore } from '$lib/stores/editorState.svelte';
 
+	// Local derived values for proper reactivity tracking
+	// These help ensure Svelte tracks dependencies on class-based store properties
+	let currentStep = $derived(simulatorStore.currentStep);
+	let patchedStep = $derived(simulatorStore.patchedStep);
+	let availableOptions = $derived(simulatorStore.availableOptions);
+	let allMatchingSteps = $derived(simulatorStore.allMatchingSteps);
+	let selectedAlternativeIndex = $derived(simulatorStore.selectedAlternativeIndex);
+
+	// Toggle for expanded step text
+	let expandedText = $state(false);
+
 	// Truncate text for display
 	function truncate(text: string | undefined, max: number = 100): string {
 		if (!text) return '';
@@ -40,8 +51,8 @@
 
 	// Check if current step can be edited (is in the loaded quest file)
 	function canEditCurrentStep(): boolean {
-		if (!simulatorStore.currentStep || !editorStore.questFile) return false;
-		const step = simulatorStore.currentStep.step;
+		if (!currentStep || !editorStore.questFile) return false;
+		const step = currentStep.step;
 		return editorStore.questFile.steps.some(
 			(s) => s.id === step.id && JSON.stringify(s.tags) === JSON.stringify(step.tags)
 		);
@@ -132,20 +143,37 @@
 			<div class="sim-section">
 				<label class="section-label">
 					Current Step
-					{#if canEditCurrentStep()}
-						<button
-							class="edit-step-btn"
-							onclick={() => simulatorStore.editCurrentStep()}
-							title="Edit in editor"
-						>
-							Edit
-						</button>
-					{/if}
+					<span class="section-actions">
+						{#if patchedStep}
+							<button
+								class="expand-btn"
+								onclick={() => expandedText = !expandedText}
+								title={expandedText ? 'Collapse text' : 'Expand text'}
+							>
+								{expandedText ? 'Collapse' : 'Expand'}
+							</button>
+						{/if}
+						{#if canEditCurrentStep()}
+							<button
+								class="edit-step-btn"
+								onclick={() => simulatorStore.editCurrentStep()}
+								title="Edit in editor"
+							>
+								Edit
+							</button>
+						{/if}
+					</span>
 				</label>
-				{#if simulatorStore.patchedStep}
-					<div class="current-step">
-						<div class="step-id">{simulatorStore.currentStep?.step.id}</div>
-						<div class="step-text">{truncate(simulatorStore.patchedStep.text, 150)}</div>
+				{#if patchedStep}
+					<div class="current-step" class:expanded={expandedText}>
+						<div class="step-id">{currentStep?.step.id}</div>
+						<div class="step-text">
+							{#if expandedText}
+								{patchedStep.text}
+							{:else}
+								{truncate(patchedStep.text, 150)}
+							{/if}
+						</div>
 					</div>
 				{:else if simulatorStore.location}
 					<div class="no-match">
@@ -158,12 +186,40 @@
 				{/if}
 			</div>
 
+			<!-- Alternative Steps (when multiple matches exist) -->
+			{#if allMatchingSteps.length > 1}
+				<div class="sim-section alternatives-section">
+					<label class="section-label">
+						Alternative Steps ({allMatchingSteps.length} matches)
+					</label>
+					<div class="alternatives-list">
+						{#each allMatchingSteps as match, i}
+							<button
+								class="alt-btn"
+								class:selected={i === selectedAlternativeIndex}
+								onclick={() => simulatorStore.selectAlternative(i)}
+								title={match.step.tags?.filter(t => t.startsWith('@') || t.startsWith('!')).join(', ') || 'No filter tags'}
+							>
+								<span class="alt-num">{i + 1}</span>
+								{#if i !== selectedAlternativeIndex}
+									<span class="alt-tags">
+										{#each (match.step.tags ?? []).filter(t => t.startsWith('@') || t.startsWith('!')).slice(0, 2) as tag}
+											<span class="alt-tag">{tag}</span>
+										{/each}
+									</span>
+								{/if}
+							</button>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
 			<!-- Options -->
-			{#if simulatorStore.patchedStep}
+			{#if patchedStep}
 				<div class="sim-section options-section">
 					<label class="section-label">Options</label>
 					<div class="options-list">
-						{#each simulatorStore.availableOptions as opt}
+						{#each availableOptions as opt}
 							{#if shouldShowOption(opt)}
 								<div class="option {getOptionClass(opt)}">
 									<button
@@ -258,7 +314,7 @@
 							{/if}
 						{/each}
 
-						{#if simulatorStore.availableOptions.filter(shouldShowOption).length === 0}
+						{#if availableOptions.filter(shouldShowOption).length === 0}
 							<div class="no-options">No options available</div>
 						{/if}
 					</div>
@@ -412,8 +468,14 @@
 		margin-bottom: 0.35rem;
 	}
 
+	.section-actions {
+		display: flex;
+		gap: 0.25rem;
+	}
+
 	.copy-tags-btn,
-	.edit-step-btn {
+	.edit-step-btn,
+	.expand-btn {
 		font-size: 0.7rem;
 		padding: 0.15rem 0.4rem;
 		background: var(--color-surface);
@@ -425,7 +487,8 @@
 	}
 
 	.copy-tags-btn:hover,
-	.edit-step-btn:hover {
+	.edit-step-btn:hover,
+	.expand-btn:hover {
 		background: #f0f0f0;
 	}
 
@@ -495,6 +558,16 @@
 		border: 1px solid var(--color-border);
 		border-radius: 4px;
 		padding: 0.5rem;
+	}
+
+	.current-step.expanded {
+		max-height: 300px;
+		overflow-y: auto;
+	}
+
+	.current-step.expanded .step-text {
+		white-space: pre-wrap;
+		line-height: 1.4;
 	}
 
 	.step-id {
@@ -809,5 +882,66 @@
 	.control-btn:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+	}
+
+	/* Alternative Steps */
+	.alternatives-section {
+		padding: 0.35rem 0.75rem;
+	}
+
+	.alternatives-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+	}
+
+	.alt-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.25rem 0.5rem;
+		background: white;
+		border: 1px solid var(--color-border);
+		border-radius: 4px;
+		cursor: pointer;
+		font-family: inherit;
+		font-size: 0.75rem;
+		transition: all 0.15s;
+	}
+
+	.alt-btn:hover {
+		background: var(--color-surface);
+		border-color: var(--color-accent);
+	}
+
+	.alt-btn.selected {
+		background: var(--color-accent);
+		color: white;
+		border-color: var(--color-accent);
+	}
+
+	.alt-num {
+		font-weight: bold;
+		min-width: 1rem;
+		text-align: center;
+	}
+
+	.alt-tags {
+		display: flex;
+		gap: 0.2rem;
+	}
+
+	.alt-tag {
+		font-family: monospace;
+		font-size: 0.65rem;
+		padding: 0.1rem 0.25rem;
+		background: var(--color-surface);
+		border-radius: 2px;
+		color: var(--color-text-secondary);
+	}
+
+	.alt-btn.selected .alt-tag {
+		background: rgba(255, 255, 255, 0.2);
+		color: white;
 	}
 </style>
